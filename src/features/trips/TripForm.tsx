@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { motion, Variants } from 'framer-motion'
 import { MapPin, Clock, Truck, Loader2 } from 'lucide-react'
-import { cn } from '@/lib/utils'
+ 
 import { useCreateTripMutation } from '@/api/tripsApi'
 import type { TripFormValues } from '@/types/trip'
 
@@ -65,12 +65,7 @@ export const TripForm = () => {
 
   return (
     <motion.div variants={cardVariants} initial="hidden" animate="visible" className="w-full max-w-[520px] mx-auto">
-      <div className={cn(
-        "rounded-lg border p-6 sm:p-8",
-        "border-[var(--glass-border)]",
-        "bg-[var(--glass-bg)] backdrop-blur-md",
-        "shadow-2xl shadow-black/20"
-      )}>
+      <div className="rounded-lg border p-6 sm:p-8 border-[var(--glass-border)] bg-[var(--glass-bg)] backdrop-blur-md shadow-2xl shadow-black/20">
         <div className="pb-4">
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight" id="form-title">
             Plan Your Trip
@@ -92,12 +87,7 @@ export const TripForm = () => {
               {...register('current_location')}
               placeholder="e.g. Chicago, IL"
               id="current-location"
-              className={cn(
-                "w-full h-11 px-3 rounded-md text-sm",
-                "bg-input border border-border",
-                "focus:outline-none focus:ring-2 focus:ring-ring",
-                "placeholder:text-muted-foreground/50"
-              )}
+              className="w-full h-11 px-3 rounded-md text-sm bg-input border border-border focus:outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground/50"
             />
             {errors.current_location && (
               <p className="text-destructive text-xs mt-1">{errors.current_location.message}</p>
@@ -113,12 +103,7 @@ export const TripForm = () => {
               {...register('pickup_location')}
               placeholder="e.g. Indianapolis, IN"
               id="pickup-location"
-              className={cn(
-                "w-full h-11 px-3 rounded-md text-sm",
-                "bg-input border border-border",
-                "focus:outline-none focus:ring-2 focus:ring-ring",
-                "placeholder:text-muted-foreground/50"
-              )}
+              className="w-full h-11 px-3 rounded-md text-sm bg-input border border-border focus:outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground/50"
             />
             {errors.pickup_location && (
               <p className="text-destructive text-xs mt-1">{errors.pickup_location.message}</p>
@@ -134,12 +119,7 @@ export const TripForm = () => {
               {...register('dropoff_location')}
               placeholder="e.g. Nashville, TN"
               id="dropoff-location"
-              className={cn(
-                "w-full h-11 px-3 rounded-md text-sm",
-                "bg-input border border-border",
-                "focus:outline-none focus:ring-2 focus:ring-ring",
-                "placeholder:text-muted-foreground/50"
-              )}
+              className="w-full h-11 px-3 rounded-md text-sm bg-input border border-border focus:outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground/50"
             />
             {errors.dropoff_location && (
               <p className="text-destructive text-xs mt-1">{errors.dropoff_location.message}</p>
@@ -169,11 +149,10 @@ export const TripForm = () => {
             {/* Visual fill */}
             <div className="h-1 w-full rounded-full bg-secondary overflow-hidden mt-2">
               <div
-                className={cn(
-                  "h-full rounded-full transition-all",
+                className={`h-full rounded-full transition-all ${
                   cycleValue > 60 ? "bg-destructive" :
                   cycleValue > 45 ? "bg-yellow-500" : "bg-primary"
-                )}
+                }`}
                 style={{ width: `${(cycleValue / 70) * 100}%` }}
               />
             </div>
@@ -198,16 +177,7 @@ export const TripForm = () => {
               type="submit"
               disabled={isSubmitting}
               id="submit-button"
-              className={cn(
-                "w-full h-12 rounded-md text-base font-semibold tracking-wide",
-                "bg-primary text-primary-foreground",
-                "transition-all duration-200",
-                "hover:scale-[1.02] hover:shadow-[0_0_24px_rgba(245,158,11,0.5)]",
-                "active:scale-[0.98]",
-                "animate-glow-pulse",
-                "disabled:opacity-50 disabled:cursor-not-allowed disabled:animate-none",
-                "flex items-center justify-center gap-2"
-              )}
+              className="w-full h-12 rounded-md text-base font-semibold tracking-wide bg-primary text-primary-foreground transition-all duration-200 hover:scale-[1.02] hover:shadow-[0_0_24px_rgba(245,158,11,0.5)] active:scale-[0.98] animate-glow-pulse disabled:opacity-50 disabled:cursor-not-allowed disabled:animate-none flex items-center justify-center gap-2"
             >
               {isSubmitting ? (
                 <>

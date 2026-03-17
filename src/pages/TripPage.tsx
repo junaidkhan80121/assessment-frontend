@@ -51,7 +51,7 @@ const TripPage: React.FC = () => {
     ? 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
     : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
 
-  const routeColor = theme === 'light' ? '#D97706' : '#F59E0B';
+  const routeColor = theme === 'light' ? '#16a34a' : '#00FFA3';
 
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [map, setMap] = useState<any>(null);
@@ -124,9 +124,9 @@ const TripPage: React.FC = () => {
       `}}/>
       {/* Map & Stats Section */}
       <section className="relative">
-        {/* Asymmetric Map Container */}
+        {/* Hero Map Container */}
         <div 
-          className={`w-full relative overflow-hidden bg-surface-container-lowest transition-all duration-300 ${isFullScreen ? 'fixed inset-0 z-[100] h-[100dvh]' : 'h-80'}`}
+          className={`w-full relative overflow-hidden bg-surface-container-lowest transition-all duration-300 ${isFullScreen ? 'fixed inset-0 z-[100] h-[100dvh]' : 'h-[65vh] min-h-[400px]'}`}
           style={{ zIndex: isFullScreen ? 100 : 1 }}
         >
           <MapContainer 
@@ -184,7 +184,7 @@ const TripPage: React.FC = () => {
             <CircleMarker 
               center={startPos}
               pathOptions={{
-                color: '#3B82F6', // Blue for current
+                color: '#3B82F6',
                 fillColor: '#3B82F6',
                 fillOpacity: 1,
                 weight: 2,
@@ -196,7 +196,7 @@ const TripPage: React.FC = () => {
             <CircleMarker 
               center={pickupPos}
               pathOptions={{
-                color: '#22C55E', // Green for pickup
+                color: '#22C55E',
                 fillColor: '#22C55E',
                 fillOpacity: 1,
                 weight: 2,
@@ -209,7 +209,7 @@ const TripPage: React.FC = () => {
             <CircleMarker 
               center={dropoffPos}
               pathOptions={{
-                color: '#EF4444', // Red for dropoff
+                color: '#EF4444',
                 fillColor: '#EF4444',
                 fillOpacity: 1,
                 weight: 2,
@@ -219,12 +219,32 @@ const TripPage: React.FC = () => {
             />
           </MapContainer>
           
-          {/* Floating Route Info Overlay */}
-          <div className="absolute top-6 left-6 bg-surface-container-low/80 backdrop-blur-xl p-4 rounded-xl border border-outline-variant/20 z-[400] pointer-events-none">
-            <h1 className="font-headline text-xl font-bold tracking-tight text-on-surface">Trip #{tripId?.split('-')[0]}</h1>
-            <p className="text-[10px] tracking-widest text-on-surface-variant font-medium mt-1 truncate max-w-[200px] md:max-w-xs uppercase">
-              {tripData.current_location.split(',')[0]} → {tripData.dropoff_location.split(',')[0]}
-            </p>
+          {/* Floating Route Info + Stats Overlay */}
+          <div className="absolute top-6 left-6 z-[400] pointer-events-none flex flex-col gap-3">
+            <div className="bg-surface-container-low/80 backdrop-blur-xl p-4 rounded-xl border border-outline-variant/20">
+              <h1 className="font-headline text-xl font-bold tracking-tight text-on-surface">Trip #{tripId?.split('-')[0]}</h1>
+              <p className="text-[10px] tracking-widest text-on-surface-variant font-medium mt-1 truncate max-w-[200px] md:max-w-xs uppercase">
+                {tripData.current_location.split(',')[0]} → {tripData.dropoff_location.split(',')[0]}
+              </p>
+            </div>
+            <div className="bg-surface-container-low/80 backdrop-blur-xl px-4 py-3 rounded-xl border border-outline-variant/20">
+              <span className="text-[9px] uppercase tracking-widest text-on-surface-variant">Distance</span>
+              <p className="font-headline text-xl font-bold text-on-surface">
+                {(tripData.total_distance_miles || 0).toFixed(1)}<span className="text-xs ml-1 opacity-60">mi</span>
+              </p>
+            </div>
+            <div className="bg-surface-container-low/80 backdrop-blur-xl px-4 py-3 rounded-xl border border-outline-variant/20">
+              <span className="text-[9px] uppercase tracking-widest text-on-surface-variant">Drive Time</span>
+              <p className="font-headline text-xl font-bold text-on-surface">
+                {Math.floor(tripData.total_drive_hours || 0)}h {Math.round(((tripData.total_drive_hours || 0) % 1) * 60)}m
+              </p>
+            </div>
+            <div className="bg-surface-container-low/80 backdrop-blur-xl px-4 py-3 rounded-xl border border-outline-variant/20">
+              <span className="text-[9px] uppercase tracking-widest text-on-surface-variant">HOS Status</span>
+              <div className={`mt-1 inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tighter ${isCompliant ? 'bg-primary-container text-on-primary shadow-[0_0_15px_rgba(0,255,163,0.3)]' : 'bg-error-container text-on-error shadow-[0_0_15px_rgba(255,50,50,0.3)]'}`}>
+                {isCompliant ? 'Compliant' : 'Violation'}
+              </div>
+            </div>
           </div>
 
           {/* Full-Screen Toggle Button */}
@@ -236,44 +256,15 @@ const TripPage: React.FC = () => {
             <span className="material-symbols-outlined text-lg">{isFullScreen ? 'fullscreen_exit' : 'fullscreen'}</span>
           </button>
         </div>
-
-        {/* Stats Row: Kinetic Bento Style */}
-        <div className="px-6 -mt-10 relative z-10 grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-surface-container-low/60 backdrop-blur-xl p-5 rounded-xl border border-outline-variant/15 flex flex-col gap-1">
-            <span className="text-[10px] uppercase tracking-widest text-on-surface-variant">Total Distance</span>
-            <span className="font-headline text-2xl font-bold text-secondary">
-              {(tripData.total_distance_miles || 0).toFixed(1)}<span className="text-sm ml-1 opacity-60">mi</span>
-            </span>
-          </div>
-          <div className="bg-surface-container-low/60 backdrop-blur-xl p-5 rounded-xl border border-outline-variant/15 flex flex-col gap-1">
-            <span className="text-[10px] uppercase tracking-widest text-on-surface-variant">Drive Time</span>
-            <span className="font-headline text-2xl font-bold text-on-surface">
-              {Math.floor(tripData.total_drive_hours || 0)}h {Math.round(((tripData.total_drive_hours || 0) % 1) * 60)}m
-            </span>
-          </div>
-          <div className="bg-surface-container-low/60 backdrop-blur-xl p-5 rounded-xl border border-outline-variant/15 flex flex-col gap-1">
-            <span className="text-[10px] uppercase tracking-widest text-on-surface-variant">Log Sheets</span>
-            <span className="font-headline text-2xl font-bold text-on-surface">
-              {totalLogsCount < 10 ? `0${totalLogsCount}` : totalLogsCount}
-            </span>
-          </div>
-          <div className="bg-surface-container-low/60 backdrop-blur-xl p-5 rounded-xl border border-outline-variant/15 flex flex-col justify-between items-start">
-            <span className="text-[10px] uppercase tracking-widest text-on-surface-variant">HOS Status</span>
-            <div className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tighter ${isCompliant ? 'bg-primary-container text-on-primary shadow-[0_0_15px_rgba(0,255,163,0.3)]' : 'bg-error-container text-on-error shadow-[0_0_15px_rgba(255,50,50,0.3)]'}`}>
-              {isCompliant ? 'Compliant' : 'Violation'}
-            </div>
-          </div>
-        </div>
       </section>
 
-      {/* Log Sheet Viewer */}
-      <section className="mt-12 px-6 pb-12">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="font-headline text-2xl font-bold tracking-tight">Log Sheet Viewer</h2>
-          <div className="flex gap-2">
-            <button className="w-10 h-10 rounded-full border border-outline-variant/20 flex items-center justify-center text-primary-container">
-              <span className="material-symbols-outlined">filter_list</span>
-            </button>
+      {/* Electronic Logging Device (ELD) Section */}
+      <section className="mt-8 px-6 pb-12">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <span className="material-symbols-outlined text-primary-container">description</span>
+            <h2 className="font-headline text-lg font-bold tracking-tight">Electronic Logging Device (ELD)</h2>
+            <span className="text-[10px] uppercase tracking-widest text-on-surface-variant bg-surface-container-high px-2 py-0.5 rounded-full">{totalLogsCount} days</span>
           </div>
         </div>
 

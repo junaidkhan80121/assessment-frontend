@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { Route, Clock, FileText, ShieldCheck, AlertTriangle } from 'lucide-react'
-import { cn } from '@/lib/utils'
+ 
 import type { Trip } from '@/types/trip'
 
 interface StatsBarProps {
@@ -69,12 +69,11 @@ export const StatsBar = ({ trip }: StatsBarProps) => {
         unit="days"
       />
       <div className="flex items-center gap-2 rounded-lg border border-border p-3 bg-card/50">
-        <div className={cn(
-          "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold",
+        <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
           trip.hos_compliant
             ? "bg-success/20 text-success"
             : "bg-destructive/20 text-destructive"
-        )}>
+        }`}>
           {trip.hos_compliant ? (
             <>
               <ShieldCheck className="h-3.5 w-3.5" />

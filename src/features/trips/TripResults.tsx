@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Download } from 'lucide-react'
-import { cn } from '@/lib/utils'
+ 
 import { useGetTripQuery } from '@/api/tripsApi'
 import { StatsBar } from './StatsBar'
 import { TripMap } from './TripMap'
@@ -100,13 +100,11 @@ export const TripResults = () => {
                 key={i}
                 onClick={() => setActiveTab(i)}
                 id={`tab-day-${i + 1}`}
-                className={cn(
-                  "px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors",
-                  "flex items-center gap-1",
+                className={`px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-1 ${
                   activeTab === i
                     ? "bg-primary text-primary-foreground"
                     : "hover:bg-secondary text-muted-foreground"
-                )}
+                }`}
               >
                 Day {i + 1}
                 {log.recap.available_tomorrow < 5 && (
@@ -132,12 +130,7 @@ export const TripResults = () => {
             <button
               onClick={handleDownloadPDF}
               id="download-pdf"
-              className={cn(
-                "w-full h-10 rounded-md text-sm font-medium",
-                "bg-primary text-primary-foreground",
-                "hover:scale-[1.01] active:scale-[0.99] transition-all",
-                "flex items-center justify-center gap-2"
-              )}
+              className="w-full h-10 rounded-md text-sm font-medium bg-primary text-primary-foreground hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2"
             >
               <Download className="h-4 w-4" />
               Download PDF

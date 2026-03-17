@@ -1,116 +1,101 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Truck, MapPin, Clock, ChevronRight } from 'lucide-react';
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer } from 'react-leaflet';
+import { MapPin, Navigation, Clock, ChevronRight, Truck } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Slider } from '@/components/ui/slider';
+import { Slider, Button, TextField, Autocomplete, InputAdornment } from '@mui/material';
 import 'leaflet/dist/leaflet.css';
 import { config } from '../config';
 
-// --- Autocomplete Input Component ---
-const AutocompleteInput = ({
-  label,
-  value,
-  onChange,
-  placeholder,
-  icon: Icon,
-  tabIndex
-}: {
-  label: string,
-  value: string,
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void,
-  placeholder: string,
-  icon: React.ElementType,
-  tabIndex?: number
-}) => {
-  const [suggestions, setSuggestions] = useState<any[]>([]);
-  const [showDropdown, setShowDropdown] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (inputRef.current && !inputRef.current.contains(event.target as Node)) {
-        setShowDropdown(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  // Fetch from Nominatim (OpenStreetMap) with a short debounce built-in
-  const fetchPlaces = async (query: string) => {
-    if (query.length < 3) {
-      setSuggestions([]);
-      return;
-    }
-
-    try {
-      const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=us&limit=5`);
-      const data = await resp.json();
-      setSuggestions(data);
-    } catch (err) {
-      console.error("Geocoding failed", err);
-    }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(e);
-    setShowDropdown(true);
-    fetchPlaces(e.target.value);
-  };
-
-  const handleSelect = (place: any) => {
-    const syntheticEvent = {
-      target: { value: place.display_name }
-    } as React.ChangeEvent<HTMLInputElement>;
-
-    onChange(syntheticEvent);
-    setShowDropdown(false);
-  };
-
+const LocationInput = ({ label, icon: Icon, placeholder, value, onChange, options = [], onSearch, onSelect, loading, tabIndex }: any) => {
   return (
-    <div className="relative" ref={inputRef}>
-      <div className="flex items-center gap-3 mb-2">
-        <Icon className="w-5 h-5 text-on-surface-variant" />
-        <label className="text-sm font-bold text-on-surface tracking-wider uppercase">{label}</label>
-      </div>
-      <Input
-        value={value}
-        onChange={handleInputChange}
-        onFocus={() => {
-          if (value.length >= 3) fetchPlaces(value);
-          setShowDropdown(true);
-        }}
-        placeholder={placeholder}
-        className="bg-surface-container-high border-outline-variant text-on-surface h-12 rounded-xl focus-visible:ring-primary focus-visible:ring-2 focus-visible:border-transparent transition-all hover:bg-surface-container-highest"
-        tabIndex={tabIndex}
-      />
-
-      <AnimatePresence>
-        {showDropdown && suggestions.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="absolute z-50 w-full mt-2 bg-surface-container-highest border border-outline-variant rounded-xl shadow-xl overflow-hidden"
-          >
-            {suggestions.map((suggestion, idx) => (
-              <div
-                key={idx}
-                className="px-4 py-3 hover:bg-surface-container-highest/50 cursor-pointer border-b border-outline-variant/30 last:border-0 transition-colors"
-                onClick={() => handleSelect(suggestion)}
-              >
-                <div className="text-on-surface text-sm">{suggestion.display_name}</div>
-              </div>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+    <Autocomplete
+      freeSolo
+      disableClearable
+      options={options}
+      getOptionLabel={(option: any) => typeof option === 'string' ? option : option.display_name || ''}
+      filterOptions={(x) => x}
+      autoComplete
+      includeInputInList
+      filterSelectedOptions
+      value={value}
+      onInputChange={onSearch}
+      onChange={(_, newValue) => {
+        if (typeof newValue !== 'string' && newValue.display_name) {
+          onSelect(newValue);
+        }
+      }}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          label={label}
+          placeholder={placeholder}
+          variant="outlined"
+          fullWidth
+          inputProps={{
+            ...params.inputProps,
+            tabIndex,
+          }}
+          InputProps={{
+            ...params.InputProps,
+            startAdornment: (
+              <InputAdornment position="start">
+                <Icon className="w-5 h-5 text-[#00FFA3]" />
+              </InputAdornment>
+            ),
+            endAdornment: (
+              <React.Fragment>
+                {loading ? <span className="material-symbols-outlined animate-spin text-on-surface-variant w-5 h-5">sync</span> : null}
+                {params.InputProps.endAdornment}
+              </React.Fragment>
+            ),
+          }}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              backgroundColor: 'var(--surface-container-low)',
+              color: 'var(--on-surface)',
+              borderRadius: '12px',
+              transition: 'all 0.2s ease',
+              '& fieldset': {
+                borderColor: 'var(--outline-variant)',
+                borderWidth: '1px',
+              },
+              '&:hover fieldset': {
+                borderColor: 'var(--primary)',
+              },
+              '&.Mui-focused fieldset': {
+                borderColor: 'var(--primary)',
+                borderWidth: '2px',
+                boxShadow: '0 0 15px rgba(0,255,163,0.1)',
+              },
+            },
+            '& .MuiInputLabel-root': {
+              color: 'var(--on-surface-variant)',
+              '&.Mui-focused': {
+                color: 'var(--primary)',
+              },
+            },
+            '& .MuiInputBase-input::placeholder': {
+              color: 'var(--on-surface-variant)',
+              opacity: 0.5,
+            },
+          }}
+        />
+      )}
+      renderOption={(props, option: any) => (
+        <li {...props} className="flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-[#00FFA3]/10 cursor-pointer border-b border-border/30 last:border-0 transition-colors">
+          <MapPin className="w-4 h-4 text-[#00FFA3] shrink-0" />
+          <span className="truncate">{option.display_name}</span>
+        </li>
+      )}
+      PaperComponent={({ children }) => (
+        <div className="mt-2 bg-background border border-border rounded-xl shadow-2xl overflow-hidden">
+          {children}
+        </div>
+      )}
+    />
   );
 };
 
@@ -175,18 +160,44 @@ const TripPlanner: React.FC = () => {
   const isDark = theme === 'dark';
   const [cycleHours, setCycleHours] = useState(45);
 
+ 
   const [currentPosition, setCurrentPosition] = useState("");
   const [pickupNode, setPickupNode] = useState("");
   const [destinationVector, setDestinationVector] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState("");
+  
+  // State for Autocomplete suggestions
+  const [currentPositionOptions, setCurrentPositionOptions] = useState<any[]>([]);
+  const [pickupNodeOptions, setPickupNodeOptions] = useState<any[]>([]);
+  const [destinationVectorOptions, setDestinationVectorOptions] = useState<any[]>([]);
+  const [isSearchingCurrent, setIsSearchingCurrent] = useState(false);
+  const [isSearchingPickup, setIsSearchingPickup] = useState(false);
+  const [isSearchingDestination, setIsSearchingDestination] = useState(false);
+
+  const fetchPlaces = async (query: string, setOptions: (opts: any[]) => void, setLoading: (loading: boolean) => void) => {
+    if (query.length < 3) {
+      setOptions([]);
+      return;
+    }
+    setLoading(true);
+    try {
+      const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=us&limit=5`);
+      const data = await resp.json();
+      setOptions(data || []);
+    } catch (err) {
+      console.error("Geocoding failed", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handlePlanTrip = async () => {
     if (!currentPosition || !pickupNode || !destinationVector) {
       setErrorMsg("Please fill out all location fields.");
       return;
     }
-    setErrorMsg(null);
+    setErrorMsg("");
     setIsLoading(true);
 
     try {
@@ -221,48 +232,6 @@ const TripPlanner: React.FC = () => {
     <div className="relative pt-16 pb-32 min-h-screen flex flex-col items-center justify-center px-6 overflow-hidden">
       {isLoading && <LoadingModal />}
 
-      {/* Map Background */}
-      <div
-        className="absolute inset-0 opacity-20 dark:opacity-40 transition-opacity duration-300"
-        style={{ zIndex: 0 }}
-      >
-        <style dangerouslySetInnerHTML={{__html:`
-          .leaflet-container {
-            width: 100%;
-            height: 100%;
-            background: ${isDark ? '#0e0e0e' : '#f8fafc'} !important;
-          }
-        `}}/>
-        <MapContainer
-          center={[39.8283, -98.5795]}
-          zoom={4}
-          scrollWheelZoom={false}
-          zoomControl={false}
-          dragging={false}
-          touchZoom={false}
-          doubleClickZoom={false}
-        >
-          <TileLayer
-            attribution='&copy; <a href="https://www.carto.com/attributions">CARTO</a>'
-            url={isDark
-              ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-              : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
-            }
-          />
-        </MapContainer>
-      </div>
-
-      {/* Subtle Vector Illustration Background */}
-      <div className="absolute bottom-0 right-0 w-full h-full opacity-5 pointer-events-none flex justify-end items-end overflow-hidden">
-        <svg className="w-3/4 h-3/4 translate-x-1/4 translate-y-1/4 text-primary-container" fill="none" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
-          <path d="M50 450L250 450L350 350L750 350" stroke="currentColor" strokeWidth="2"></path>
-          <path d="M0 550L300 550L450 400L800 400" stroke="currentColor" strokeWidth="1"></path>
-          <rect height="40" stroke="currentColor" strokeWidth="2" width="80" x="200" y="420"></rect>
-          <circle cx="215" cy="465" r="8" stroke="currentColor" strokeWidth="2"></circle>
-          <circle cx="265" cy="465" r="8" stroke="currentColor" strokeWidth="2"></circle>
-        </svg>
-      </div>
-
       {/* Hero Content */}
       <div className="relative z-10 text-center mb-12">
         <h1 className="font-headline text-5xl md:text-7xl font-black tracking-tighter leading-none mb-4">
@@ -277,30 +246,42 @@ const TripPlanner: React.FC = () => {
       {/* Trip Form Card */}
       <div className="relative z-10 w-full max-w-2xl bg-surface-container/80 backdrop-blur-xl border border-outline-variant/30 rounded-3xl p-8 shadow-2xl">
         <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-          <AutocompleteInput
+          <LocationInput
             label="Current Position"
-            icon={MapPin}
-            placeholder="e.g. Toledo, OH"
+            icon={Navigation}
+            placeholder="e.g. Chicago, IL"
             value={currentPosition}
-            onChange={(e) => setCurrentPosition(e.target.value)}
+            onChange={(e: any) => setCurrentPosition(e?.target?.value || '')}
+            onSearch={(e: any, newValue: string) => fetchPlaces(newValue, setCurrentPositionOptions, setIsSearchingCurrent)}
+            onSelect={(item: any) => setCurrentPosition(item.display_name)}
+            options={currentPositionOptions}
+            loading={isSearchingCurrent}
             tabIndex={1}
           />
 
-          <AutocompleteInput
-            label="Pickup Location"
+          <LocationInput
+            label="Pickup Node"
             icon={Truck}
-            placeholder="e.g. Cleveland, OH"
+            placeholder="e.g. Detroit, MI"
             value={pickupNode}
-            onChange={(e) => setPickupNode(e.target.value)}
+            onChange={(e: any) => setPickupNode(e?.target?.value || '')}
+            onSearch={(e: any, newValue: string) => fetchPlaces(newValue, setPickupNodeOptions, setIsSearchingPickup)}
+            onSelect={(item: any) => setPickupNode(item.display_name)}
+            options={pickupNodeOptions}
+            loading={isSearchingPickup}
             tabIndex={2}
           />
 
-          <AutocompleteInput
+          <LocationInput
             label="Destination Vector"
             icon={MapPin}
             placeholder="e.g. Pittsburgh, PA"
             value={destinationVector}
-            onChange={(e) => setDestinationVector(e.target.value)}
+            onChange={(e: any) => setDestinationVector(e?.target?.value || '')}
+            onSearch={(e: any, newValue: string) => fetchPlaces(newValue, setDestinationVectorOptions, setIsSearchingDestination)}
+            onSelect={(item: any) => setDestinationVector(item.display_name)}
+            options={destinationVectorOptions}
+            loading={isSearchingDestination}
             tabIndex={3}
           />
 
@@ -316,11 +297,35 @@ const TripPlanner: React.FC = () => {
               </span>
             </div>
             <Slider
-              value={[cycleHours]}
-              onValueChange={(v: number[]) => setCycleHours(v[0])}
+              value={cycleHours}
+              onChange={(_, v) => setCycleHours(v as number)}
               max={70}
               step={0.5}
-              className="py-4"
+              sx={{
+                color: '#00FFA3',
+                height: 6,
+                padding: '16px 0',
+                '& .MuiSlider-track': {
+                  border: 'none',
+                },
+                '& .MuiSlider-thumb': {
+                  height: 20,
+                  width: 20,
+                  backgroundColor: '#00FFA3',
+                  border: '2px solid #00FFA3',
+                  boxShadow: '0 0 10px rgba(0,255,163,0.4)',
+                  '&:focus, &:hover, &.Mui-active, &.Mui-focusVisible': {
+                    boxShadow: 'inherit',
+                  },
+                  '&::before': {
+                    display: 'none',
+                  },
+                },
+                '& .MuiSlider-rail': {
+                  opacity: 0.2,
+                  backgroundColor: '#00FFA3',
+                },
+              }}
             />
             <div className="flex justify-between text-xs text-on-surface-variant font-medium">
               <span>Fresh Cycle (0 hrs)</span>
@@ -330,13 +335,32 @@ const TripPlanner: React.FC = () => {
 
           {/* Submit Button */}
           <Button
-            className={`w-full mt-2 h-14 text-lg font-bold rounded-xl transition-all ${
-              isLoading
-                ? 'bg-surface-container-highest text-on-surface-variant cursor-not-allowed border-none'
-                : 'bg-primary text-on-primary hover:bg-primary/90 hover:scale-[1.02] shadow-[0_0_20px_rgba(0,255,163,0.3)] hover:shadow-[0_0_30px_rgba(0,255,163,0.5)]'
-            }`}
-            onClick={handlePlanTrip}
+            variant="contained"
+            fullWidth
             disabled={isLoading}
+            onClick={handlePlanTrip}
+            sx={{
+              mt: 2,
+              height: '56px',
+              fontSize: '1.125rem',
+              fontWeight: 'bold',
+              borderRadius: '12px',
+              textTransform: 'none',
+              backgroundColor: isLoading ? 'var(--surface-container-highest)' : 'var(--primary)',
+              color: isLoading ? 'var(--on-surface-variant)' : 'var(--on-primary)',
+              boxShadow: isLoading ? 'none' : '0 0 20px rgba(0,255,163,0.3)',
+              transition: 'all 0.2s',
+              '&:hover': {
+                backgroundColor: 'var(--primary)',
+                opacity: 0.9,
+                transform: 'scale(1.02)',
+                boxShadow: '0 0 30px rgba(0,255,163,0.5)',
+              },
+              '&.Mui-disabled': {
+                backgroundColor: 'var(--surface-container-highest)',
+                color: 'var(--on-surface-variant)',
+              }
+            }}
           >
             {isLoading ? (
               <div className="flex items-center gap-3">
