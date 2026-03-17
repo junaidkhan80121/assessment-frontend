@@ -133,15 +133,30 @@ export const TripMap = ({ trip }: TripMapProps) => {
           url={tileUrl}
         />
         {trip.route_geometry.length > 0 && (
-          <Polyline
-            positions={trip.route_geometry}
-            pathOptions={{
-              color: routeColor,
-              weight: 4,
-              opacity: 0.8,
-              dashArray: undefined,
-            }}
-          />
+          <>
+            {/* Outline / Border */}
+            <Polyline
+              positions={trip.route_geometry}
+              pathOptions={{
+                color: theme === 'dark' ? '#0F172A' : '#1E40AF',
+                weight: 8,
+                opacity: 0.6,
+                lineJoin: 'round',
+                lineCap: 'round',
+              }}
+            />
+            {/* Inner Line */}
+            <Polyline
+              positions={trip.route_geometry}
+              pathOptions={{
+                color: theme === 'dark' ? '#3B82F6' : '#60A5FA',
+                weight: 4,
+                opacity: 1,
+                lineJoin: 'round',
+                lineCap: 'round',
+              }}
+            />
+          </>
         )}
         <StopMarkers stops={trip.stops} />
         <FitBounds trip={trip} />

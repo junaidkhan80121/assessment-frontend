@@ -97,6 +97,7 @@ const TripPage: React.FC = () => {
 
   // The API already provides [latitude, longitude] so no need to swap
   const routePositions: [number, number][] = (tripData.route_geometry || []) as [number, number][];
+  const routeOptions = (tripData.route_options || []) as any[];
   
   const startPos: [number, number] = [tripData.current_location_lat || 41.5, tripData.current_location_lon || -80.0];
   const dropoffPos: [number, number] = [tripData.dropoff_location_lat || 40.7, tripData.dropoff_location_lon || -74.0];
@@ -141,18 +142,42 @@ const TripPage: React.FC = () => {
               url={tileUrl}
             />
             {routePositions.length > 0 && <MapUpdater positions={routePositions} />}
-            {/* The Route Line */}
-            {routePositions.length > 0 && (
-              <Polyline 
-                positions={routePositions} 
-                pathOptions={{ 
-                  color: routeColor, 
-                  weight: 4, 
-                  dashArray: '8, 8',
-                  lineJoin: 'round',
-                  className: theme === 'dark' ? 'drop-shadow-[0_0_8px_rgba(245,158,11,0.8)]' : ''
-                }} 
-              />
+            {/* Route Lines: fastest plus alternatives */}
+            {routeOptions.length > 0 ? (
+              <>
+                {routeOptions.map((opt, idx) => {
+                  const positions = (opt.route_geometry || []) as [number, number][];
+                  if (!positions.length) return null;
+                  const isFastest = !!opt.is_fastest;
+                  return (
+                    <Polyline
+                      key={idx}
+                      positions={positions}
+                      pathOptions={{
+                        color: isFastest ? routeColor : (theme === 'light' ? '#9CA3AF' : '#4B5563'),
+                        weight: isFastest ? 5 : 3,
+                        opacity: isFastest ? 0.95 : 0.6,
+                        dashArray: isFastest ? undefined : '6, 8',
+                        lineJoin: 'round',
+                        lineCap: 'round',
+                      }}
+                    />
+                  );
+                })}
+              </>
+            ) : (
+              routePositions.length > 0 && (
+                <Polyline 
+                  positions={routePositions} 
+                  pathOptions={{ 
+                    color: routeColor, 
+                    weight: 5, 
+                    opacity: 0.9,
+                    lineJoin: 'round',
+                    lineCap: 'round',
+                  }} 
+                />
+              )
             )}
             
             {/* Origin Node (Current Location) */}

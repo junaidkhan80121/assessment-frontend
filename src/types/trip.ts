@@ -63,6 +63,24 @@ export interface Trip {
   status: "PENDING" | "COMPUTING" | "COMPUTED" | "FAILED"
   error_message: string
   route_geometry: [number, number][]
+  route_options?: {
+    id: number
+    leg1_miles: number
+    leg2_miles: number
+    total_distance_miles: number
+    leg1_duration_hours: number
+    leg2_duration_hours: number
+    route_geometry: [number, number][]
+    stops: TripStop[]
+    daily_logs: DailyLog[]
+    total_on_duty_hours: number
+    total_drive_hours: number
+    hos_compliant: boolean
+    weekly_hours_used: number
+    weekly_hours_remaining: number
+    is_fastest?: boolean
+    label?: string
+  }[]
   total_distance_miles: number
   leg1_miles: number
   leg2_miles: number
