@@ -1,0 +1,115 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* ── DARK MODE (default) ───────────────────────────── */
+  :root,
+  .dark {
+    --background:        222 47% 6%;     /* #060B14 deep navy */
+    --foreground:        213 31% 91%;    /* #E2E8F0 cool white */
+    --card:              222 47% 9%;     /* #0A0F1E card bg */
+    --card-foreground:   213 31% 91%;
+    --border:            217 33% 17%;
+    --input:             217 33% 13%;
+    --ring:              38 92% 50%;     /* amber focus ring */
+    --primary:           38 92% 50%;    /* #F59E0B amber */
+    --primary-foreground:222 47% 6%;
+    --secondary:         217 33% 17%;
+    --secondary-foreground: 213 31% 91%;
+    --muted:             217 33% 17%;
+    --muted-foreground:  215 20% 55%;
+    --accent:            199 89% 48%;   /* #0EA5E9 sky blue */
+    --accent-foreground: 222 47% 6%;
+    --destructive:       0 63% 51%;
+    --destructive-foreground: 213 31% 91%;
+    --success:           142 71% 45%;
+    --success-foreground: 0 0% 100%;
+    --radius:            0.625rem;
+
+    /* Custom tokens */
+    --hero-glow:         rgba(245, 158, 11, 0.12);
+    --glass-bg:          rgba(255, 255, 255, 0.04);
+    --glass-border:      rgba(255, 255, 255, 0.09);
+    --map-route-color:   #F59E0B;
+    --popover:           222 47% 9%;
+    --popover-foreground: 213 31% 91%;
+  }
+
+  /* ── LIGHT MODE ────────────────────────────────────── */
+  .light {
+    --background:        210 40% 98%;   /* near-white blue-tint */
+    --foreground:        222 47% 11%;   /* dark navy text */
+    --card:              0 0% 100%;
+    --card-foreground:   222 47% 11%;
+    --border:            214 32% 91%;
+    --input:             214 32% 95%;
+    --ring:              38 92% 50%;
+    --primary:           38 92% 45%;   /* slightly darker amber for contrast */
+    --primary-foreground:0 0% 100%;
+    --secondary:         210 40% 94%;
+    --secondary-foreground: 222 47% 20%;
+    --muted:             210 40% 94%;
+    --muted-foreground:  215 20% 45%;
+    --accent:            199 89% 40%;
+    --accent-foreground: 0 0% 100%;
+    --destructive:       0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --success:           142 71% 35%;
+    --success-foreground: 0 0% 100%;
+
+    --hero-glow:         rgba(245, 158, 11, 0.08);
+    --glass-bg:          rgba(255, 255, 255, 0.7);
+    --glass-border:      rgba(0, 0, 0, 0.08);
+    --map-route-color:   #D97706;
+    --popover:           0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+  }
+}
+
+* { @apply border-border; }
+body { @apply bg-background text-foreground antialiased; }
+
+/* Smooth theme transition */
+*, *::before, *::after {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.15s ease;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Skeleton shimmer */
+@layer components {
+  .skeleton-shimmer {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--muted)) 25%,
+      hsl(var(--muted-foreground) / 0.15) 50%,
+      hsl(var(--muted)) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.8s linear infinite;
+  }
+}
+
+/* Map marker pulse keyframes (injected for Leaflet DivIcons) */
+@keyframes markerPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.4; }
+}
+
+/* Leaflet overrides for dark mode */
+.dark .leaflet-container {
+  background: hsl(222 47% 6%);
+}
+
+.light .leaflet-container {
+  background: hsl(210 40% 98%);
+}
