@@ -17,7 +17,7 @@ interface StatChipProps {
 
 const StatChip = ({ icon, label, value, unit }: StatChipProps) => (
   <div className="flex min-h-[68px] items-center gap-3 rounded-2xl border border-outline-variant/30 bg-surface-container-low/78 px-3.5 py-2 shadow-[0_8px_18px_rgba(15,23,42,0.06)]">
-    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/12 text-primary [&_svg]:h-[1.35rem] [&_svg]:w-[1.35rem]">{icon}</div>
+    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-500/12 text-emerald-700 dark:text-emerald-300 [&_svg]:h-[1.35rem] [&_svg]:w-[1.35rem]">{icon}</div>
     <div>
       <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">{label}</p>
       <p className="mt-1 text-lg font-bold font-mono leading-none text-emerald-700 dark:text-emerald-300 sm:text-[1.6rem]">

@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useMemo, useState, type MouseEvent as ReactMouseEvent } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, useSpring } from 'framer-motion'
 import { MapContainer, TileLayer, Polyline, ZoomControl, useMap } from 'react-leaflet'
 import L from 'leaflet'
@@ -11,15 +12,15 @@ interface TripMapProps {
   trip: Trip
 }
 
-type RouteMapStyle = 'default' | 'terrain' | 'dark' | 'satellite'
+type RouteMapStyle = 'default' | 'voyager' | 'minimal' | 'terrain' | 'dark' | 'satellite'
 
 const MARKER_COLORS: Record<string, string> = {
-  CURRENT: '#3B82F6',
-  PICKUP: '#22C55E',
-  DROPOFF: '#EF4444',
-  FUEL: '#F97316',
-  REST: '#8B5CF6',
-  BREAK: '#EAB308',
+  CURRENT: '#64B5F6',
+  PICKUP: '#81C784',
+  DROPOFF: '#E57373',
+  FUEL: '#FFB74D',
+  REST: '#9575CD',
+  BREAK: '#FFF176',
 }
 
 const MARKER_LABELS: Record<string, string> = {
@@ -33,6 +34,8 @@ const MARKER_LABELS: Record<string, string> = {
 
 const MAP_STYLE_LABELS: Record<RouteMapStyle, string> = {
   default: 'Default',
+  voyager: 'Voyager',
+  minimal: 'Minimal',
   terrain: 'Terrain',
   dark: 'Dark',
   satellite: 'Satellite',
@@ -202,13 +205,21 @@ function splitRouteAtPickup(
 
 export const TripMap = ({ trip }: TripMapProps) => {
   const { theme } = useTheme()
-  const [mapStyle, setMapStyle] = useState<RouteMapStyle>('default')
+  const [mapStyle, setMapStyle] = useState<RouteMapStyle>('dark')
   const [isFullscreen, setIsFullscreen] = useState(false)
   const hoverX = useSpring(0, { stiffness: 320, damping: 24, mass: 0.6 })
   const hoverY = useSpring(0, { stiffness: 320, damping: 24, mass: 0.6 })
   const hoverScale = useSpring(1, { stiffness: 280, damping: 22, mass: 0.7 })
 
   const tileUrl = useMemo(() => {
+    if (mapStyle === 'voyager') {
+      return 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
+    }
+
+    if (mapStyle === 'minimal') {
+      return 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png'
+    }
+
     if (mapStyle === 'terrain') {
       return 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png'
     }
@@ -281,7 +292,7 @@ export const TripMap = ({ trip }: TripMapProps) => {
     hoverScale.set(1)
   }
 
-  const isLightBasemap = mapStyle === 'default' || mapStyle === 'terrain'
+  const isLightBasemap = mapStyle === 'default' || mapStyle === 'voyager' || mapStyle === 'minimal' || mapStyle === 'terrain'
   const overlaySurfaceClass = isLightBasemap
     ? 'bg-white/92 text-slate-950 border-slate-300/90'
     : 'bg-slate-950/78 text-slate-100 border-white/12'
@@ -294,42 +305,59 @@ export const TripMap = ({ trip }: TripMapProps) => {
     ? 'border-slate-200 bg-slate-100/95'
     : 'border-white/8 bg-white/[0.05]'
 
-  return (
-    <div className={`${isFullscreen ? 'fixed inset-0 z-[1200] h-screen w-screen bg-background/95 p-3' : 'relative h-[360px] lg:h-full w-full'}`}>
+  useEffect(() => {
+    if (!isFullscreen) {
+      return
+    }
+
+    const { overflow } = document.body.style
+    document.body.style.overflow = 'hidden'
+
+    return () => {
+      document.body.style.overflow = overflow
+    }
+  }, [isFullscreen])
+
+  const mapShell = (
+    <div className={`${isFullscreen ? 'fixed inset-0 z-[1600] h-screen w-screen bg-background/95 p-3 sm:p-4' : 'relative h-[360px] w-full lg:h-full'}`}>
       <div
         className={`relative h-full w-full overflow-hidden border border-border shadow-2xl ${
           isLightBasemap ? 'bg-[#dbe5ef]' : 'bg-slate-950'
-        }`}
+        } ${isFullscreen ? 'rounded-[28px]' : ''}`}
         id="trip-map"
       >
-      <div className={`absolute left-3 top-3 z-[500] w-[220px] rounded-xl border px-2.5 py-2 backdrop-blur-xl shadow-xl ${overlaySurfaceClass}`}>
+      <div className={`absolute z-[500] w-[250px] rounded-xl border px-2.5 py-2 backdrop-blur-xl shadow-xl ${
+        isFullscreen ? 'left-3 top-16 sm:left-4 sm:top-20' : 'left-3 top-3'
+      } ${overlaySurfaceClass}`}>
         {hasRouteOptions && routeOptions.some((option) => option.is_fastest) && (
           <div className={`mb-2 inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.18em] ${isLightBasemap ? 'border-primary/25 bg-primary/10 text-emerald-700' : 'border-primary/20 bg-primary/12 text-primary'}`}>
             <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_10px_rgba(0,255,163,0.55)]" />
             Fastest route highlighted
           </div>
         )}
-        <div className={`flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] ${overlayHeadingClass}`}>
-          <span className="inline-block h-[3px] w-7 rounded-full bg-[#0284C7]" />
-          <span>Current to pickup</span>
-        </div>
-        <div className={`mt-2 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] ${overlayMutedClass}`}>
-          <span className="inline-block h-[3px] w-7 rounded-full bg-[#059669]" />
-          <span>Pickup to destination</span>
-        </div>
-        {hasRouteOptions && (
-          <div className={`mt-2 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] ${overlayMutedClass}`}>
-            <span className="inline-block w-7 border-t-[3px] border-dashed border-[#7DD3FC] opacity-90" />
-            <span>Alt current to pickup</span>
+        <div className="grid grid-cols-2 gap-x-3 gap-y-2">
+          <div className={`flex items-center gap-2 text-[9px] font-semibold uppercase tracking-[0.14em] ${overlayHeadingClass}`}>
+            <span className="inline-block h-[3px] w-6 rounded-full bg-[#0284C7]" />
+            <span>To pickup</span>
           </div>
-        )}
-        {hasRouteOptions && (
-          <div className={`mt-2 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] ${overlayMutedClass}`}>
-            <span className="inline-block w-7 border-t-[3px] border-dashed border-[#86EFAC] opacity-90" />
-            <span>Alt pickup to destination</span>
+          <div className={`flex items-center gap-2 text-[9px] font-semibold uppercase tracking-[0.14em] ${overlayMutedClass}`}>
+            <span className="inline-block h-[3px] w-6 rounded-full bg-[#059669]" />
+            <span>To dropoff</span>
           </div>
-        )}
-        <div className={`mt-3 grid grid-cols-2 gap-x-2 gap-y-2 text-[9px] font-semibold uppercase tracking-[0.14em] ${overlayMutedClass}`}>
+          {hasRouteOptions ? (
+            <>
+              <div className={`flex items-center gap-2 text-[9px] font-semibold uppercase tracking-[0.14em] ${overlayMutedClass}`}>
+                <span className="inline-block w-6 border-t-[3px] border-dashed border-[#7DD3FC] opacity-90" />
+                <span>Alt pickup</span>
+              </div>
+              <div className={`flex items-center gap-2 text-[9px] font-semibold uppercase tracking-[0.14em] ${overlayMutedClass}`}>
+                <span className="inline-block w-6 border-t-[3px] border-dashed border-[#86EFAC] opacity-90" />
+                <span>Alt dropoff</span>
+              </div>
+            </>
+          ) : null}
+        </div>
+        <div className={`mt-2.5 grid grid-cols-2 gap-x-2 gap-y-2 text-[9px] font-semibold uppercase tracking-[0.14em] ${overlayMutedClass}`}>
           <div className="flex items-center gap-2">
             <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#3B82F6] text-[8px] font-bold text-white">S</span>
             <span>Start</span>
@@ -347,12 +375,12 @@ export const TripMap = ({ trip }: TripMapProps) => {
             <span>Fuel/Rest</span>
           </div>
         </div>
-        <div className="mt-3 space-y-2 border-t border-white/10 pt-2.5">
+        <div className="mt-2.5 space-y-1.5 border-t border-white/10 pt-2">
           {hasRouteOptions ? (
             routeOptions.map((option, index) => (
               <div
                 key={option.id}
-                className={`flex items-center justify-between gap-2 rounded-xl border px-2.5 py-2 text-[9px] font-semibold uppercase tracking-[0.12em] ${overlayCardClass}`}
+                className={`flex items-center justify-between gap-2 rounded-xl border px-2.5 py-1.5 text-[8.5px] font-semibold uppercase tracking-[0.1em] ${overlayCardClass}`}
               >
                 <div className={`flex items-center gap-2 ${overlayHeadingClass}`}>
                   <span className={`inline-block h-[3px] w-6 rounded-full ${option.is_fastest ? 'bg-[#0284C7]' : 'border-t-[3px] border-dashed border-[#7DD3FC]'}`} />
@@ -362,7 +390,7 @@ export const TripMap = ({ trip }: TripMapProps) => {
               </div>
             ))
           ) : (
-            <div className={`flex items-center justify-between gap-2 rounded-xl border px-2.5 py-2 text-[9px] font-semibold uppercase tracking-[0.12em] ${overlayCardClass}`}>
+            <div className={`flex items-center justify-between gap-2 rounded-xl border px-2.5 py-1.5 text-[8.5px] font-semibold uppercase tracking-[0.1em] ${overlayCardClass}`}>
               <span className={overlayHeadingClass}>Main route</span>
               <span className={overlayMutedClass}>{trip.total_distance_miles.toFixed(1)} mi</span>
             </div>
@@ -370,20 +398,28 @@ export const TripMap = ({ trip }: TripMapProps) => {
         </div>
       </div>
 
-      <div className={`absolute right-3 top-3 z-[550] flex max-w-[min(560px,calc(100%-24px))] flex-wrap items-center justify-end gap-2 rounded-2xl border px-2 py-2 backdrop-blur-xl shadow-xl ${routeControlsClass}`}>
-        <button
-          type="button"
-          onClick={() => setIsFullscreen((current) => !current)}
-          className={`rounded-full px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] transition-all ${isLightBasemap ? 'text-slate-700 hover:bg-slate-900/10 hover:text-slate-950' : 'text-slate-200 hover:bg-white/10 hover:text-white'}`}
-        >
-          {isFullscreen ? <Minimize className="h-4 w-4" /> : <Expand className="h-4 w-4" />}
-        </button>
+      <button
+        type="button"
+        onClick={() => setIsFullscreen((current) => !current)}
+        className={`absolute right-3 top-3 z-[560] inline-flex h-10 w-10 items-center justify-center rounded-full border backdrop-blur-xl shadow-xl transition-all ${
+          isLightBasemap
+            ? 'border-slate-200/80 bg-white/90 text-slate-700 hover:bg-white hover:text-slate-950'
+            : 'border-white/12 bg-slate-950/82 text-slate-200 hover:bg-slate-900 hover:text-white'
+        }`}
+        aria-label={isFullscreen ? 'Exit fullscreen map' : 'Open fullscreen map'}
+      >
+        {isFullscreen ? <Minimize className="h-4 w-4" /> : <Expand className="h-4 w-4" />}
+      </button>
+
+      <div className={`absolute z-[550] flex w-max max-w-[calc(100%-84px)] flex-nowrap items-center justify-start gap-1.5 overflow-x-auto rounded-2xl border px-2 py-2 backdrop-blur-xl shadow-xl ${routeControlsClass} ${
+        isFullscreen ? 'left-1/2 top-3 -translate-x-1/2 sm:top-4' : 'right-16 top-3'
+      }`}>
         {(Object.keys(MAP_STYLE_LABELS) as RouteMapStyle[]).map((styleKey) => (
           <button
             key={styleKey}
             type="button"
             onClick={() => setMapStyle(styleKey)}
-            className={`rounded-full px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] transition-all ${
+            className={`shrink-0 rounded-full px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] transition-all ${
               mapStyle === styleKey
                 ? 'bg-primary text-on-primary shadow-[0_0_16px_rgba(0,255,163,0.24)]'
                 : isLightBasemap
@@ -542,4 +578,10 @@ export const TripMap = ({ trip }: TripMapProps) => {
       </div>
     </div>
   )
+
+  if (isFullscreen && typeof document !== 'undefined') {
+    return createPortal(mapShell, document.body)
+  }
+
+  return mapShell
 }

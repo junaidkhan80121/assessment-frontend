@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Download, RotateCw } from 'lucide-react'
+import { useTheme } from 'next-themes'
  
 import { useCreateTripMutation, useGetTripQuery } from '@/api/tripsApi'
 import { StatsBar } from './StatsBar'
@@ -13,6 +14,8 @@ import type { ApiErrorResponse } from '@/types/trip'
 export const TripResults = () => {
   const { tripId } = useParams<{ tripId: string }>()
   const navigate = useNavigate()
+  const { resolvedTheme, setTheme } = useTheme()
+  const hasInitializedTheme = useRef(false)
   const [activeTab, setActiveTab] = useState(0)
   const [pollingInterval, setPollingInterval] = useState(5000)
   const [createTrip, { isLoading: isRecalculating }] = useCreateTripMutation()
@@ -23,6 +26,16 @@ export const TripResults = () => {
     refetchOnFocus: true,
     refetchOnReconnect: true,
   })
+
+  useEffect(() => {
+    if (!hasInitializedTheme.current && resolvedTheme !== 'dark') {
+      setTheme('dark')
+      hasInitializedTheme.current = true
+      return
+    }
+
+    hasInitializedTheme.current = true
+  }, [resolvedTheme, setTheme])
 
   useEffect(() => {
     if (trip?.status === 'COMPUTING' || trip?.status === 'PENDING') {
