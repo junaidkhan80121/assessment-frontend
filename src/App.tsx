@@ -13,6 +13,48 @@ const NAV_ITEMS = [
   { to: '/about', icon: 'info', label: 'About Us' },
 ]
 
+function VanguardLogo() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="h-11 w-11"
+      viewBox="0 0 48 48"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <defs>
+        <linearGradient id="vanguard-logo-accent" x1="8" y1="8" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#34D399" />
+          <stop offset="1" stopColor="#22D3EE" />
+        </linearGradient>
+      </defs>
+      <rect
+        x="1.5"
+        y="1.5"
+        width="45"
+        height="45"
+        rx="13.5"
+        className="fill-slate-900 dark:fill-slate-100"
+        opacity="0.94"
+      />
+      <path
+        d="M10.5 12.5L24 37.5L37.5 12.5"
+        stroke="url(#vanguard-logo-accent)"
+        strokeWidth="4.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M17.5 24H30.5"
+        className="stroke-slate-100 dark:stroke-slate-900"
+        strokeWidth="3.4"
+        strokeLinecap="round"
+      />
+      <circle cx="24" cy="8.5" r="2.8" fill="#34D399" />
+    </svg>
+  )
+}
+
 function Layout({ children, pathname }: { children: React.ReactNode; pathname: string }) {
   const backgroundVariant = pathname.startsWith('/trip/') ? 'static' : 'interactive'
 
@@ -23,7 +65,7 @@ function Layout({ children, pathname }: { children: React.ReactNode; pathname: s
         <div className="mx-auto flex h-20 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl bg-surface-container-highest ring-1 ring-white/10">
-              <img alt="Vanguard Logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtH--9Krht0fw-kBOUshybtzQSBzfz6rieEWtoMG40pzDb13CGoBujS2vRhbU0FA-t8tpQN246XWm9ouZ_VwtnvwyiDmIHRYzvDk-UE1DgumGkJkyo8FeFSImac8lySbhQsD5Ei7TK2UdVVJ5EJY4LNIP9ni6_Ttwn9EoAret3wRxGt1GUR-kTqQ8lCPE1iMCGedGRovHAvDdLdDe1ytSsm0fls_tMI3k1NFUsbbvimeftQY81iFKcfcLv2y59j1Rs3YNSMQSVyhbq" />
+              <VanguardLogo />
             </div>
             <div className="flex flex-col">
               <span className="font-headline text-xl font-black uppercase tracking-tighter text-primary">Vanguard</span>
