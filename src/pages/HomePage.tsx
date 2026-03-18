@@ -89,6 +89,7 @@ const LocationInput = ({
       renderInput={(params) => (
         <TextField
           {...params}
+          size="small"
           label={label}
           placeholder={placeholder}
           variant="outlined"
@@ -106,13 +107,13 @@ const LocationInput = ({
             startAdornment: (
               <InputAdornment position="start">
                 <span style={{ color: accentColor }}>
-                  <Icon className="w-5 h-5" />
+                  <Icon className="h-4 w-4" />
                 </span>
               </InputAdornment>
             ),
             endAdornment: (
               <>
-                {loading ? <span className="material-symbols-outlined animate-spin text-on-surface-variant w-5 h-5">sync</span> : null}
+                {loading ? <span className="material-symbols-outlined h-4 w-4 animate-spin text-on-surface-variant">sync</span> : null}
                 {params.InputProps.endAdornment}
               </>
             ),
@@ -121,7 +122,8 @@ const LocationInput = ({
             '& .MuiOutlinedInput-root': {
               backgroundColor: 'var(--surface-container-low)',
               color: 'var(--on-surface)',
-              borderRadius: '12px',
+              borderRadius: '10px',
+              minHeight: '46px',
               transition: 'all 0.2s ease',
               '& fieldset': {
                 borderColor: errorText ? 'var(--error)' : 'var(--outline-variant)',
@@ -139,17 +141,24 @@ const LocationInput = ({
               },
             },
             '& .MuiInputLabel-root': {
+              fontSize: '0.85rem',
               color: errorText ? 'var(--error)' : 'var(--on-surface-variant)',
               '&.Mui-focused': {
                 color: errorText ? 'var(--error)' : 'var(--primary)',
               },
+            },
+            '& .MuiInputBase-input': {
+              fontSize: '0.95rem',
+              paddingTop: '10px',
+              paddingBottom: '10px',
             },
             '& .MuiInputBase-input::placeholder': {
               color: 'var(--on-surface-variant)',
               opacity: 0.5,
             },
             '& .MuiFormHelperText-root': {
-              minHeight: '1.25rem',
+              minHeight: '1rem',
+              fontSize: '0.75rem',
               color: errorText ? 'var(--error)' : 'var(--on-surface-variant)',
               marginLeft: 0,
             },
@@ -177,14 +186,14 @@ const LocationInput = ({
 }
 
 const RouteIllustration = () => (
-  <div className="relative mx-auto mb-6 h-60 w-full max-w-xs overflow-hidden rounded-[28px] border border-outline-variant/40 bg-[radial-gradient(circle_at_top,_rgba(0,255,163,0.16),_transparent_48%),linear-gradient(180deg,_rgba(32,31,31,0.95),_rgba(14,14,14,0.96))] px-5 pt-5 shadow-[0_20px_60px_rgba(0,0,0,0.38)]">
+  <div className="relative mx-auto mb-6 h-72 w-full max-w-xs overflow-hidden rounded-[28px] border border-outline-variant/40 bg-[radial-gradient(circle_at_top,_rgba(0,255,163,0.16),_transparent_48%),linear-gradient(180deg,_rgba(32,31,31,0.95),_rgba(14,14,14,0.96))] px-5 pt-5 shadow-[0_20px_60px_rgba(0,0,0,0.38)]">
     <motion.div
       animate={{ opacity: [0.3, 0.7, 0.3] }}
       transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
       className="absolute inset-x-6 top-5 h-16 rounded-full bg-primary/10 blur-2xl"
     />
-    <div className="absolute inset-x-4 bottom-9 h-16 rounded-[28px] border border-white/8 bg-white/[0.04]" />
-    <div className="absolute inset-x-10 bottom-[72px] h-[2px] bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.45),transparent)]" />
+    <div className="absolute inset-x-4 bottom-6 h-20 rounded-[28px] border border-white/8 bg-white/[0.04]" />
+    <div className="absolute inset-x-10 top-[134px] h-[2px] bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.45),transparent)]" />
     <div className="relative h-full">
       <div className="absolute left-5 right-5 top-6 flex items-center justify-between text-[11px] uppercase tracking-[0.24em] text-on-surface-variant">
         <span>Current</span>
@@ -221,7 +230,7 @@ const RouteIllustration = () => (
       <motion.div
         animate={{ x: ['-10%', '88%'], y: [0, -2, 0] }}
         transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute top-[122px] flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/20 bg-surface-container-highest/90 text-primary shadow-[0_12px_30px_rgba(0,255,163,0.18)]"
+        className="absolute top-[116px] flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/20 bg-surface-container-highest/90 text-primary shadow-[0_12px_30px_rgba(0,255,163,0.18)]"
       >
         <Truck className="h-6 w-6" />
       </motion.div>
@@ -238,7 +247,7 @@ const RouteIllustration = () => (
         ].map((card, index) => (
           <div
             key={card.title}
-            className="rounded-2xl border border-white/8 bg-white/[0.04] px-3 py-2 text-center"
+            className="rounded-2xl border border-white/8 bg-[rgba(15,23,42,0.42)] px-3 py-2 text-center backdrop-blur-sm"
             style={{ animationDelay: `${index * 120}ms` }}
           >
             <p className="text-[10px] uppercase tracking-[0.18em] text-on-surface-variant">{card.title}</p>
@@ -489,116 +498,109 @@ const TripPlanner: React.FC = () => {
   }
 
   return (
-    <div className="relative pt-16 pb-32 min-h-screen flex flex-col items-center justify-center px-6 overflow-hidden">
+    <div className="relative min-h-screen overflow-hidden px-4 pb-16 pt-28 sm:px-6">
       {isLoading && <LoadingModal />}
 
-      <div className="relative z-10 text-center mb-12">
+      <div className="relative z-10 mx-auto w-full max-w-7xl">
+      <div className="mb-8 text-center">
         <div className="mb-4 flex flex-wrap items-center justify-center gap-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-on-surface-variant">
           <span className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-primary">Smart geocoding</span>
           <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">Alternative routes</span>
           <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">HOS-aware logs</span>
         </div>
         <h1 className="font-headline text-5xl md:text-7xl font-black tracking-tighter leading-none mb-4">
-          Plan Your Trip <br />
-          <span style={{ color: accentColor }}>Vanguard</span>
+          Plan Your Trip
+          <span style={{ color: accentColor }} className="block">
+            Vanguard
+          </span>
         </h1>
-        <p className="mx-auto max-w-xl text-sm font-medium uppercase tracking-[0.24em] text-on-surface-variant md:text-base">
-          <TypewriterText text="Optimizing kinetic logistics through precision engineering" speed={22} />
+        <p className="mx-auto max-w-[44rem] text-xs font-medium uppercase tracking-[0.2em] text-on-surface-variant sm:text-sm md:text-base">
+          <TypewriterText
+            text="Optimizing kinetic logistics through precision engineering"
+            speed={52}
+            repeat
+            pauseMs={2800}
+            className="text-center md:whitespace-nowrap"
+          />
         </p>
       </div>
 
-      <div className="relative z-10 w-full max-w-3xl overflow-hidden rounded-[32px] border border-outline-variant/30 bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03))] p-1 shadow-[0_24px_90px_rgba(0,0,0,0.32)] backdrop-blur-xl">
-        <div className="rounded-[28px] border border-white/10 bg-surface-container/92 p-8">
-        <div className="mb-6 flex flex-col gap-4 border-b border-white/10 pb-6 md:flex-row md:items-end md:justify-between">
+      <div className="mx-auto w-full max-w-[43rem] overflow-hidden rounded-[24px] border border-outline-variant/30 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03))] shadow-[0_18px_48px_rgba(0,0,0,0.22)] backdrop-blur-xl">
+        <div className="rounded-[20px] border border-white/10 bg-surface-container/90 p-4 sm:px-4 sm:py-5">
+        <form className="space-y-2.5" onSubmit={(e) => e.preventDefault()}>
+          <div className="grid gap-2.5 md:grid-cols-2">
+            <LocationInput
+              label="Current Position"
+              icon={Navigation}
+              placeholder="e.g. Chicago, IL"
+              value={formValues.current_location}
+              onChange={(value) => updateField('current_location', value)}
+              onSelect={(item) => selectLocation('current_location', item)}
+              options={currentSearch.options}
+              loading={currentSearch.isFetching}
+              isOpen={activeField === 'current_location' && currentSearch.isOpen}
+              onFocus={() => setActiveField('current_location')}
+              onBlur={() => {
+                setActiveField((current) => (current === 'current_location' ? null : current))
+                markTouched('current_location')
+              }}
+              errorText={fieldErrors.current_location}
+              tabIndex={1}
+              accentColor={accentColor}
+              accentGlow={accentGlow}
+            />
+            <LocationInput
+              label="Pickup Node"
+              icon={Truck}
+              placeholder="e.g. Detroit, MI"
+              value={formValues.pickup_location}
+              onChange={(value) => updateField('pickup_location', value)}
+              onSelect={(item) => selectLocation('pickup_location', item)}
+              options={pickupSearch.options}
+              loading={pickupSearch.isFetching}
+              isOpen={activeField === 'pickup_location' && pickupSearch.isOpen}
+              onFocus={() => setActiveField('pickup_location')}
+              onBlur={() => {
+                setActiveField((current) => (current === 'pickup_location' ? null : current))
+                markTouched('pickup_location')
+              }}
+              errorText={fieldErrors.pickup_location}
+              tabIndex={2}
+              accentColor={accentColor}
+              accentGlow={accentGlow}
+            />
+          </div>
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-on-surface-variant">Dispatch Console</p>
-            <h2 className="mt-2 font-headline text-3xl font-black tracking-tight text-on-surface">Route inputs and cycle limits</h2>
-            <p className="mt-2 max-w-lg text-sm text-on-surface-variant">
-              Search or type any US stop, tune cycle hours, and we will compute the main route plus alternates.
-            </p>
+            <LocationInput
+              label="Destination Vector"
+              icon={MapPin}
+              placeholder="e.g. Pittsburgh, PA"
+              value={formValues.dropoff_location}
+              onChange={(value) => updateField('dropoff_location', value)}
+              onSelect={(item) => selectLocation('dropoff_location', item)}
+              options={dropoffSearch.options}
+              loading={dropoffSearch.isFetching}
+              isOpen={activeField === 'dropoff_location' && dropoffSearch.isOpen}
+              onFocus={() => setActiveField('dropoff_location')}
+              onBlur={() => {
+                setActiveField((current) => (current === 'dropoff_location' ? null : current))
+                markTouched('dropoff_location')
+              }}
+              errorText={fieldErrors.dropoff_location}
+              tabIndex={3}
+              accentColor={accentColor}
+              accentGlow={accentGlow}
+            />
           </div>
-          <div className="grid grid-cols-2 gap-3 text-left text-xs uppercase tracking-[0.18em] text-on-surface-variant">
-            <div className="rounded-2xl border border-white/8 bg-white/[0.04] px-4 py-3">
-              <div className="text-[10px]">Inputs</div>
-              <div className="mt-1 text-lg font-bold text-on-surface">3 Stops</div>
-            </div>
-            <div className="rounded-2xl border border-white/8 bg-white/[0.04] px-4 py-3">
-              <div className="text-[10px]">Cycle</div>
-              <div className="mt-1 text-lg font-bold text-on-surface">70 hrs</div>
-            </div>
-          </div>
-        </div>
-        <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-          <LocationInput
-            label="Current Position"
-            icon={Navigation}
-            placeholder="e.g. Chicago, IL"
-            value={formValues.current_location}
-            onChange={(value) => updateField('current_location', value)}
-            onSelect={(item) => selectLocation('current_location', item)}
-            options={currentSearch.options}
-            loading={currentSearch.isFetching}
-            isOpen={activeField === 'current_location' && currentSearch.isOpen}
-            onFocus={() => setActiveField('current_location')}
-            onBlur={() => {
-              setActiveField((current) => (current === 'current_location' ? null : current))
-              markTouched('current_location')
-            }}
-            errorText={fieldErrors.current_location}
-            tabIndex={1}
-            accentColor={accentColor}
-            accentGlow={accentGlow}
-          />
 
-          <LocationInput
-            label="Pickup Node"
-            icon={Truck}
-            placeholder="e.g. Detroit, MI"
-            value={formValues.pickup_location}
-            onChange={(value) => updateField('pickup_location', value)}
-            onSelect={(item) => selectLocation('pickup_location', item)}
-            options={pickupSearch.options}
-            loading={pickupSearch.isFetching}
-            isOpen={activeField === 'pickup_location' && pickupSearch.isOpen}
-            onFocus={() => setActiveField('pickup_location')}
-            onBlur={() => {
-              setActiveField((current) => (current === 'pickup_location' ? null : current))
-              markTouched('pickup_location')
-            }}
-            errorText={fieldErrors.pickup_location}
-            tabIndex={2}
-            accentColor={accentColor}
-            accentGlow={accentGlow}
-          />
-
-          <LocationInput
-            label="Destination Vector"
-            icon={MapPin}
-            placeholder="e.g. Pittsburgh, PA"
-            value={formValues.dropoff_location}
-            onChange={(value) => updateField('dropoff_location', value)}
-            onSelect={(item) => selectLocation('dropoff_location', item)}
-            options={dropoffSearch.options}
-            loading={dropoffSearch.isFetching}
-            isOpen={activeField === 'dropoff_location' && dropoffSearch.isOpen}
-            onFocus={() => setActiveField('dropoff_location')}
-            onBlur={() => {
-              setActiveField((current) => (current === 'dropoff_location' ? null : current))
-              markTouched('dropoff_location')
-            }}
-            errorText={fieldErrors.dropoff_location}
-            tabIndex={3}
-            accentColor={accentColor}
-            accentGlow={accentGlow}
-          />
-
-          <div className="space-y-4 pt-2">
+          <div className="grid gap-3 lg:grid-cols-[1.45fr_auto] lg:items-end">
+            <div className="space-y-2.5">
             <div className="flex justify-between items-end">
               <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4" style={{ color: accentColor }} />
+                <Clock className="h-3.5 w-3.5" style={{ color: accentColor }} />
                 <label className="font-headline text-[10px] uppercase tracking-widest" style={{ color: accentColor }}>Cycle Hours Used</label>
               </div>
-              <span className="font-headline text-2xl font-bold text-on-surface">
+              <span className="font-headline text-lg font-bold text-on-surface sm:text-xl">
                 {formValues.current_cycle_used.toFixed(1)} <span className="text-xs font-normal text-on-surface-variant ml-1">HRS</span>
               </span>
             </div>
@@ -617,14 +619,14 @@ const TripPlanner: React.FC = () => {
               step={0.5}
               sx={{
                 color: accentColor,
-                height: 6,
-                padding: '16px 0',
+                height: 4,
+                padding: '10px 0',
                 '& .MuiSlider-track': {
                   border: 'none',
                 },
                 '& .MuiSlider-thumb': {
-                  height: 20,
-                  width: 20,
+                  height: 16,
+                  width: 16,
                   backgroundColor: accentColor,
                   border: `2px solid ${accentColor}`,
                   boxShadow: isLight ? '0 0 12px rgba(15,159,87,0.24)' : '0 0 10px rgba(0,255,163,0.4)',
@@ -641,27 +643,28 @@ const TripPlanner: React.FC = () => {
                 },
               }}
             />
-            <div className="flex justify-between text-xs text-on-surface-variant font-medium">
+            <div className="flex justify-between text-[11px] text-on-surface-variant font-medium">
               <span>Fresh Cycle (0 hrs)</span>
               <span>Maxed Out (70 hrs)</span>
             </div>
             {fieldErrors.current_cycle_used ? (
-              <p className="text-sm text-error">{fieldErrors.current_cycle_used}</p>
+              <p className="text-xs text-error">{fieldErrors.current_cycle_used}</p>
             ) : null}
-          </div>
+            </div>
 
           <Button
             variant="contained"
-            fullWidth
             disabled={isLoading}
             onClick={handlePlanTrip}
             sx={{
-              mt: 1,
-              height: '56px',
-              fontSize: '1.125rem',
+              minWidth: { lg: '184px' },
+              width: { xs: '100%', lg: '184px' },
+              height: '44px',
+              fontSize: '0.875rem',
               fontWeight: 'bold',
-              borderRadius: '12px',
+              borderRadius: '10px',
               textTransform: 'none',
+              whiteSpace: 'nowrap',
               backgroundColor: isLoading ? 'var(--surface-container-highest)' : 'var(--primary)',
               color: isLoading ? 'var(--on-surface-variant)' : 'var(--on-primary)',
               boxShadow: isLoading ? 'none' : accentButtonGlow,
@@ -679,22 +682,23 @@ const TripPlanner: React.FC = () => {
             }}
           >
             {isLoading ? (
-              <div className="flex items-center gap-3">
-                <span className="material-symbols-outlined animate-spin drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">progress_activity</span>
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-base animate-spin drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">progress_activity</span>
                 <span>Optimizing Route...</span>
               </div>
             ) : (
-              <div className="flex items-center gap-2">
-                <span>{hasErrors ? 'Resolve Fields First' : 'Plan My Trip'}</span>
-                <ChevronRight className="w-5 h-5 ml-1" />
+              <div className="flex items-center gap-1.5 whitespace-nowrap">
+                <span>{hasErrors ? 'Resolve Fields' : 'Plan Trip'}</span>
+                <ChevronRight className="ml-0.5 h-3.5 w-3.5 shrink-0" />
               </div>
             )}
           </Button>
+          </div>
         </form>
         </div>
       </div>
 
-      <div className="relative z-10 mt-16 flex w-full max-w-4xl flex-wrap justify-between gap-8 opacity-80">
+      <div className="mt-10 flex w-full flex-wrap justify-between gap-4 opacity-80">
         <div className="flex flex-col gap-1 rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-4" style={{ borderColor: `${accentColor}40` }}>
           <span className="text-[10px] uppercase tracking-widest font-bold">Fleet Status</span>
           <span className="font-headline text-xl font-bold text-on-surface">98.4% ACTIVE</span>
@@ -707,6 +711,7 @@ const TripPlanner: React.FC = () => {
           <span className="text-[10px] uppercase tracking-widest font-bold">Latency</span>
           <span className="font-headline text-xl font-bold text-on-surface">12ms</span>
         </div>
+      </div>
       </div>
     </div>
   )

@@ -112,90 +112,104 @@ export const TripResults = () => {
   }
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Back button + stats */}
-      <div className="border-b border-border bg-card">
-        <div className="flex items-center justify-between gap-3 px-4 py-3">
-          <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate('/')}
-            className="p-2 rounded-md hover:bg-secondary transition-colors"
-            id="back-button"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </button>
-          <div>
-            <h1 className="text-sm font-semibold">Trip Results</h1>
-            <p className="text-xs text-muted-foreground">
-              {trip.current_location} → {trip.pickup_location} → {trip.dropoff_location}
-            </p>
-          </div>
-          </div>
-          <button
-            onClick={handleRecalculateRoute}
-            disabled={isRecalculating}
-            className="inline-flex h-10 items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 text-xs font-semibold uppercase tracking-[0.18em] text-primary transition-all hover:scale-[1.02] hover:bg-primary/15 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            <RotateCw className={`h-3.5 w-3.5 ${isRecalculating ? 'animate-spin' : ''}`} />
-            Recalculate Route
-          </button>
-        </div>
-        <StatsBar trip={trip} />
-      </div>
-
-      {/* Main content: map + logs */}
-      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
-        {/* Map panel */}
-        <div className="w-full lg:w-[55%] h-[300px] lg:h-auto">
-          <TripMap trip={trip} />
-        </div>
-
-        {/* Log sheets panel */}
-        <div className="w-full lg:w-[45%] flex flex-col border-t lg:border-t-0 lg:border-l border-border bg-background">
-          {/* Tabs */}
-          <div className="flex-shrink-0 flex overflow-x-auto gap-1 p-2 border-b border-border bg-card">
-            {trip.daily_logs.map((log, i) => (
+    <div className="relative z-10 min-h-screen px-4 pb-4 pt-28 sm:px-6 sm:pt-28 lg:px-8 xl:h-[100svh] xl:overflow-hidden xl:pb-3">
+      <div className="mx-auto flex w-full max-w-[1680px] flex-col gap-2.5 xl:h-full">
+        <section className="rounded-[24px] border border-outline-variant/30 bg-surface/88 p-3 shadow-[0_18px_60px_rgba(15,23,42,0.14)] backdrop-blur-xl sm:px-4 sm:py-2.5 xl:flex-shrink-0">
+          <div className="flex flex-col gap-1.5 xl:flex-row xl:items-start xl:justify-between">
+            <div className="flex items-start gap-3">
               <button
-                key={i}
-                onClick={() => setActiveTab(i)}
-                id={`tab-day-${i + 1}`}
-                className={`px-3 py-1.5 rounded-md text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-1 ${
-                  activeTab === i
-                    ? "bg-primary text-primary-foreground"
-                    : "hover:bg-secondary text-muted-foreground"
-                }`}
+                onClick={() => navigate('/')}
+                className="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-xl border border-outline-variant/30 bg-surface-container-low text-on-surface transition-colors hover:bg-surface-container"
+                id="back-button"
               >
-                Day {i + 1}
-                {log.recap.available_tomorrow < 5 && (
-                  <span className="h-1.5 w-1.5 rounded-full bg-yellow-500" />
-                )}
+                <ArrowLeft className="h-3.5 w-3.5" />
               </button>
-            ))}
-          </div>
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-primary">Trip Results</p>
+                <p className="mt-0.5 max-w-4xl text-xs text-muted-foreground sm:text-[13px]">
+                  {trip.current_location} → {trip.pickup_location} → {trip.dropoff_location}
+                </p>
+              </div>
+            </div>
 
-          {/* Active log sheet */}
-          <div className="flex-1 overflow-auto p-3 bg-background">
-            {trip.daily_logs[activeTab] && (
-              <LogSheet
-                trip={trip}
-                dayLog={trip.daily_logs[activeTab]}
-                dayNumber={trip.daily_logs[activeTab].day_number}
-              />
-            )}
-          </div>
-
-          {/* Download button */}
-          <div className="p-3 border-t border-border">
             <button
-              onClick={handleDownloadPDF}
-              id="download-pdf"
-              className="w-full h-10 rounded-md text-sm font-medium bg-primary text-primary-foreground hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2"
+              onClick={handleRecalculateRoute}
+              disabled={isRecalculating}
+              className="inline-flex h-9 items-center justify-center gap-2 self-start rounded-full border border-primary/20 bg-primary/10 px-3.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary transition-all hover:scale-[1.02] hover:bg-primary/15 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <Download className="h-4 w-4" />
-              Download Current Log PDF
+              <RotateCw className={`h-3 w-3 ${isRecalculating ? 'animate-spin' : ''}`} />
+              Recalculate Route
             </button>
           </div>
-        </div>
+
+          <div className="mt-1.5">
+            <StatsBar trip={trip} />
+          </div>
+        </section>
+
+        <section className="grid gap-3 xl:min-h-0 xl:flex-1 xl:grid-cols-[minmax(0,1.45fr)_minmax(420px,0.95fr)] xl:items-stretch">
+          <div className="flex flex-col rounded-[28px] border border-outline-variant/30 bg-surface/88 p-3 shadow-[0_18px_60px_rgba(15,23,42,0.14)] backdrop-blur-xl sm:p-4 xl:min-h-0">
+            <div className="mb-2 flex items-center justify-between gap-3 px-1">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">Route Map</p>
+                <h2 className="mt-1 text-lg font-bold text-on-surface">Primary route and alternatives</h2>
+              </div>
+              <p className="text-xs text-muted-foreground">Fullscreen, alternate tiles, moving vehicle</p>
+            </div>
+            <div className="h-[540px] flex-1 overflow-hidden rounded-[24px] border border-outline-variant/25 bg-card lg:h-[640px] xl:min-h-0">
+              <TripMap trip={trip} />
+            </div>
+          </div>
+
+          <div className="flex min-h-0 flex-col rounded-[28px] border border-outline-variant/30 bg-surface/88 p-3 shadow-[0_18px_60px_rgba(15,23,42,0.14)] backdrop-blur-xl sm:p-4 xl:min-h-0">
+            <div className="flex flex-col gap-3 border-b border-outline-variant/25 pb-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">Driver Logs</p>
+                  <h2 className="mt-1 text-lg font-bold text-on-surface">Daily log sheets and trip events</h2>
+                </div>
+                <button
+                  onClick={handleDownloadPDF}
+                  id="download-pdf"
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-full bg-primary px-4 text-xs font-semibold uppercase tracking-[0.16em] text-primary-foreground transition-all hover:scale-[1.01] active:scale-[0.99]"
+                >
+                  <Download className="h-4 w-4" />
+                  Download PDF
+                </button>
+              </div>
+
+              <div className="flex overflow-x-auto gap-2 pb-1">
+                {trip.daily_logs.map((log, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setActiveTab(i)}
+                    id={`tab-day-${i + 1}`}
+                    className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] whitespace-nowrap transition-colors ${
+                      activeTab === i
+                        ? 'bg-primary text-primary-foreground shadow-[0_0_18px_rgba(0,255,163,0.18)]'
+                        : 'border border-outline-variant/30 bg-surface-container-low text-muted-foreground hover:bg-surface-container'
+                    }`}
+                  >
+                    Day {i + 1}
+                    {log.recap.available_tomorrow < 5 && (
+                      <span className="h-1.5 w-1.5 rounded-full bg-yellow-500" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="min-h-0 flex-1 overflow-auto pt-4">
+              {trip.daily_logs[activeTab] && (
+                <LogSheet
+                  trip={trip}
+                  dayLog={trip.daily_logs[activeTab]}
+                  dayNumber={trip.daily_logs[activeTab].day_number}
+                />
+              )}
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   )

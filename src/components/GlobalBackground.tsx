@@ -4,9 +4,14 @@ import { MapContainer, TileLayer } from 'react-leaflet';
 import { useTheme } from 'next-themes';
 import 'leaflet/dist/leaflet.css';
 
-export const GlobalBackground = () => {
+interface GlobalBackgroundProps {
+  variant?: 'interactive' | 'static'
+}
+
+export const GlobalBackground = ({ variant = 'interactive' }: GlobalBackgroundProps) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const isInteractive = variant === 'interactive';
 
   const cursorX = useMotionValue(-100);
   const cursorY = useMotionValue(-100);
@@ -39,53 +44,62 @@ export const GlobalBackground = () => {
         body, html { cursor: none !important; }
         a, button, input { cursor: none !important; }
       `}}/>
-      <motion.div
-        className="fixed top-0 left-0 z-[9999] pointer-events-none"
-        style={{
-          x: springCursorX,
-          y: springCursorY,
-          translateX: '-50%',
-          translateY: '-50%',
-        }}
-      >
-        <div className="w-3 h-3 rounded-full bg-[#00FFA3] shadow-[0_0_12px_4px_rgba(0,255,163,0.7)]" />
-      </motion.div>
 
-      <motion.div
-        className="fixed top-0 left-0 z-[9998] pointer-events-none"
-        style={{
-          x: springRingX,
-          y: springRingY,
-          translateX: '-50%',
-          translateY: '-50%',
-        }}
-      >
+      <>
         <motion.div
-          animate={{
-            borderRadius: ['50%', '40% 60% 60% 40%', '60% 40% 40% 60%', '50%'],
+          className="fixed top-0 left-0 z-[2147483647] pointer-events-none"
+          style={{
+            x: springCursorX,
+            y: springCursorY,
+            translateX: '-50%',
+            translateY: '-50%',
           }}
-          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-          className="w-10 h-10 border border-[#00FFA3]/40 bg-[#00FFA3]/[0.06]"
-        />
-      </motion.div>
+        >
+          <div className="w-3 h-3 rounded-full bg-[#00FFA3] shadow-[0_0_12px_4px_rgba(0,255,163,0.7)]" />
+        </motion.div>
+
+        <motion.div
+          className="fixed top-0 left-0 z-[2147483646] pointer-events-none"
+          style={{
+            x: springRingX,
+            y: springRingY,
+            translateX: '-50%',
+            translateY: '-50%',
+          }}
+        >
+          <motion.div
+            animate={{
+              borderRadius: ['50%', '40% 60% 60% 40%', '60% 40% 40% 60%', '50%'],
+            }}
+            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+            className="w-10 h-10 border border-[#00FFA3]/40 bg-[#00FFA3]/[0.06]"
+          />
+        </motion.div>
+      </>
+
+      {isInteractive ? (
+        <>
+          <motion.div
+            className="fixed top-0 left-0 z-[2147483645] pointer-events-none"
+            style={{
+              x: springRingX,
+              y: springRingY,
+              translateX: '-50%',
+              translateY: '-50%',
+            }}
+          >
+            <div className="w-64 h-64 rounded-full bg-[#00FFA3]/[0.08] blur-3xl" />
+          </motion.div>
+        </>
+      ) : null}
 
       <motion.div
-        className="fixed top-0 left-0 z-[9997] pointer-events-none"
+        className={`fixed inset-[-50px] pointer-events-none z-0 transition-opacity duration-300 ${
+          isInteractive ? 'opacity-[0.35] dark:opacity-40' : 'opacity-[0.28] dark:opacity-[0.34]'
+        }`}
         style={{
-          x: springRingX,
-          y: springRingY,
-          translateX: '-50%',
-          translateY: '-50%',
-        }}
-      >
-        <div className="w-64 h-64 rounded-full bg-[#00FFA3]/[0.08] blur-3xl" />
-      </motion.div>
-
-      <motion.div
-        className="fixed inset-[-50px] opacity-[0.35] dark:opacity-40 transition-opacity duration-300 pointer-events-none z-0"
-        style={{
-          x: mapOffsetX,
-          y: mapOffsetY
+          x: isInteractive ? mapOffsetX : 0,
+          y: isInteractive ? mapOffsetY : 0
         }}
       >
         <style dangerouslySetInnerHTML={{__html:`
@@ -112,7 +126,13 @@ export const GlobalBackground = () => {
         </MapContainer>
       </motion.div>
 
-      <div className="fixed bottom-0 right-0 w-full h-full opacity-5 pointer-events-none flex justify-end items-end overflow-hidden z-0">
+      {!isInteractive ? (
+        <div className="fixed inset-0 z-0 pointer-events-none bg-[radial-gradient(circle_at_top,_rgba(0,255,163,0.08),_transparent_34%),linear-gradient(180deg,rgba(15,23,42,0.06),rgba(15,23,42,0.22))] dark:bg-[radial-gradient(circle_at_top,_rgba(0,255,163,0.1),_transparent_34%),linear-gradient(180deg,rgba(2,6,23,0.12),rgba(2,6,23,0.34))]" />
+      ) : null}
+
+      <div className={`fixed bottom-0 right-0 w-full h-full pointer-events-none flex justify-end items-end overflow-hidden z-0 ${
+        isInteractive ? 'opacity-5' : 'opacity-[0.035]'
+      }`}>
         <svg className="w-3/4 h-3/4 translate-x-1/4 translate-y-1/4 text-primary-container" fill="none" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
           <path d="M50 450L250 450L350 350L750 350" stroke="currentColor" strokeWidth="2"></path>
           <path d="M0 550L300 550L450 400L800 400" stroke="currentColor" strokeWidth="1"></path>

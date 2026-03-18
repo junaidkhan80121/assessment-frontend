@@ -1,4 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react'
+import { useTheme } from 'next-themes'
+import { BedDouble, Coffee, Fuel, MapPinned, Truck } from 'lucide-react'
 import type { DailyLog, Trip } from '@/types/trip'
 
 interface LogSheetProps {
@@ -29,6 +31,9 @@ const ROW_HEIGHT = 55
 
 export const LogSheet = ({ trip, dayLog, dayNumber }: LogSheetProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const { resolvedTheme } = useTheme()
+  const tripEvents = dayLog.remarks.map((remark) => mapRemarkToEvent(remark.note, remark.location, remark.time))
+  const isDark = resolvedTheme === 'dark'
 
   const drawLogSheet = useCallback(() => {
     const canvas = canvasRef.current
@@ -40,8 +45,8 @@ export const LogSheet = ({ trip, dayLog, dayNumber }: LogSheetProps) => {
     const dpr = window.devicePixelRatio || 1
     canvas.width = CANVAS_WIDTH * dpr
     canvas.height = CANVAS_HEIGHT * dpr
-    canvas.style.width = `${CANVAS_WIDTH}px`
-    canvas.style.height = `${CANVAS_HEIGHT}px`
+    canvas.style.width = '100%'
+    canvas.style.height = 'auto'
     ctx.scale(dpr, dpr)
 
     // Background
@@ -259,14 +264,65 @@ export const LogSheet = ({ trip, dayLog, dayNumber }: LogSheetProps) => {
 
   return (
     <div
-      className="overflow-x-auto rounded-2xl border border-slate-200 bg-white p-3 pb-2 shadow-[0_18px_50px_rgba(15,23,42,0.12)]"
+      className={`flex min-h-full flex-col rounded-[24px] border p-3 pb-4 shadow-[0_18px_50px_rgba(15,23,42,0.12)] ${
+        isDark
+          ? 'border-white/10 bg-slate-950/85'
+          : 'border-slate-200 bg-white'
+      }`}
       id={`log-sheet-day-${dayNumber}`}
     >
-      <canvas
-        ref={canvasRef}
-        style={{ width: CANVAS_WIDTH, height: CANVAS_HEIGHT }}
-        className="rounded-md border border-slate-200 bg-white"
-      />
+      <div className="shrink-0">
+        <canvas
+          ref={canvasRef}
+          className="h-auto w-full rounded-md border border-slate-200 bg-white"
+        />
+      </div>
+
+      {tripEvents.length > 0 && (
+        <div
+          className={`mt-5 min-h-[340px] flex-1 overflow-auto border-t pt-5 ${
+            isDark ? 'border-white/10' : 'border-slate-200'
+          }`}
+        >
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <p className={`text-[11px] font-semibold uppercase tracking-[0.18em] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Trip Events</p>
+              <h3 className={`mt-1 text-lg font-bold ${isDark ? 'text-slate-50' : 'text-slate-900'}`}>Day {dayNumber} activity log</h3>
+            </div>
+            <div className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] ${
+              isDark ? 'bg-white/10 text-slate-300' : 'bg-slate-100 text-slate-600'
+            }`}>
+              {tripEvents.length} events
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            {tripEvents.map((event, index) => (
+              <div
+                key={`${event.time}-${event.title}-${index}`}
+                className={`flex items-center justify-between gap-4 rounded-2xl border px-4 py-3 ${
+                  isDark
+                    ? 'border-white/10 bg-white/[0.04]'
+                    : 'border-slate-200 bg-slate-50'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${event.iconBg}`}>
+                    <event.icon className={`h-5 w-5 ${event.iconColor}`} />
+                  </div>
+                  <div>
+                    <p className={`text-sm font-semibold ${isDark ? 'text-slate-50' : 'text-slate-900'}`}>{event.title}</p>
+                    <p className={`text-sm ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{event.location}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className={`text-sm font-bold ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>{formatEventTime(event.time)}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -318,4 +374,79 @@ function splitLogDate(dateLabel: string, dayNumber: number): [string, string, st
 function timeToMinutes(time: string): number {
   const parts = time.split(':')
   return parseInt(parts[0]) * 60 + parseInt(parts[1])
+}
+
+function formatEventTime(time: string): string {
+  const [hourRaw, minuteRaw] = time.split(':').map(Number)
+  const suffix = hourRaw >= 12 ? 'PM' : 'AM'
+  const hour = hourRaw % 12 || 12
+  return `${String(hour).padStart(2, '0')}:${String(minuteRaw).padStart(2, '0')} ${suffix}`
+}
+
+function mapRemarkToEvent(note: string, location: string, time: string) {
+  const normalized = note.toLowerCase()
+
+  if (normalized.includes('fuel')) {
+    return {
+      title: 'Fueling Stop',
+      location,
+      time,
+      icon: Fuel,
+      iconBg: 'bg-amber-50',
+      iconColor: 'text-amber-500',
+    }
+  }
+
+  if (normalized.includes('30-min') || normalized.includes('break')) {
+    return {
+      title: '30-Min Rest Break',
+      location,
+      time,
+      icon: Coffee,
+      iconBg: 'bg-violet-50',
+      iconColor: 'text-violet-500',
+    }
+  }
+
+  if (normalized.includes('rest') || normalized.includes('off-duty')) {
+    return {
+      title: 'Rest Period',
+      location,
+      time,
+      icon: BedDouble,
+      iconBg: 'bg-slate-100',
+      iconColor: 'text-slate-600',
+    }
+  }
+
+  if (normalized.includes('pickup') || normalized.includes('shipper')) {
+    return {
+      title: 'Pickup Stop',
+      location,
+      time,
+      icon: MapPinned,
+      iconBg: 'bg-emerald-50',
+      iconColor: 'text-emerald-500',
+    }
+  }
+
+  if (normalized.includes('dropoff') || normalized.includes('delivery')) {
+    return {
+      title: 'Delivery Stop',
+      location,
+      time,
+      icon: MapPinned,
+      iconBg: 'bg-rose-50',
+      iconColor: 'text-rose-500',
+    }
+  }
+
+  return {
+    title: normalized.includes('inspection') ? 'Shift Start' : 'Trip Event',
+    location,
+    time,
+    icon: Truck,
+    iconBg: 'bg-blue-50',
+    iconColor: 'text-blue-500',
+  }
 }

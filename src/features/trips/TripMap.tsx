@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState, type MouseEvent as ReactMouseEvent } from 'react'
+import { Fragment, useEffect, useMemo, useState, type MouseEvent as ReactMouseEvent } from 'react'
 import { motion, useSpring } from 'framer-motion'
-import { MapContainer, TileLayer, Polyline, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, Polyline, ZoomControl, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import { useTheme } from 'next-themes'
 import { Expand, Minimize } from 'lucide-react'
@@ -59,6 +59,33 @@ const createMarkerIcon = (color: string, label: string) => L.divIcon({
   iconAnchor: [14, 14],
 })
 
+const createVehicleIcon = (accentColor: string) => L.divIcon({
+  className: '',
+  html: `
+    <div style="position:relative; width:34px; height:34px;">
+      <div style="
+        position:absolute; inset:0; border-radius:999px;
+        background:${accentColor}; opacity:0.18;
+        box-shadow:0 0 18px ${accentColor};
+      "></div>
+      <div style="
+        position:absolute; inset:4px; border-radius:999px;
+        background:#0f172a; border:2px solid white;
+        display:flex; align-items:center; justify-content:center;
+      ">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M3 8h11l3 3h4v6h-2a2 2 0 1 1-4 0H9a2 2 0 1 1-4 0H3V8Z" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M14 8v3h6" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="7" cy="17" r="1.6" fill="white"/>
+          <circle cx="17" cy="17" r="1.6" fill="white"/>
+        </svg>
+      </div>
+    </div>
+  `,
+  iconSize: [34, 34],
+  iconAnchor: [17, 17],
+})
+
 function StopMarkers({ stops }: { stops: TripStop[] }) {
   const map = useMap()
 
@@ -90,6 +117,40 @@ function StopMarkers({ stops }: { stops: TripStop[] }) {
   return null
 }
 
+function AnimatedRouteVehicle({
+  positions,
+  accentColor,
+}: {
+  positions: [number, number][]
+  accentColor: string
+}) {
+  const map = useMap()
+
+  useEffect(() => {
+    if (positions.length < 2) {
+      return
+    }
+
+    const marker = L.marker(positions[0], {
+      icon: createVehicleIcon(accentColor),
+      zIndexOffset: 1200,
+    }).addTo(map)
+
+    let pointIndex = 0
+    const timer = window.setInterval(() => {
+      pointIndex = (pointIndex + 1) % positions.length
+      marker.setLatLng(positions[pointIndex])
+    }, 140)
+
+    return () => {
+      window.clearInterval(timer)
+      marker.remove()
+    }
+  }, [accentColor, map, positions])
+
+  return null
+}
+
 function FitBounds({ trip }: { trip: Trip }) {
   const map = useMap()
 
@@ -112,6 +173,33 @@ function FitBounds({ trip }: { trip: Trip }) {
   return null
 }
 
+function splitRouteAtPickup(
+  positions: [number, number][],
+  pickup: [number, number],
+): { beforePickup: [number, number][], afterPickup: [number, number][] } {
+  if (positions.length < 2) {
+    return { beforePickup: positions, afterPickup: [] }
+  }
+
+  let closestIndex = 0
+  let closestDistance = Number.POSITIVE_INFINITY
+
+  positions.forEach(([lat, lon], index) => {
+    const distance = Math.hypot(lat - pickup[0], lon - pickup[1])
+    if (distance < closestDistance) {
+      closestDistance = distance
+      closestIndex = index
+    }
+  })
+
+  const safeSplitIndex = Math.min(Math.max(closestIndex, 1), positions.length - 1)
+
+  return {
+    beforePickup: positions.slice(0, safeSplitIndex + 1),
+    afterPickup: positions.slice(safeSplitIndex),
+  }
+}
+
 export const TripMap = ({ trip }: TripMapProps) => {
   const { theme } = useTheme()
   const [mapStyle, setMapStyle] = useState<RouteMapStyle>('default')
@@ -119,16 +207,6 @@ export const TripMap = ({ trip }: TripMapProps) => {
   const hoverX = useSpring(0, { stiffness: 320, damping: 24, mass: 0.6 })
   const hoverY = useSpring(0, { stiffness: 320, damping: 24, mass: 0.6 })
   const hoverScale = useSpring(1, { stiffness: 280, damping: 22, mass: 0.7 })
-
-  useEffect(() => {
-    setMapStyle((current) => {
-      if (theme === 'dark') {
-        return current === 'default' ? 'dark' : current
-      }
-
-      return current === 'dark' ? 'default' : current
-    })
-  }, [theme])
 
   const tileUrl = useMemo(() => {
     if (mapStyle === 'terrain') {
@@ -170,6 +248,22 @@ export const TripMap = ({ trip }: TripMapProps) => {
 
   const routeOptions = useMemo(() => trip.route_options ?? [], [trip.route_options])
   const hasRouteOptions = routeOptions.length > 0
+  const pickupPosition = useMemo<[number, number]>(
+    () => [trip.pickup_location_lat, trip.pickup_location_lon],
+    [trip.pickup_location_lat, trip.pickup_location_lon],
+  )
+  const fallbackRouteSplit = useMemo(
+    () => splitRouteAtPickup(trip.route_geometry as [number, number][], pickupPosition),
+    [pickupPosition, trip.route_geometry],
+  )
+  const primaryRoutePositions = useMemo<[number, number][]>(() => {
+    if (hasRouteOptions) {
+      return (routeOptions.find((option) => option.is_fastest)?.route_geometry ?? routeOptions[0]?.route_geometry ?? []) as [number, number][]
+    }
+
+    return trip.route_geometry as [number, number][]
+  }, [hasRouteOptions, routeOptions, trip.route_geometry])
+  const vehicleAccent = theme === 'dark' ? '#22D3EE' : '#2563EB'
 
   const handleMouseMove = (event: ReactMouseEvent<HTMLDivElement>) => {
     const bounds = event.currentTarget.getBoundingClientRect()
@@ -187,45 +281,100 @@ export const TripMap = ({ trip }: TripMapProps) => {
     hoverScale.set(1)
   }
 
+  const isLightBasemap = mapStyle === 'default' || mapStyle === 'terrain'
+  const overlaySurfaceClass = isLightBasemap
+    ? 'bg-white/92 text-slate-950 border-slate-300/90'
+    : 'bg-slate-950/78 text-slate-100 border-white/12'
+  const routeControlsClass = isLightBasemap
+    ? 'bg-white/86 text-slate-900 border-slate-200/80'
+    : 'bg-slate-950/78 text-slate-100 border-white/12'
+  const overlayHeadingClass = isLightBasemap ? 'text-slate-900' : 'text-white'
+  const overlayMutedClass = isLightBasemap ? 'text-slate-600' : 'text-slate-300'
+  const overlayCardClass = isLightBasemap
+    ? 'border-slate-200 bg-slate-100/95'
+    : 'border-white/8 bg-white/[0.05]'
+
   return (
-    <div className={`${isFullscreen ? 'fixed inset-0 z-[1200] h-screen w-screen bg-background p-3' : 'relative h-[360px] lg:h-full w-full'}`}>
-      <div className="relative h-full w-full overflow-hidden border border-border bg-card shadow-2xl" id="trip-map">
-      <div className="absolute left-3 top-3 z-[500] rounded-2xl border border-white/10 bg-background/85 px-3 py-2 backdrop-blur-xl shadow-xl">
-        <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-on-surface">
-          <span className="inline-block h-[3px] w-8 rounded-full bg-[#2563EB]" />
-          <span>Main route</span>
-        </div>
-        {hasRouteOptions && (
-          <div className="mt-2 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-on-surface-variant">
-            <span className="inline-block w-8 border-t-[3px] border-dashed border-[#64748B] opacity-80" />
-            <span>Alternative route</span>
+    <div className={`${isFullscreen ? 'fixed inset-0 z-[1200] h-screen w-screen bg-background/95 p-3' : 'relative h-[360px] lg:h-full w-full'}`}>
+      <div
+        className={`relative h-full w-full overflow-hidden border border-border shadow-2xl ${
+          isLightBasemap ? 'bg-[#dbe5ef]' : 'bg-slate-950'
+        }`}
+        id="trip-map"
+      >
+      <div className={`absolute left-3 top-3 z-[500] w-[220px] rounded-xl border px-2.5 py-2 backdrop-blur-xl shadow-xl ${overlaySurfaceClass}`}>
+        {hasRouteOptions && routeOptions.some((option) => option.is_fastest) && (
+          <div className={`mb-2 inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.18em] ${isLightBasemap ? 'border-primary/25 bg-primary/10 text-emerald-700' : 'border-primary/20 bg-primary/12 text-primary'}`}>
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_10px_rgba(0,255,163,0.55)]" />
+            Fastest route highlighted
           </div>
         )}
-        <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-on-surface-variant">
+        <div className={`flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] ${overlayHeadingClass}`}>
+          <span className="inline-block h-[3px] w-7 rounded-full bg-[#0284C7]" />
+          <span>Current to pickup</span>
+        </div>
+        <div className={`mt-2 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] ${overlayMutedClass}`}>
+          <span className="inline-block h-[3px] w-7 rounded-full bg-[#059669]" />
+          <span>Pickup to destination</span>
+        </div>
+        {hasRouteOptions && (
+          <div className={`mt-2 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] ${overlayMutedClass}`}>
+            <span className="inline-block w-7 border-t-[3px] border-dashed border-[#7DD3FC] opacity-90" />
+            <span>Alt current to pickup</span>
+          </div>
+        )}
+        {hasRouteOptions && (
+          <div className={`mt-2 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.16em] ${overlayMutedClass}`}>
+            <span className="inline-block w-7 border-t-[3px] border-dashed border-[#86EFAC] opacity-90" />
+            <span>Alt pickup to destination</span>
+          </div>
+        )}
+        <div className={`mt-3 grid grid-cols-2 gap-x-2 gap-y-2 text-[9px] font-semibold uppercase tracking-[0.14em] ${overlayMutedClass}`}>
           <div className="flex items-center gap-2">
-            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#3B82F6] text-[9px] font-bold text-white">S</span>
+            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#3B82F6] text-[8px] font-bold text-white">S</span>
             <span>Start</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#22C55E] text-[9px] font-bold text-white">P</span>
+            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#22C55E] text-[8px] font-bold text-white">P</span>
             <span>Pickup</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#EF4444] text-[9px] font-bold text-white">D</span>
+            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#EF4444] text-[8px] font-bold text-white">D</span>
             <span>Dropoff</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#F97316] text-[9px] font-bold text-white">F</span>
+            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#F97316] text-[8px] font-bold text-white">F</span>
             <span>Fuel/Rest</span>
           </div>
         </div>
+        <div className="mt-3 space-y-2 border-t border-white/10 pt-2.5">
+          {hasRouteOptions ? (
+            routeOptions.map((option, index) => (
+              <div
+                key={option.id}
+                className={`flex items-center justify-between gap-2 rounded-xl border px-2.5 py-2 text-[9px] font-semibold uppercase tracking-[0.12em] ${overlayCardClass}`}
+              >
+                <div className={`flex items-center gap-2 ${overlayHeadingClass}`}>
+                  <span className={`inline-block h-[3px] w-6 rounded-full ${option.is_fastest ? 'bg-[#0284C7]' : 'border-t-[3px] border-dashed border-[#7DD3FC]'}`} />
+                  <span>{option.is_fastest ? 'Fastest route' : `Alternative ${index}`}</span>
+                </div>
+                <span className={overlayMutedClass}>{option.total_distance_miles.toFixed(1)} mi</span>
+              </div>
+            ))
+          ) : (
+            <div className={`flex items-center justify-between gap-2 rounded-xl border px-2.5 py-2 text-[9px] font-semibold uppercase tracking-[0.12em] ${overlayCardClass}`}>
+              <span className={overlayHeadingClass}>Main route</span>
+              <span className={overlayMutedClass}>{trip.total_distance_miles.toFixed(1)} mi</span>
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className="absolute right-3 top-3 z-[500] flex items-center gap-2 rounded-full border border-white/10 bg-background/85 px-2 py-2 backdrop-blur-xl shadow-xl">
+      <div className={`absolute right-3 top-3 z-[550] flex max-w-[min(560px,calc(100%-24px))] flex-wrap items-center justify-end gap-2 rounded-2xl border px-2 py-2 backdrop-blur-xl shadow-xl ${routeControlsClass}`}>
         <button
           type="button"
           onClick={() => setIsFullscreen((current) => !current)}
-          className="rounded-full px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-on-surface-variant transition-all hover:bg-surface-container-high hover:text-on-surface"
+          className={`rounded-full px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] transition-all ${isLightBasemap ? 'text-slate-700 hover:bg-slate-900/10 hover:text-slate-950' : 'text-slate-200 hover:bg-white/10 hover:text-white'}`}
         >
           {isFullscreen ? <Minimize className="h-4 w-4" /> : <Expand className="h-4 w-4" />}
         </button>
@@ -237,7 +386,9 @@ export const TripMap = ({ trip }: TripMapProps) => {
             className={`rounded-full px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] transition-all ${
               mapStyle === styleKey
                 ? 'bg-primary text-on-primary shadow-[0_0_16px_rgba(0,255,163,0.24)]'
-                : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
+                : isLightBasemap
+                  ? 'bg-slate-900/5 text-slate-700 hover:bg-slate-900/10 hover:text-slate-950'
+                  : 'bg-white/5 text-slate-200 hover:bg-white/10 hover:text-white'
             }`}
           >
             {MAP_STYLE_LABELS[styleKey]}
@@ -251,16 +402,57 @@ export const TripMap = ({ trip }: TripMapProps) => {
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
+        <style>{`
+          #trip-map .leaflet-control-zoom {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 12px 32px rgba(15, 23, 42, 0.28);
+          }
+
+          #trip-map .leaflet-control-zoom a {
+            width: 34px;
+            height: 34px;
+            line-height: 34px;
+            background: rgba(15, 23, 42, 0.86);
+            color: #e5e7eb;
+            border-bottom-color: rgba(255, 255, 255, 0.08);
+          }
+
+          #trip-map .leaflet-control-zoom a:hover {
+            background: rgba(30, 41, 59, 0.96);
+            color: white;
+          }
+
+          #trip-map .leaflet-bottom.leaflet-right {
+            right: 12px;
+            bottom: 16px;
+          }
+
+          @media (max-width: 1024px) {
+            #trip-map .leaflet-bottom.leaflet-right {
+              bottom: 72px;
+            }
+          }
+
+          @media (max-width: 768px) {
+            #trip-map .leaflet-control-container .leaflet-top.leaflet-left,
+            #trip-map .leaflet-control-container .leaflet-top.leaflet-right {
+              max-width: calc(100% - 24px);
+            }
+          }
+        `}</style>
         <MapContainer
           center={center}
           zoom={5}
           className="h-full w-full"
-          zoomControl
+          zoomControl={false}
           zoomSnap={0.5}
           zoomDelta={0.5}
           wheelPxPerZoomLevel={160}
           scrollWheelZoom
         >
+          <ZoomControl position="bottomright" />
           <TileLayer
             attribution={attribution}
             url={tileUrl}
@@ -272,48 +464,77 @@ export const TripMap = ({ trip }: TripMapProps) => {
                 if (positions.length === 0) {
                   return null
                 }
+                const { beforePickup, afterPickup } = splitRouteAtPickup(
+                  positions as [number, number][],
+                  pickupPosition,
+                )
 
                 return (
-                  <Polyline
-                    key={option.id}
-                    positions={positions}
-                    pathOptions={{
-                      color: isFastest
-                        ? theme === 'dark' ? '#3B82F6' : '#2563EB'
-                        : theme === 'dark' ? '#94A3B8' : '#64748B',
-                      weight: isFastest ? 5 : 3,
-                      opacity: isFastest ? 0.95 : 0.7,
-                      dashArray: isFastest ? undefined : '10 8',
-                      lineJoin: 'round',
-                      lineCap: 'round',
-                    }}
-                  />
+                  <Fragment key={option.id}>
+                    {beforePickup.length > 1 && (
+                      <Polyline
+                        positions={beforePickup}
+                        pathOptions={{
+                          color: isFastest
+                            ? theme === 'dark' ? '#38BDF8' : '#0284C7'
+                            : theme === 'dark' ? '#7DD3FC' : '#7DD3FC',
+                          weight: isFastest ? 6 : 4,
+                          opacity: isFastest ? 0.95 : 0.72,
+                          dashArray: isFastest ? undefined : '10 8',
+                          lineJoin: 'round',
+                          lineCap: 'round',
+                        }}
+                      />
+                    )}
+                    {afterPickup.length > 1 && (
+                      <Polyline
+                        positions={afterPickup}
+                        pathOptions={{
+                          color: isFastest
+                            ? theme === 'dark' ? '#34D399' : '#059669'
+                            : theme === 'dark' ? '#86EFAC' : '#86EFAC',
+                          weight: isFastest ? 4 : 2.5,
+                          opacity: isFastest ? 0.95 : 0.72,
+                          dashArray: isFastest ? undefined : '10 8',
+                          lineJoin: 'round',
+                          lineCap: 'round',
+                        }}
+                      />
+                    )}
+                  </Fragment>
                 )
               })
             : trip.route_geometry.length > 0 && (
                 <>
-                  <Polyline
-                    positions={trip.route_geometry}
-                    pathOptions={{
-                      color: theme === 'dark' ? '#0F172A' : '#1E40AF',
-                      weight: 8,
-                      opacity: 0.6,
-                      lineJoin: 'round',
-                      lineCap: 'round',
-                    }}
-                  />
-                  <Polyline
-                    positions={trip.route_geometry}
-                    pathOptions={{
-                      color: theme === 'dark' ? '#3B82F6' : '#60A5FA',
-                      weight: 4,
-                      opacity: 1,
-                      lineJoin: 'round',
-                      lineCap: 'round',
-                    }}
-                  />
+                  {fallbackRouteSplit.beforePickup.length > 1 && (
+                    <Polyline
+                      positions={fallbackRouteSplit.beforePickup}
+                      pathOptions={{
+                        color: theme === 'dark' ? '#38BDF8' : '#0284C7',
+                        weight: 6,
+                        opacity: 0.92,
+                        lineJoin: 'round',
+                        lineCap: 'round',
+                      }}
+                    />
+                  )}
+                  {fallbackRouteSplit.afterPickup.length > 1 && (
+                    <Polyline
+                      positions={fallbackRouteSplit.afterPickup}
+                      pathOptions={{
+                        color: theme === 'dark' ? '#34D399' : '#059669',
+                        weight: 4,
+                        opacity: 0.92,
+                        lineJoin: 'round',
+                        lineCap: 'round',
+                      }}
+                    />
+                  )}
                 </>
               )}
+          {primaryRoutePositions.length > 1 && (
+            <AnimatedRouteVehicle positions={primaryRoutePositions} accentColor={vehicleAccent} />
+          )}
           <StopMarkers stops={trip.stops} />
           <FitBounds trip={trip} />
         </MapContainer>

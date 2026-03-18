@@ -16,13 +16,13 @@ interface StatChipProps {
 }
 
 const StatChip = ({ icon, label, value, unit }: StatChipProps) => (
-  <div className="flex items-center gap-3 rounded-lg border border-border p-3 bg-card/50">
-    <div className="text-primary">{icon}</div>
+  <div className="flex min-h-[68px] items-center gap-3 rounded-2xl border border-outline-variant/30 bg-surface-container-low/78 px-3.5 py-2 shadow-[0_8px_18px_rgba(15,23,42,0.06)]">
+    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/12 text-primary [&_svg]:h-[1.35rem] [&_svg]:w-[1.35rem]">{icon}</div>
     <div>
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="text-lg font-bold font-mono">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">{label}</p>
+      <p className="mt-1 text-lg font-bold font-mono leading-none text-emerald-700 dark:text-emerald-300 sm:text-[1.6rem]">
         <span data-count-up={value}>0</span>
-        <span className="text-xs font-normal text-muted-foreground ml-1">{unit}</span>
+        <span className="ml-1 text-[11px] font-normal text-emerald-700/75 dark:text-emerald-300/75">{unit}</span>
       </p>
     </div>
   </div>
@@ -49,39 +49,39 @@ export const StatsBar = ({ trip }: StatsBarProps) => {
   }, [trip])
 
   return (
-    <div ref={containerRef} className="grid grid-cols-2 lg:grid-cols-4 gap-2 p-3">
+    <div ref={containerRef} className="grid grid-cols-2 gap-2 lg:grid-cols-4">
       <StatChip
-        icon={<Route className="h-4 w-4" />}
+        icon={<Route />}
         label="Total Distance"
         value={trip.total_distance_miles}
         unit="mi"
       />
       <StatChip
-        icon={<Clock className="h-4 w-4" />}
+        icon={<Clock />}
         label="Drive Time"
         value={trip.total_drive_hours}
         unit="hrs"
       />
       <StatChip
-        icon={<FileText className="h-4 w-4" />}
+        icon={<FileText />}
         label="Log Sheets"
         value={trip.daily_logs.length}
         unit="days"
       />
-      <div className="flex items-center gap-2 rounded-lg border border-border p-3 bg-card/50">
-        <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
+      <div className="flex min-h-[68px] items-center rounded-2xl border border-outline-variant/30 bg-surface-container-low/78 px-3.5 py-2 shadow-[0_8px_18px_rgba(15,23,42,0.06)]">
+        <div className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold ${
           trip.hos_compliant
-            ? "bg-success/20 text-success"
+            ? "bg-emerald-500/18 text-emerald-700 dark:text-emerald-300"
             : "bg-destructive/20 text-destructive"
         }`}>
           {trip.hos_compliant ? (
             <>
-              <ShieldCheck className="h-3.5 w-3.5" />
+              <ShieldCheck className="h-4.5 w-4.5" />
               HOS Compliant
             </>
           ) : (
             <>
-              <AlertTriangle className="h-3.5 w-3.5" />
+              <AlertTriangle className="h-4.5 w-4.5" />
               Check Hours
             </>
           )}
