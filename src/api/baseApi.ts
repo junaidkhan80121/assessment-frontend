@@ -1,10 +1,9 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
-
-const baseUrl = import.meta.env.VITE_API_URL || "/api"
+import { config } from "@/config"
 
 export const baseApi = createApi({
   reducerPath: "api",
-  baseQuery: fetchBaseQuery({ baseUrl }),
+  baseQuery: fetchBaseQuery({ baseUrl: config.services.backendApiUrl }),
   tagTypes: ["Trip"],
   endpoints: () => ({}),
 })

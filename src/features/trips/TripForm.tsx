@@ -2,19 +2,13 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import { motion, Variants } from 'framer-motion'
 import { MapPin, Clock, Truck, Loader2 } from 'lucide-react'
  
 import { useCreateTripMutation } from '@/api/tripsApi'
 import type { TripFormValues } from '@/types/trip'
-
-const tripSchema = z.object({
-  current_location: z.string().min(2, 'Enter a valid location'),
-  pickup_location: z.string().min(2, 'Enter a valid location'),
-  dropoff_location: z.string().min(2, 'Enter a valid location'),
-  current_cycle_used: z.number().min(0).max(70, 'Must be 0–70'),
-})
+import { useToast } from '@/components/ToastProvider'
+import { buildTripPayload, tripFormSchema } from '@/utils/tripValidation'
 
 const cardVariants: Variants = {
   hidden: { opacity: 0, y: 40, scale: 0.97 },
@@ -33,6 +27,7 @@ export const TripForm = () => {
   const navigate = useNavigate()
   const [createTrip] = useCreateTripMutation()
   const [serverError, setServerError] = useState<string | null>(null)
+  const toast = useToast()
 
   const {
     register,
@@ -41,7 +36,7 @@ export const TripForm = () => {
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<TripFormValues>({
-    resolver: zodResolver(tripSchema),
+    resolver: zodResolver(tripFormSchema),
     defaultValues: {
       current_location: '',
       pickup_location: '',
@@ -55,11 +50,16 @@ export const TripForm = () => {
   const onSubmit = async (data: TripFormValues) => {
     setServerError(null)
     try {
-      const result = await createTrip(data).unwrap()
+      const result = await createTrip(buildTripPayload(data)).unwrap()
       navigate(`/trip/${result.id}`)
     } catch (err: unknown) {
       const error = err as { data?: { error?: string } }
-      setServerError(error?.data?.error || 'An unexpected error occurred. Please try again.')
+      const message = error?.data?.error || 'An unexpected error occurred. Please try again.'
+      setServerError(message)
+      toast.error({
+        title: 'Trip planning failed',
+        description: message,
+      })
     }
   }
 
@@ -164,13 +164,6 @@ export const TripForm = () => {
             )}
           </motion.div>
 
-          {/* Server error */}
-          {serverError && (
-            <div className="p-3 rounded-md bg-destructive/10 border border-destructive/20">
-              <p className="text-destructive text-sm">{serverError}</p>
-            </div>
-          )}
-
           {/* Submit */}
           <motion.div variants={itemVariants}>
             <button
@@ -187,7 +180,7 @@ export const TripForm = () => {
               ) : (
                 <>
                   <Truck className="h-4 w-4" />
-                  Plan My Trip
+                  {serverError ? 'Try Planning Again' : 'Plan My Trip'}
                 </>
               )}
             </button>

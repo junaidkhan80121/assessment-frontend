@@ -4,7 +4,7 @@ import { MapContainer, TileLayer, Polyline, CircleMarker, useMap } from 'react-l
 import { useTheme } from 'next-themes';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { config } from '../config';
+import { useGetTripQuery } from '@/api/tripsApi';
 
 const MapUpdater: React.FC<{ positions: [number, number][] }> = ({ positions }) => {
   const map = useMap();
@@ -20,32 +20,13 @@ const MapUpdater: React.FC<{ positions: [number, number][] }> = ({ positions }) 
 const TripPage: React.FC = () => {
   const { tripId } = useParams();
   const { theme } = useTheme();
-  
-  const [tripData, setTripData] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [activeLogIndex, setActiveLogIndex] = useState(0);
-
-  useEffect(() => {
-    const fetchTrip = async () => {
-      try {
-        const response = await fetch(`${config.API_BASE_URL}/trips/${tripId}/`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch trip details. It might still be computing or does not exist.');
-        }
-        const data = await response.json();
-        setTripData(data);
-      } catch (err: any) {
-        setErrorMsg(err.message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (tripId) {
-      fetchTrip();
-    }
-  }, [tripId]);
+  const { data: tripData, isLoading, error } = useGetTripQuery(tripId || '', {
+    skip: !tripId,
+    pollingInterval: 5000,
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
+  })
 
   const tileUrl = theme === 'light' 
     ? 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
@@ -76,6 +57,11 @@ const TripPage: React.FC = () => {
       </div>
     );
   }
+
+  const errorMsg =
+    (error as { data?: { message?: string; error?: string } } | undefined)?.data?.message ||
+    (error as { data?: { message?: string; error?: string } } | undefined)?.data?.error ||
+    null
 
   if (errorMsg || !tripData) {
     return (
@@ -327,8 +313,9 @@ const TripPage: React.FC = () => {
                   {/* Log Path */}
                   <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
                     {(() => {
-                      const logData = tripData.daily_logs[activeLogIndex];
-                      if (!logData || !logData.events) return null;
+                      const logData = tripData.daily_logs[activeLogIndex] as any;
+                      const events = logData?.events as any[] | undefined;
+                      if (!logData || !events) return null;
                       
                       const width = 600; 
                       const hourWidth = width / 24;
@@ -342,14 +329,14 @@ const TripPage: React.FC = () => {
                       let points = "";
                       let circles: React.ReactNode[] = [];
 
-                      logData.events.forEach((event: any, idx: number) => {
+                      events.forEach((event: any, idx: number) => {
                         const startX = event.start_hour * hourWidth;
                         const endX = event.end_hour * hourWidth;
                         const y = yMap[event.status];
 
                         // Vertical connecting line from previous event
                         if (idx > 0) {
-                           const prevEvent = logData.events[idx - 1];
+                           const prevEvent = events[idx - 1];
                            const prevY = yMap[prevEvent.status];
                            points += ` ${startX},${prevY} ${startX},${y}`;
                         } else {
@@ -380,29 +367,29 @@ const TripPage: React.FC = () => {
                 <div className="p-3 border-r border-black/10">
                   <span className="block text-[8px] font-bold text-black/50 uppercase">Total Off</span>
                   <span className="text-xs font-bold text-black">
-                    {Math.floor(tripData.daily_logs[activeLogIndex]?.total_off_duty_hours || 0)}h 
-                    {Math.round(((tripData.daily_logs[activeLogIndex]?.total_off_duty_hours || 0) % 1) * 60)}m
+                    {Math.floor(tripData.daily_logs[activeLogIndex]?.totals?.OFF_DUTY || 0)}h 
+                    {Math.round(((tripData.daily_logs[activeLogIndex]?.totals?.OFF_DUTY || 0) % 1) * 60)}m
                   </span>
                 </div>
                 <div className="p-3 border-r border-black/10">
                   <span className="block text-[8px] font-bold text-black/50 uppercase">Total SB</span>
                   <span className="text-xs font-bold text-black">
-                    {Math.floor(tripData.daily_logs[activeLogIndex]?.total_sleeper_berth_hours || 0)}h 
-                    {Math.round(((tripData.daily_logs[activeLogIndex]?.total_sleeper_berth_hours || 0) % 1) * 60)}m
+                    {Math.floor(tripData.daily_logs[activeLogIndex]?.totals?.SLEEPER || 0)}h 
+                    {Math.round(((tripData.daily_logs[activeLogIndex]?.totals?.SLEEPER || 0) % 1) * 60)}m
                   </span>
                 </div>
                 <div className="p-3 border-r border-black/10">
                   <span className="block text-[8px] font-bold text-black/50 uppercase">Total Drive</span>
                   <span className="text-xs font-bold text-black">
-                    {Math.floor(tripData.daily_logs[activeLogIndex]?.total_drive_hours || 0)}h 
-                    {Math.round(((tripData.daily_logs[activeLogIndex]?.total_drive_hours || 0) % 1) * 60)}m
+                    {Math.floor(tripData.daily_logs[activeLogIndex]?.totals?.DRIVING || 0)}h 
+                    {Math.round(((tripData.daily_logs[activeLogIndex]?.totals?.DRIVING || 0) % 1) * 60)}m
                   </span>
                 </div>
                 <div className="p-3">
                   <span className="block text-[8px] font-bold text-black/50 uppercase">Total On</span>
                   <span className="text-xs font-bold text-black">
-                    {Math.floor(tripData.daily_logs[activeLogIndex]?.total_on_duty_hours || 0)}h 
-                    {Math.round(((tripData.daily_logs[activeLogIndex]?.total_on_duty_hours || 0) % 1) * 60)}m
+                    {Math.floor(tripData.daily_logs[activeLogIndex]?.totals?.ON_DUTY_NOT_DRIVING || 0)}h 
+                    {Math.round(((tripData.daily_logs[activeLogIndex]?.totals?.ON_DUTY_NOT_DRIVING || 0) % 1) * 60)}m
                   </span>
                 </div>
               </div>

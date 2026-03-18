@@ -16,6 +16,7 @@ export interface DutyEntry {
   end: string     // "HH:MM"
   hours: number
   location: string
+  miles?: number
 }
 
 export interface DutyTotals {
@@ -44,8 +45,16 @@ export interface DailyLog {
   day_number: number
   duty_entries: DutyEntry[]
   totals: DutyTotals
+  total_miles_driving_today: number
   remarks: Remark[]
   recap: Recap
+}
+
+export interface ApiErrorResponse {
+  code?: string
+  message?: string
+  details?: Record<string, string[] | string>
+  error?: string
 }
 
 export interface Trip {
@@ -99,8 +108,14 @@ export interface Trip {
 
 export interface TripCreatePayload {
   current_location: string
+  current_location_lat?: number
+  current_location_lon?: number
   pickup_location: string
+  pickup_location_lat?: number
+  pickup_location_lon?: number
   dropoff_location: string
+  dropoff_location_lat?: number
+  dropoff_location_lon?: number
   current_cycle_used: number
 }
 
