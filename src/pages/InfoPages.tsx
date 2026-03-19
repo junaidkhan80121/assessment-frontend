@@ -32,6 +32,8 @@ interface ContentPageProps {
 
 const GuidelinesVisual = () => {
   const rootRef = useRef<HTMLDivElement>(null)
+  const { theme } = useTheme()
+  const isLight = theme === 'light'
 
   useEffect(() => {
     if (!rootRef.current) {
@@ -131,7 +133,14 @@ const GuidelinesVisual = () => {
 
   return (
     <div ref={rootRef} data-hero-item className="grid gap-4 lg:grid-cols-[1.12fr_0.88fr]" style={{ perspective: '1000px' }}>
-      <div data-hero-card className="rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.07),rgba(255,255,255,0.03))] p-5 shadow-[0_20px_40px_rgba(0,0,0,0.3)]">
+      <div
+        data-hero-card
+        className={`rounded-[28px] border p-5 shadow-[0_20px_40px_rgba(0,0,0,0.18)] ${
+          isLight
+            ? 'border-emerald-900/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(241,248,244,0.88))]'
+            : 'border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.07),rgba(255,255,255,0.03))] shadow-[0_20px_40px_rgba(0,0,0,0.3)]'
+        }`}
+      >
         <div className="mb-4 flex items-center justify-between">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-primary">Guidance Network</p>
@@ -141,9 +150,21 @@ const GuidelinesVisual = () => {
             <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" /> Active
           </div>
         </div>
-        <div className="relative rounded-[22px] border border-white/8 bg-black/20 p-4 overflow-hidden">
+        <div
+          className={`relative overflow-hidden rounded-[22px] border p-4 ${
+            isLight ? 'border-emerald-900/10 bg-[rgba(232,241,236,0.95)]' : 'border-white/8 bg-[rgba(0,0,0,0.4)]'
+          }`}
+        >
           {/* Radar Sweep Effect */}
-          <div data-radar-sweep className="absolute top-1/2 left-1/2 w-[200%] h-[200%] -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ background: 'conic-gradient(from 0deg, transparent 70%, rgba(0,255,163,0.1) 90%, rgba(0,255,163,0.4) 100%)' }} />
+          <div
+            data-radar-sweep
+            className="absolute top-1/2 left-1/2 h-[200%] w-[200%] -translate-x-1/2 -translate-y-1/2 rounded-full"
+            style={{
+              background: isLight
+                ? 'conic-gradient(from 0deg, transparent 72%, rgba(0,92,48,0.06) 88%, rgba(0,92,48,0.2) 100%)'
+                : 'conic-gradient(from 0deg, transparent 70%, rgba(0,255,163,0.1) 90%, rgba(0,255,163,0.4) 100%)',
+            }}
+          />
           
           <svg viewBox="0 0 360 180" className="relative z-10 h-40 w-full overflow-visible">
             {[
@@ -187,21 +208,32 @@ const GuidelinesVisual = () => {
       </div>
 
       <div className="grid gap-4">
-        <div data-hero-card className="rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.07),rgba(255,255,255,0.03))] p-5 shadow-[0_20px_40px_rgba(0,0,0,0.3)]">
+        <div
+          data-hero-card
+          className={`rounded-[28px] border p-5 shadow-[0_20px_40px_rgba(0,0,0,0.18)] ${
+            isLight
+              ? 'border-sky-900/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(241,248,251,0.9))]'
+              : 'border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.07),rgba(255,255,255,0.03))] shadow-[0_20px_40px_rgba(0,0,0,0.3)]'
+          }`}
+        >
           <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-primary">Lane Density Histogram</p>
-          <div className="mt-4 rounded-[22px] border border-white/8 bg-black/20 px-4 py-4 relative overflow-hidden">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-16 bg-primary/20 blur-[30px] rounded-full" />
+          <div
+            className={`relative mt-4 overflow-hidden rounded-[22px] border px-4 py-4 ${
+              isLight ? 'border-sky-900/10 bg-[rgba(236,245,248,0.96)]' : 'border-white/8 bg-[rgba(0,0,0,0.4)]'
+            }`}
+          >
+            <div className={`absolute top-0 left-1/2 h-16 w-32 -translate-x-1/2 rounded-full blur-[30px] ${isLight ? 'bg-primary/10' : 'bg-primary/20'}`} />
             <div className="relative z-10 flex h-28 items-end gap-2.5">
               {[0.42, 0.66, 0.54, 0.9, 0.72, 0.5, 0.82].map((value, index) => (
                 <div key={index} className="flex h-full flex-1 items-end relative group">
-                  <div className="absolute bottom-0 w-full h-full bg-primary/5 rounded-t-[12px] opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className={`absolute bottom-0 h-full w-full rounded-t-[12px] opacity-0 transition-opacity group-hover:opacity-100 ${isLight ? 'bg-primary/8' : 'bg-primary/5'}`} />
                   <div
                     data-hist-bar
                     data-value={value}
-                    className="relative w-full rounded-t-[12px] bg-[linear-gradient(180deg,rgba(0,255,163,0.9),rgba(0,255,163,0.1))] border-t border-primary/50 shadow-[0_-4px_12px_rgba(0,255,163,0.2)]"
+                    className={`relative w-full rounded-t-[12px] border-t ${isLight ? 'border-primary/45 bg-[linear-gradient(180deg,rgba(0,140,88,0.85),rgba(0,140,88,0.18))] shadow-[0_-4px_10px_rgba(0,92,48,0.14)]' : 'border-primary/50 bg-[linear-gradient(180deg,rgba(0,255,163,0.9),rgba(0,255,163,0.1))] shadow-[0_-4px_12px_rgba(0,255,163,0.2)]'}`}
                     style={{ height: '10%' }}
                   >
-                    <div className="absolute top-0 w-full h-1 bg-white/40 rounded-t-full" />
+                    <div className={`absolute top-0 h-1 w-full rounded-t-full ${isLight ? 'bg-white/55' : 'bg-white/40'}`} />
                   </div>
                 </div>
               ))}
@@ -215,10 +247,14 @@ const GuidelinesVisual = () => {
                 <div key={label}>
                   <div className="mb-1.5 flex items-center justify-between text-xs text-on-surface-variant font-medium">
                     <span>{label}</span>
-                    <span className="text-white">{value}</span>
+                    <span className={isLight ? 'text-slate-700' : 'text-white'}>{value}</span>
                   </div>
-                  <div className="h-2 rounded-full overflow-hidden bg-white/5 border border-white/5">
-                    <div data-metric-rail className="h-full rounded-full bg-[linear-gradient(90deg,rgba(0,255,163,0.2),rgba(0,255,163,0.95),rgba(0,255,163,0.2))] bg-[length:200%_100%] shadow-[0_0_8px_rgba(0,255,163,0.5)]" style={{ width: value }} />
+                  <div className={`h-2 overflow-hidden rounded-full border ${isLight ? 'border-slate-300/90 bg-slate-200/80' : 'border-white/5 bg-white/10'}`}>
+                    <div
+                      data-metric-rail
+                      className={`h-full rounded-full bg-[length:200%_100%] ${isLight ? 'bg-[linear-gradient(90deg,rgba(0,92,48,0.18),rgba(0,140,88,0.92),rgba(34,211,238,0.28))] shadow-[0_0_6px_rgba(0,92,48,0.18)]' : 'bg-[linear-gradient(90deg,rgba(0,255,163,0.2),rgba(0,255,163,0.95),rgba(0,255,163,0.2))] shadow-[0_0_8px_rgba(0,255,163,0.5)]'}`}
+                      style={{ width: value }}
+                    />
                   </div>
                 </div>
               ))}
@@ -232,6 +268,8 @@ const GuidelinesVisual = () => {
 
 const ManualVisual = () => {
   const rootRef = useRef<HTMLDivElement>(null)
+  const { theme } = useTheme()
+  const isLight = theme === 'light'
 
   useEffect(() => {
     if (!rootRef.current) {
@@ -293,7 +331,14 @@ const ManualVisual = () => {
 
   return (
     <div ref={rootRef} data-hero-item className="grid gap-5 lg:grid-cols-[0.92fr_1.08fr]" style={{ perspective: '1200px' }}>
-      <div data-perspective-card className="rounded-[28px] border border-white/10 bg-[linear-gradient(145deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))] p-6 shadow-[0_24px_50px_rgba(0,0,0,0.35)] transform-style-3d">
+      <div
+        data-perspective-card
+        className={`rounded-[28px] border p-6 shadow-[0_24px_50px_rgba(0,0,0,0.18)] transform-style-3d ${
+          isLight
+            ? 'border-emerald-900/10 bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(242,248,244,0.9))]'
+            : 'border-white/10 bg-[linear-gradient(145deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))] shadow-[0_24px_50px_rgba(0,0,0,0.35)]'
+        }`}
+      >
         <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-primary">Workflow Stack</p>
         <div className="mt-5 space-y-4">
           {[
@@ -302,17 +347,23 @@ const ManualVisual = () => {
             ['Log check', '0.76'],
             ['Export', '0.62'],
           ].map(([title, scale], index) => (
-            <div key={title} data-manual-card className="relative overflow-hidden rounded-[22px] border border-white/8 bg-black/30 p-4 transition-colors hover:bg-black/40 hover:border-white/15">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-[40px] rounded-full" />
+            <div
+              key={title}
+              data-manual-card
+              className={`relative overflow-hidden rounded-[22px] border p-4 transition-colors ${
+                isLight ? 'border-slate-200 bg-white hover:border-slate-300' : 'border-white/8 bg-[rgba(0,0,0,0.5)] hover:border-white/15'
+              }`}
+            >
+              <div className={`absolute top-0 right-0 h-32 w-32 rounded-full blur-[40px] ${isLight ? 'bg-primary/8' : 'bg-primary/5'}`} />
               <div className="relative z-10 flex items-center gap-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] border border-primary/30 bg-[linear-gradient(135deg,rgba(0,255,163,0.2),rgba(0,255,163,0.05))] text-sm font-black text-primary shadow-[0_0_15px_rgba(0,255,163,0.15)]">
+                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] border text-sm font-black text-primary ${isLight ? 'border-primary/20 bg-[linear-gradient(135deg,rgba(0,92,48,0.12),rgba(0,92,48,0.04))] shadow-[0_0_10px_rgba(0,92,48,0.1)]' : 'border-primary/30 bg-[linear-gradient(135deg,rgba(0,255,163,0.2),rgba(0,255,163,0.05))] shadow-[0_0_15px_rgba(0,255,163,0.15)]'}`}>
                   {index + 1}
                 </div>
                 <div className="flex-1">
-                  <p className="text-[13px] font-bold text-white uppercase tracking-wider">{title}</p>
-                  <div className="mt-2.5 h-1.5 rounded-full bg-black/50 border border-white/5 overflow-hidden">
-                    <div data-step-bar data-scale={scale} className="relative h-full w-full rounded-full bg-[linear-gradient(90deg,#22D3EE,#00FFA3)] shadow-[0_0_10px_rgba(0,255,163,0.4)]">
-                      <div className="absolute top-0 right-0 w-4 h-full bg-white opacity-50 blur-[2px]" />
+                  <p className={`text-[13px] font-bold uppercase tracking-wider ${isLight ? 'text-slate-900' : 'text-white'}`}>{title}</p>
+                  <div className={`mt-2.5 h-1.5 overflow-hidden rounded-full border ${isLight ? 'border-slate-200 bg-slate-200/80' : 'border-white/5 bg-[rgba(0,0,0,0.6)]'}`}>
+                    <div data-step-bar data-scale={scale} className={`relative h-full w-full rounded-full ${isLight ? 'bg-[linear-gradient(90deg,#0f766e,#0f9f73)] shadow-[0_0_6px_rgba(15,118,110,0.18)]' : 'bg-[linear-gradient(90deg,#22D3EE,#00FFA3)] shadow-[0_0_10px_rgba(0,255,163,0.4)]'}`}>
+                      <div className={`absolute top-0 right-0 h-full w-4 blur-[2px] ${isLight ? 'bg-white/60' : 'bg-white opacity-50'}`} />
                     </div>
                   </div>
                 </div>
@@ -322,7 +373,14 @@ const ManualVisual = () => {
         </div>
       </div>
 
-      <div data-perspective-card className="rounded-[28px] border border-white/10 bg-[linear-gradient(145deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))] p-6 shadow-[0_24px_50px_rgba(0,0,0,0.35)] transform-style-3d">
+      <div
+        data-perspective-card
+        className={`rounded-[28px] border p-6 shadow-[0_24px_50px_rgba(0,0,0,0.18)] transform-style-3d ${
+          isLight
+            ? 'border-sky-900/10 bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(241,247,252,0.9))]'
+            : 'border-white/10 bg-[linear-gradient(145deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))] shadow-[0_24px_50px_rgba(0,0,0,0.35)]'
+        }`}
+      >
         <div className="flex items-center justify-between">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-cyan-400">Progress Board</p>
@@ -337,13 +395,13 @@ const ManualVisual = () => {
             ['Log sync', '91%', '#00FFA3'],
             ['Export prep', '63%', '#22D3EE'],
           ].map(([label, width, color]) => (
-            <div key={label} className="relative overflow-hidden rounded-[22px] border border-white/8 bg-black/20 p-5 group">
-              <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div key={label} className={`group relative overflow-hidden rounded-[22px] border p-5 ${isLight ? 'border-slate-200 bg-white' : 'border-white/8 bg-[rgba(0,0,0,0.4)]'}`}>
+              <div className={`absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 ${isLight ? 'bg-gradient-to-br from-slate-100 to-transparent' : 'bg-gradient-to-br from-white/5 to-transparent'}`} />
               <div className="relative z-10">
-                <p className="text-[13px] font-bold text-white uppercase tracking-wider">{label}</p>
-                <div className="mt-4 h-2 rounded-full bg-black/50 border border-white/5 overflow-hidden relative">
-                  <div data-progress-fill data-width={width} className="relative h-full w-0 rounded-full" style={{ background: `linear-gradient(90deg, ${color}33, ${color})`, boxShadow: `0 0 12px ${color}66` }}>
-                    <div data-progress-glow className="absolute top-0 -left-6 w-12 h-full bg-white opacity-80 blur-[4px] -skew-x-12" />
+                <p className={`text-[13px] font-bold uppercase tracking-wider ${isLight ? 'text-slate-900' : 'text-white'}`}>{label}</p>
+                <div className={`relative mt-4 h-2 overflow-hidden rounded-full border ${isLight ? 'border-slate-200 bg-slate-200/80' : 'border-white/5 bg-[rgba(0,0,0,0.6)]'}`}>
+                  <div data-progress-fill data-width={width} className="relative h-full w-0 rounded-full" style={{ background: isLight ? `linear-gradient(90deg, ${color}22, ${color}dd)` : `linear-gradient(90deg, ${color}33, ${color})`, boxShadow: isLight ? `0 0 8px ${color}33` : `0 0 12px ${color}66` }}>
+                    <div data-progress-glow className={`absolute top-0 -left-6 h-full w-12 -skew-x-12 blur-[4px] ${isLight ? 'bg-white/65' : 'bg-white opacity-80'}`} />
                   </div>
                 </div>
                 <div className="mt-3 flex items-center justify-between text-xs font-semibold">
@@ -361,6 +419,8 @@ const ManualVisual = () => {
 
 const AboutVisual = () => {
   const rootRef = useRef<HTMLDivElement>(null)
+  const { theme } = useTheme()
+  const isLight = theme === 'light'
 
   useEffect(() => {
     if (!rootRef.current) {
@@ -471,10 +531,17 @@ const AboutVisual = () => {
 
   return (
     <div ref={rootRef} data-hero-item className="grid gap-5 lg:grid-cols-[0.92fr_1.08fr]" style={{ perspective: '1200px' }}>
-      <div data-perspective-card className="rounded-[28px] border border-white/10 bg-[linear-gradient(145deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))] p-6 shadow-[0_24px_50px_rgba(0,0,0,0.35)] transform-style-3d">
+      <div
+        data-perspective-card
+        className={`rounded-[28px] border p-6 shadow-[0_24px_50px_rgba(0,0,0,0.18)] transform-style-3d ${
+          isLight
+            ? 'border-emerald-900/10 bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(242,248,244,0.9))]'
+            : 'border-white/10 bg-[linear-gradient(145deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))] shadow-[0_24px_50px_rgba(0,0,0,0.35)]'
+        }`}
+      >
         <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-primary">Product Orbit</p>
-        <div className="relative mt-5 flex h-64 items-center justify-center rounded-[24px] border border-white/8 bg-black/20 overflow-hidden group">
-          <div className="absolute inset-0 bg-primary/5 blur-[50px] rounded-full scale-150 opacity-50 group-hover:opacity-100 transition-opacity duration-700" />
+        <div className={`group relative mt-5 flex h-64 items-center justify-center overflow-hidden rounded-[24px] border ${isLight ? 'border-emerald-900/10 bg-[linear-gradient(145deg,rgba(240,247,243,0.98),rgba(228,240,234,0.94))]' : 'border-white/8 bg-[linear-gradient(145deg,rgba(0,0,0,0.4),rgba(5,10,8,0.7))]'}`}>
+          <div className={`absolute inset-0 scale-150 rounded-full blur-[50px] opacity-50 transition-opacity duration-700 group-hover:opacity-100 ${isLight ? 'bg-primary/8' : 'bg-primary/5'}`} />
           <svg viewBox="0 0 220 220" className="relative z-10 h-56 w-56">
             <g data-orbit-shell>
               <circle cx="110" cy="110" r="74" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5" strokeDasharray="4 16" strokeLinecap="round" />
@@ -488,57 +555,58 @@ const AboutVisual = () => {
             <circle cx="110" cy="110" r="22" fill="#00FFA3" opacity="0.9" />
             <circle cx="110" cy="110" r="8" fill="#ffffff" />
           </svg>
-          <div data-orbit-chip className="absolute left-6 top-10 rounded-full border border-primary/30 bg-[linear-gradient(135deg,rgba(0,255,163,0.2),rgba(0,255,163,0.05))] px-3.5 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white shadow-[0_0_20px_rgba(0,255,163,0.2)]">Routes</div>
-          <div data-orbit-chip className="absolute right-6 top-16 rounded-full border border-cyan-400/30 bg-[linear-gradient(135deg,rgba(34,211,238,0.2),rgba(34,211,238,0.05))] px-3.5 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white shadow-[0_0_20px_rgba(34,211,238,0.2)]">Logs</div>
-          <div data-orbit-chip className="absolute bottom-10 left-12 rounded-full border border-white/20 bg-[linear-gradient(135deg,rgba(255,255,255,0.1),rgba(255,255,255,0.02))] px-3.5 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white shadow-[0_0_20px_rgba(255,255,255,0.1)]">Drivers</div>
-          <div data-orbit-chip className="absolute bottom-12 right-10 rounded-full border border-primary/30 bg-[linear-gradient(135deg,rgba(0,255,163,0.2),rgba(0,255,163,0.05))] px-3.5 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white shadow-[0_0_20px_rgba(0,255,163,0.2)]">Dispatch</div>
+          <div data-orbit-chip className={`absolute left-6 top-10 rounded-full border px-3.5 py-2 text-[11px] font-bold uppercase tracking-[0.18em] shadow-[0_0_20px_rgba(0,255,163,0.2)] ${isLight ? 'border-primary/20 bg-white/92 text-slate-900 shadow-[0_10px_24px_rgba(15,23,42,0.08)]' : 'border-primary/30 bg-[linear-gradient(135deg,rgba(0,255,163,0.2),rgba(0,255,163,0.05))] text-white'}`}>Routes</div>
+          <div data-orbit-chip className={`absolute right-6 top-16 rounded-full border px-3.5 py-2 text-[11px] font-bold uppercase tracking-[0.18em] ${isLight ? 'border-cyan-400/20 bg-white/92 text-slate-900 shadow-[0_10px_24px_rgba(15,23,42,0.08)]' : 'border-cyan-400/30 bg-[linear-gradient(135deg,rgba(34,211,238,0.2),rgba(34,211,238,0.05))] text-white shadow-[0_0_20px_rgba(34,211,238,0.2)]'}`}>Logs</div>
+          <div data-orbit-chip className={`absolute bottom-10 left-12 rounded-full border px-3.5 py-2 text-[11px] font-bold uppercase tracking-[0.18em] ${isLight ? 'border-slate-300 bg-white/92 text-slate-900 shadow-[0_10px_24px_rgba(15,23,42,0.08)]' : 'border-white/20 bg-[linear-gradient(135deg,rgba(255,255,255,0.1),rgba(255,255,255,0.02))] text-white shadow-[0_0_20px_rgba(255,255,255,0.1)]'}`}>Drivers</div>
+          <div data-orbit-chip className={`absolute bottom-12 right-10 rounded-full border px-3.5 py-2 text-[11px] font-bold uppercase tracking-[0.18em] ${isLight ? 'border-primary/20 bg-white/92 text-slate-900 shadow-[0_10px_24px_rgba(15,23,42,0.08)]' : 'border-primary/30 bg-[linear-gradient(135deg,rgba(0,255,163,0.2),rgba(0,255,163,0.05))] text-white shadow-[0_0_20px_rgba(0,255,163,0.2)]'}`}>Dispatch</div>
         </div>
       </div>
 
-      <div data-perspective-card className="rounded-[28px] border border-white/10 bg-[linear-gradient(145deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))] p-6 shadow-[0_24px_50px_rgba(0,0,0,0.35)] transform-style-3d">
-        <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-primary">Performance Metrics</p>
-        <div className="mt-5 grid gap-4 md:grid-cols-[0.9fr_1.1fr]">
-          <div className="rounded-[22px] border border-white/8 bg-black/20 p-5 flex flex-col items-center justify-center relative overflow-hidden group">
-            <div className="absolute inset-0 bg-primary/5 blur-[30px] opacity-0 group-hover:opacity-100 transition-opacity" />
-            <svg viewBox="0 0 120 120" className="relative z-10 mx-auto h-28 w-28 drop-shadow-[0_0_12px_rgba(0,255,163,0.3)]">
-              <circle cx="60" cy="60" r="40" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="16" />
-              <circle data-pie-slice data-slice="52" cx="60" cy="60" r="40" fill="none" stroke="#00FFA3" strokeWidth="16" strokeDasharray="251" transform="rotate(-90 60 60)" />
-              <circle data-pie-slice data-slice="126" cx="60" cy="60" r="40" fill="none" stroke="#22D3EE" strokeWidth="16" strokeDasharray="251" transform="rotate(-15 60 60)" />
-              <circle data-pie-slice data-slice="184" cx="60" cy="60" r="40" fill="none" stroke="#ffffff" strokeOpacity="0.8" strokeWidth="16" strokeDasharray="251" transform="rotate(76 60 60)" />
-            </svg>
-            <div className="relative z-10 mt-4 grid grid-cols-3 gap-3 w-full text-center text-[10px] font-bold uppercase tracking-wider text-white">
-              <span className="border-b-2 border-[#00FFA3] pb-1">Route</span>
-              <span className="border-b-2 border-[#22D3EE] pb-1">Logs</span>
-              <span className="border-b-2 border-white pb-1">Ops</span>
-            </div>
-          </div>
-          <div className="grid gap-4 md:grid-cols-3">
-            {[
-              ['Clarity', '88'],
-              ['Compliance', '74'],
-              ['UX', '81'],
-            ].map(([label, offset], index) => (
-              <div key={label} className="relative rounded-[22px] border border-white/8 bg-black/20 p-4 text-center overflow-hidden">
-                <svg viewBox="0 0 120 120" className="relative z-10 mx-auto h-24 w-24">
-                  <circle cx="60" cy="60" r="40" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="8" />
-                  <circle
-                    data-ring-progress
-                    data-offset={offset}
-                    cx="60"
-                    cy="60"
-                    r="40"
-                    fill="none"
-                    stroke={index === 1 ? '#22D3EE' : '#00FFA3'}
-                    strokeWidth="8"
-                    strokeLinecap="round"
-                    strokeDasharray="252"
-                    transform="rotate(-90 60 60)"
-                  />
-                  <text x="60" y="65" textAnchor="middle" fill="white" fontSize="24" fontWeight="bold" fontFamily="sans-serif">{offset}%</text>
-                </svg>
-                <p className="relative z-10 mt-3 text-[12px] font-bold uppercase tracking-wider text-white">{label}</p>
+      <div
+        data-perspective-card
+        className={`rounded-[28px] border p-6 shadow-[0_24px_50px_rgba(0,0,0,0.18)] transform-style-3d ${
+          isLight
+            ? 'border-sky-900/10 bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(241,247,252,0.9))]'
+            : 'border-white/10 bg-[linear-gradient(145deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))] shadow-[0_24px_50px_rgba(0,0,0,0.35)]'
+        }`}
+      >
+        <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-primary mb-5">Performance Metrics</p>
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            ['Clarity', '88', '#00FFA3'],
+            ['Compliance', '74', '#22D3EE'],
+            ['UX', '81', '#00FFA3'],
+          ].map(([label, offset, color], index) => (
+              <div key={label} className={`relative overflow-hidden rounded-[22px] border transition-all duration-300 group ${isLight ? 'border-slate-200 bg-white hover:border-slate-300' : 'border-white/8 bg-[linear-gradient(145deg,rgba(0,0,0,0.5),rgba(5,10,8,0.7))] hover:border-white/20'}`}>
+              <div className="p-5 text-center flex flex-col items-center">
+              <div className="absolute inset-0 rounded-[22px] opacity-0 group-hover:opacity-100 transition-opacity duration-500" style={{ background: `radial-gradient(circle at 50% 0%, ${color}18, transparent 70%)` }} />
+              <svg viewBox="0 0 120 120" className="relative z-10 mx-auto h-20 w-20 drop-shadow-[0_0_8px_rgba(0,255,163,0.25)]">
+                <circle cx="60" cy="60" r="42" fill="none" stroke={isLight ? 'rgba(148,163,184,0.24)' : 'rgba(255,255,255,0.06)'} strokeWidth="10" />
+                <circle
+                  data-ring-progress
+                  data-offset={offset}
+                  cx="60"
+                  cy="60"
+                  r="42"
+                  fill="none"
+                  stroke={color as string}
+                  strokeWidth="10"
+                  strokeLinecap="round"
+                  strokeDasharray="264"
+                  transform="rotate(-90 60 60)"
+                />
+                <text x="60" y="66" textAnchor="middle" fill={isLight ? '#0f172a' : 'white'} fontSize="22" fontWeight="800" fontFamily="sans-serif">{offset}%</text>
+              </svg>
+              <p className="relative z-10 mt-4 w-full text-[11px] font-bold uppercase tracking-widest" style={{ color: color as string }}>{label}</p>
               </div>
-            ))}
+            </div>
+          ))}
+        </div>
+        <div className={`mt-4 rounded-[18px] border p-3 ${isLight ? 'border-slate-200 bg-slate-50/90' : 'border-white/8 bg-[rgba(0,0,0,0.3)]'}`}>
+          <div className="grid grid-cols-3 gap-2 text-center text-[9px] font-bold uppercase tracking-widest text-[#005c30] dark:text-primary">
+            <span className="border-b-2 border-[#00FFA3]/60 pb-1.5">Route</span>
+            <span className="border-b-2 border-[#22D3EE]/60 pb-1.5">Logs</span>
+            <span className="border-b-2 border-white/40 pb-1.5">Ops</span>
           </div>
         </div>
       </div>
@@ -599,32 +667,46 @@ const ContentShowcasePage = ({
   }, [])
 
   const boxGlass = isLight
-    ? 'border-white/80 bg-white/50 shadow-[0_8px_30px_rgba(0,0,0,0.04)] hover:bg-white/70'
-    : 'border-white/10 bg-surface/30 shadow-[0_8px_30px_rgba(0,0,0,0.3)] hover:bg-surface/50'
+    ? 'border-slate-300 bg-white shadow-[0_22px_48px_rgba(15,23,42,0.14),0_6px_16px_rgba(15,23,42,0.06),inset_0_1px_0_rgba(255,255,255,1)] hover:bg-white backdrop-blur-xl'
+    : 'border-white/10 bg-black/22 shadow-[0_8px_30px_rgba(0,0,0,0.4)] hover:bg-black/30 backdrop-blur-xl'
+
+  const textMutedClass = isLight ? 'text-slate-800' : 'text-on-surface-variant'
+  const textHeadingClass = isLight ? 'text-slate-950' : 'text-on-surface'
+  const eyebrowClass = isLight ? 'text-[#005c30]' : 'text-primary'
+  const eyebrowCyanClass = isLight ? 'text-[#0369a1]' : 'text-cyan-400'
+  const bulletBg = isLight ? 'border-slate-200/95 bg-[rgba(255,255,255,0.98)]' : 'border-white/5 bg-black/15'
+  const bulletDot = isLight ? 'bg-[#0369a1]' : 'bg-cyan-400'
 
   return (
-    <div ref={rootRef} className="min-h-screen px-4 pb-24 pt-28 sm:px-6">
+    <div ref={rootRef} className="min-h-screen px-4 pb-16 pt-24 sm:px-6 sm:pb-20 sm:pt-26">
       <div className="mx-auto max-w-[1280px]">
         {/* BENTO GRID */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-12 md:gap-5">
           
           {/* 1. HERO BLOCK */}
-          <div data-bento className={`relative col-span-12 flex flex-col items-center justify-center overflow-hidden rounded-[40px] border ${boxGlass} p-10 text-center backdrop-blur-3xl transition-all duration-500 lg:p-16`}>
-            <div data-bento-glow className="pointer-events-none absolute -top-10 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-primary/20 blur-[80px]" />
-            <div className="relative z-10 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-5 py-2.5 text-[12px] font-bold uppercase tracking-[0.2em] text-primary shadow-[0_0_20px_rgba(0,255,163,0.15)] mb-8">
-              <span className="material-symbols-outlined text-lg">{icon}</span>
+          <div data-bento className={`relative col-span-12 flex min-h-[270px] flex-col items-center justify-center overflow-hidden rounded-[36px] border ${boxGlass} px-6 py-8 text-center transition-all duration-500 sm:min-h-[300px] sm:px-8 sm:py-10 lg:px-14 lg:py-14`}>
+            <div data-bento-glow className="pointer-events-none absolute -top-10 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-primary/15 blur-[100px]" />
+            <div data-bento-glow className="pointer-events-none absolute -bottom-20 right-1/4 h-64 w-64 rounded-full bg-cyan-400/10 blur-[80px]" />
+            <div className={`relative z-10 inline-flex items-center gap-2.5 rounded-full border px-5 py-2.5 text-[11px] font-bold uppercase tracking-[0.22em] mb-10 backdrop-blur-sm ${
+              isLight ? 'border-[#005c30]/30 bg-[#005c30]/10 text-[#005c30] shadow-[0_0_20px_rgba(0,92,48,0.15)]' : 'border-primary/30 bg-primary/10 text-primary shadow-[0_0_25px_rgba(0,255,163,0.2),inset_0_1px_0_rgba(255,255,255,0.1)]'
+            }`}>
+              <span className="material-symbols-outlined text-base">{icon}</span>
               <span>{heroBadge}</span>
             </div>
-            <h1 className="relative z-10 font-headline text-5xl font-black tracking-tighter text-on-surface sm:text-6xl md:text-7xl lg:text-[5.5rem] leading-[0.9]">
+            <h1 className={`relative z-10 max-w-4xl font-headline text-4xl font-black leading-[0.94] tracking-tighter sm:text-5xl md:text-6xl lg:text-[4.8rem] ${textHeadingClass}`}>
               {title}
             </h1>
-            <p className="relative z-10 mt-6 max-w-2xl text-base leading-relaxed text-on-surface-variant sm:text-lg">
+            <p className={`relative z-10 mt-4 max-w-2xl text-sm leading-relaxed sm:text-base ${textMutedClass}`}>
               {description}
             </p>
+            <div className={`mt-6 inline-flex items-center gap-2 rounded-full border px-3 py-1 ${isLight ? 'border-[#005c30]/10 bg-[#005c30]/5' : 'border-primary/10 bg-primary/5'}`}>
+              <div className={`h-1.5 w-1.5 rounded-full ${isLight ? 'bg-[#005c30]' : 'bg-primary'} shadow-[0_0_8px_currentColor] animate-pulse`} />
+              <span className={`text-[10px] font-semibold uppercase tracking-[0.3em] ${isLight ? 'text-[#005c30]' : 'text-primary'}`}>Vanguard Fleet Ops</span>
+            </div>
           </div>
 
           {/* 2. VISUAL BLOCK (Interactive Components) */}
-          <div data-bento className="col-span-12 pt-4 pb-2 w-full">
+          <div data-bento className="col-span-12 w-full pt-1 pb-1 sm:pt-2">
              {visual}
           </div>
 
@@ -633,12 +715,17 @@ const ContentShowcasePage = ({
             <div
               key={item.label}
               data-bento
-              className={`col-span-12 rounded-[32px] border ${boxGlass} p-8 backdrop-blur-2xl transition-all duration-500 hover:-translate-y-1 md:col-span-4`}
+              className={`group relative col-span-12 overflow-hidden rounded-[28px] border ${boxGlass} p-6 backdrop-blur-2xl transition-all duration-500 hover:-translate-y-1.5 md:col-span-4 lg:p-7`}
             >
-              <div className="mb-6 h-1 w-12 rounded-full bg-[linear-gradient(90deg,var(--primary),transparent)]" />
-              <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-primary">{item.label}</p>
-              <p className="mt-4 font-headline text-4xl font-black tracking-tight text-on-surface">{item.value}</p>
-              <p className="mt-3 text-sm leading-6 text-on-surface-variant font-medium">{item.detail}</p>
+              <div className="pointer-events-none absolute -top-8 -right-8 h-32 w-32 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700" style={{ background: isLight ? 'rgba(0,92,48,0.06)' : 'rgba(0,255,163,0.08)', filter: 'blur(40px)' }} />
+              <div className="mb-5 flex items-center gap-3">
+                <div className={`h-1 w-10 rounded-full bg-gradient-to-r ${isLight ? 'from-[#005c30]' : 'from-primary'} to-transparent`} />
+                <div className={`h-1 w-4 rounded-full ${isLight ? 'bg-[#005c30]/30' : 'bg-primary/30'}`} />
+              </div>
+              <p className={`text-[11px] font-bold uppercase tracking-[0.24em] ${eyebrowClass}`}>{item.label}</p>
+              <p className={`mt-3 font-headline text-4xl font-black leading-none tracking-tight sm:text-[2.7rem] ${textHeadingClass}`}>{item.value}</p>
+              <div className={`my-4 h-px w-full bg-gradient-to-r ${isLight ? 'from-slate-200' : 'from-on-surface-variant/10'} to-transparent`} />
+              <p className={`text-sm leading-5.5 font-medium ${textMutedClass}`}>{item.detail}</p>
             </div>
           ))}
 
@@ -647,28 +734,30 @@ const ContentShowcasePage = ({
             <div
               key={section.title}
               data-bento
-              className={`group relative col-span-12 overflow-hidden rounded-[32px] border ${boxGlass} p-8 backdrop-blur-2xl transition-all duration-500 hover:-translate-y-1 lg:col-span-4`}
+              className={`group relative col-span-12 overflow-hidden rounded-[28px] border ${boxGlass} p-6 backdrop-blur-2xl transition-all duration-500 hover:-translate-y-1.5 lg:col-span-4 lg:p-7`}
             >
-              <div data-bento-glow className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-cyan-400/10 blur-[50px] transition-opacity group-hover:bg-cyan-400/20" />
+              <div data-bento-glow className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full blur-[60px] opacity-0 group-hover:opacity-100 transition-opacity duration-700" style={{ background: isLight ? 'rgba(3,105,161,0.08)' : 'rgba(34,211,238,0.08)' }} />
               
-              <div className="relative z-10 flex items-start justify-between gap-4 mb-6">
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-cyan-400">{section.eyebrow}</p>
-                  <h2 className="mt-2 font-headline text-2xl font-black tracking-tight text-on-surface group-hover:text-cyan-300 transition-colors">{section.title}</h2>
+              <div className="relative z-10 mb-5 flex items-start justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <p className={`text-[10px] font-bold uppercase tracking-[0.24em] mb-2 ${eyebrowCyanClass}`}>{section.eyebrow}</p>
+                  <h2 className={`font-headline text-2xl font-black tracking-tight leading-tight transition-colors ${textHeadingClass} group-hover:${isLight ? 'text-[#0369a1]' : 'text-cyan-300'}`}>{section.title}</h2>
                 </div>
-                <div className="shrink-0 rounded-[20px] border border-cyan-400/20 bg-cyan-400/10 px-4 py-3 text-right">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-400">{section.statLabel}</p>
-                  <p className="mt-1 font-headline text-xl font-black text-on-surface">{section.statValue}</p>
+                <div className={`shrink-0 rounded-[18px] border px-4 py-3 text-right backdrop-blur-sm ${
+                  isLight ? 'border-[#0369a1]/20 bg-[#0369a1]/8' : 'border-cyan-400/20 bg-cyan-400/8'
+                }`}>
+                  <p className={`text-[9px] font-bold uppercase tracking-[0.2em] ${eyebrowCyanClass}`}>{section.statLabel}</p>
+                  <p className={`mt-0.5 font-headline text-xl font-black ${textHeadingClass}`}>{section.statValue}</p>
                 </div>
               </div>
               
-              <p className="relative z-10 text-sm leading-6 text-on-surface-variant mb-6">{section.description}</p>
+              <p className={`relative z-10 mb-5 text-[13px] leading-5.5 line-clamp-3 ${textMutedClass}`}>{section.description}</p>
               
-              <div className="relative z-10 space-y-3">
+              <div className="relative z-10 space-y-2.5">
                 {section.bullets.slice(0, 2).map((bullet) => (
-                  <div key={bullet} className={`flex items-start gap-3 rounded-2xl border ${isLight ? 'border-black/5 bg-white/40' : 'border-white/5 bg-black/20'} px-4 py-3`}>
-                    <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.5)]" />
-                    <p className="text-sm leading-5 text-on-surface-variant">{bullet}</p>
+                  <div key={bullet} className={`flex items-start gap-3 rounded-2xl border px-4 py-3 backdrop-blur-sm ${bulletBg}`}>
+                    <span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full shadow-[0_0_8px] ${bulletDot}`} style={{ boxShadow: isLight ? '0 0 6px rgba(3,105,161,0.4)' : '0 0 8px rgba(34,211,238,0.6)' }} />
+                    <p className={`text-[13px] leading-5 ${textMutedClass}`}>{bullet}</p>
                   </div>
                 ))}
               </div>
@@ -676,15 +765,30 @@ const ContentShowcasePage = ({
           ))}
 
           {/* 5. FOOTER BLOCK */}
-          <div data-bento className={`relative col-span-12 flex flex-col gap-6 overflow-hidden rounded-[32px] border ${boxGlass} p-8 backdrop-blur-3xl transition-all duration-500 sm:flex-row sm:items-center sm:justify-between lg:p-10 lg:px-12`}>
+          <div
+            data-bento
+            className={`relative col-span-12 flex flex-col gap-6 overflow-hidden rounded-[28px] border p-6 transition-all duration-500 sm:flex-row sm:items-center sm:justify-between lg:p-8 ${
+              isLight
+                ? 'border-slate-300 bg-[linear-gradient(180deg,#ffffff,#f8fbf9)] shadow-[0_24px_54px_rgba(15,23,42,0.16),0_8px_18px_rgba(15,23,42,0.06),inset_0_1px_0_rgba(255,255,255,1)]'
+                : boxGlass
+            }`}
+          >
+            <div data-bento-glow className="pointer-events-none absolute -left-20 top-0 h-48 w-48 rounded-full blur-[60px]" style={{ background: isLight ? 'rgba(0,92,48,0.08)' : 'rgba(0,255,163,0.10)' }} />
             <div className="relative z-10 max-w-3xl">
-              <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-primary mb-3">Operations Note</p>
-              <h2 className="font-headline text-3xl font-black tracking-tight text-on-surface">{footerTitle}</h2>
-              <p className="mt-3 text-sm leading-7 text-on-surface-variant">{footerText}</p>
+              <div className="mb-3 flex items-center gap-3">
+                <div className={`h-1 w-8 rounded-full bg-gradient-to-r ${isLight ? 'from-[#005c30]' : 'from-primary'} to-transparent`} />
+                <p className={`text-[10px] font-bold uppercase tracking-[0.28em] ${eyebrowClass}`}>Operations Note</p>
+              </div>
+              <h2 className={`font-headline text-3xl font-black tracking-tight leading-tight ${textHeadingClass}`}>{footerTitle}</h2>
+              <p className={`mt-3 text-sm leading-7 max-w-xl ${textMutedClass}`}>{footerText}</p>
             </div>
-            <div className="relative z-10 shrink-0">
-               <div className="flex h-16 w-16 items-center justify-center rounded-full border border-primary/30 bg-primary/10 shadow-[0_0_30px_rgba(0,255,163,0.2)]">
-                  <span className="material-symbols-outlined text-3xl text-primary">task_alt</span>
+            <div className="relative z-10 shrink-0 flex items-center gap-4">
+               <div className={`flex h-20 w-20 items-center justify-center rounded-[24px] border backdrop-blur-xl ${
+                 isLight
+                   ? 'border-[#005c30]/30 bg-[linear-gradient(135deg,rgba(0,92,48,0.12),rgba(0,92,48,0.04))] shadow-[0_0_30px_rgba(0,92,48,0.15)]'
+                   : 'border-primary/30 bg-[linear-gradient(135deg,rgba(0,255,163,0.15),rgba(0,255,163,0.05))] shadow-[0_0_40px_rgba(0,255,163,0.2),inset_0_1px_0_rgba(255,255,255,0.1)]'
+               }`}>
+                  <span className={`material-symbols-outlined text-4xl ${eyebrowClass}`}>task_alt</span>
                </div>
             </div>
           </div>
@@ -697,156 +801,156 @@ const ContentShowcasePage = ({
 
 export const GuidelinesPage = () => (
   <ContentShowcasePage
-    icon="local_shipping"
-    title="Trucker Guidelines"
-    description="Quick guidance for pre-trip checks, break pacing, terrain awareness, and stop quality."
-    heroBadge="Roadside playbook"
+    icon="rule"
+    title="FMCSA Guidelines"
+    description="Core assumptions and routing constraints applied to the trip generation logic."
+    heroBadge="Assessment Rules"
     visual={<GuidelinesVisual />}
     summary={[
-      { label: 'Departure', value: '45 min', detail: 'Walkaround and paperwork window.' },
-      { label: 'Fuel Rhythm', value: '220-260 mi', detail: 'Planning range for cleaner stop spacing.' },
-      { label: 'Break Trigger', value: '7h 30m', detail: 'Early warning before the legal break.' },
+      { label: 'Driver Type', value: 'Property', detail: 'Applying standard property-carrying rules.' },
+      { label: 'HOS Cycle', value: '70h/8d', detail: 'Operating on a 70-hour/8-day cycle.' },
+      { label: 'Conditions', value: 'Normal', detail: 'Assuming no adverse driving conditions.' },
     ]}
     sections={[
       {
-        eyebrow: 'Pre-Trip',
-        title: 'Departure readiness',
-        description: 'Lock in the first leg, first stop, and obvious route hazards before you roll.',
+        eyebrow: 'Operations',
+        title: 'Duty actions',
+        description: 'Standard time allocations for required shipping activities.',
         bullets: [
-          'Verify trailer, seal, and special pickup notes.',
-          'Confirm location match so city-name errors do not become reroute miles.',
+          'Allocate exactly 1 hour for pickup activities.',
+          'Allocate exactly 1 hour for drop-off activities.',
         ],
-        statLabel: 'Priority',
-        statValue: 'High',
+        statLabel: 'Duration',
+        statValue: '1 Hr',
       },
       {
-        eyebrow: 'On Road',
-        title: 'Break pacing',
-        description: 'Plan breaks around parking quality and traffic, not at the last minute.',
+        eyebrow: 'Maintenance',
+        title: 'Fueling intervals',
+        description: 'Enforcing maximum distance between required fuel stops.',
         bullets: [
-          'Pick stops where a 30-minute break works without extra deadhead.',
-          'If weather or traffic bites, protect the break and overnight parking first.',
+          'Must schedule fueling at least once every 1,000 miles.',
+          'Fuel stops must be integrated into the duty cycle.',
         ],
-        statLabel: 'Cadence',
-        statValue: 'Steady',
+        statLabel: 'Max Range',
+        statValue: '1k mi',
       },
       {
-        eyebrow: 'Terrain',
-        title: 'Grades and weather',
-        description: 'Mountain and freeze corridors need slower assumptions and bigger margins.',
+        eyebrow: 'Exceptions',
+        title: 'Driving conditions',
+        description: 'Handling edge cases and environmental variables.',
         bullets: [
-          'Mountain routes need brake-check thinking and wider fuel buffer.',
-          'Surface crosswind, chain, and freeze warnings before the commitment zone.',
+          'Assume no adverse driving conditions are present.',
+          'Operating under standard visibility and weather assumptions.',
         ],
-        statLabel: 'Advisory',
-        statValue: 'Dynamic',
+        statLabel: 'Adverse',
+        statValue: 'None',
       },
     ]}
-    footerTitle="Guidance kept compact"
-    footerText="Less reading, more scan value: route patterns, histogram bars, and short operational notes."
+    footerTitle="Constraint-based routing"
+    footerText="These rules form the foundation of the automated ELD log generation and route planning."
   />
 )
 
 export const ManualPage = () => (
   <ContentShowcasePage
     icon="menu_book"
-    title="Driver Manual"
-    description="Short workflow notes for entering a trip, checking outputs, and exporting the final package."
-    heroBadge="Workflow manual"
+    title="Assessment Manual"
+    description="Instructions on how to use the full-stack route and ELD log generator."
+    heroBadge="App Instructions"
     visual={<ManualVisual />}
     summary={[
-      { label: 'Route Modes', value: '3+', detail: 'Compare main and alternate paths fast.' },
-      { label: 'Logs', value: 'Auto-built', detail: 'Daily logs sync from route events.' },
-      { label: 'Review', value: '< 2 min', detail: 'Map, stops, logs, then export.' },
+      { label: 'Inputs', value: '4 Fields', detail: 'Current location, pickup, dropoff, and cycle hours.' },
+      { label: 'Outputs', value: 'Map & Logs', detail: 'Map with stops and drawn ELD log sheets.' },
+      { label: 'Tech Stack', value: 'React/Django', detail: 'Built with React frontend and Django backend.' },
     ]}
     sections={[
       {
-        eyebrow: 'Input Flow',
-        title: 'Enter the trip',
-        description: 'Start with current location, pickup, destination, and cycle hours.',
+        eyebrow: 'Step 1',
+        title: 'Enter Inputs',
+        description: 'Provide the required trip details to begin generation.',
         bullets: [
-          'Use suggestions when possible for cleaner coordinates.',
-          'Cycle hours directly shape the aggressiveness of the plan.',
+          'Current Location, Pickup Location, and Dropoff Location.',
+          'Current Cycle Used (Hrs).',
         ],
-        statLabel: 'Step',
-        statValue: '01',
+        statLabel: 'Fields',
+        statValue: '04',
       },
       {
-        eyebrow: 'Route Review',
-        title: 'Review the package',
-        description: 'Compare distance, drive time, stops, and route shape before choosing a path.',
+        eyebrow: 'Step 2',
+        title: 'Review Route',
+        description: 'The app queries a free map API to generate pathing.',
         bullets: [
-          'Check the stats bar first.',
-          'Use the map to verify stop placement and alternate corridors.',
+          'View the map showing the generated route.',
+          'Check information regarding stops and rests directly on the map.',
         ],
-        statLabel: 'Step',
-        statValue: '02',
+        statLabel: 'Map API',
+        statValue: 'Used',
       },
       {
-        eyebrow: 'Paperwork',
-        title: 'Finalize logs',
-        description: 'Make sure the remarks and day splits line up with the route plan.',
+        eyebrow: 'Step 3',
+        title: 'Check ELD Logs',
+        description: 'The system automatically draws on the blank log template.',
         bullets: [
-          'Remarks should explain why the stop exists.',
-          'Treat exports as handoff documents, not just snapshots.',
+          'Daily Log Sheets are filled out dynamically.',
+          'Multiple log sheets are generated for longer multi-day trips.',
         ],
-        statLabel: 'Step',
-        statValue: '03',
+        statLabel: 'Logs',
+        statValue: 'Drawn',
       },
     ]}
-    footerTitle="Manual made visual"
-    footerText="Progress modules and compact step bars replace heavier text blocks."
+    footerTitle="End-to-end automation"
+    footerText="From 4 simple inputs to a fully compliant visualized route with drawn logbook pages."
   />
 )
 
 export const AboutPage = () => (
   <ContentShowcasePage
     icon="info"
-    title="About Vanguard"
-    description="A compact product profile focused on route clarity, driver usability, and HOS-aware planning."
-    heroBadge="Product profile"
+    title="Assessment Details"
+    description="Project deliverables, grading criteria, and tech stack details for the full-stack developer assessment."
+    heroBadge="Project Deliverables"
     visual={<AboutVisual />}
     summary={[
-      { label: 'Mission', value: 'Clarity', detail: 'Readable route planning for ops and drivers.' },
-      { label: 'Focus', value: 'HOS-Aware', detail: 'Compliance influences the route early.' },
-      { label: 'Style', value: 'Driver-Centered', detail: 'Fast to scan under pressure.' },
+      { label: 'Reward', value: '$100', detail: 'Bounty for successful completion.' },
+      { label: 'Hosting', value: 'Live', detail: 'Deployed to Vercel or similar platform.' },
+      { label: 'Accuracy', value: 'Tested', detail: 'Outputs are verified to standards.' },
     ]}
     sections={[
       {
-        eyebrow: 'Why',
-        title: 'Why it exists',
-        description: 'Route planning should show route shape, paperwork context, and compliance in one flow.',
+        eyebrow: 'Submission',
+        title: 'Code & Demo',
+        description: 'Requirements for handing off the completed assessment.',
         bullets: [
-          'Dispatch needs route options and timing confidence together.',
-          'Drivers need a plan that feels intentional, not fragmented.',
+          'Share the GitHub code repository.',
+          'Create a 3-5 minute Loom video going over the app and code.',
         ],
-        statLabel: 'North Star',
-        statValue: 'Clarity',
+        statLabel: 'Loom',
+        statValue: '3-5m',
       },
       {
-        eyebrow: 'Product',
-        title: 'What improves',
-        description: 'The product acts like a route-and-paperwork cockpit, not just a map screen.',
+        eyebrow: 'Design',
+        title: 'UI and UX',
+        description: 'Aesthetics matter significantly for this project.',
         bullets: [
-          'Show route alternatives without hiding compliance cost.',
-          'Keep route, stops, logs, and summary in one workspace.',
+          'UI and UX must be good. Pay attention to good design.',
+          'Great aesthetics can compensate for some inaccuracies in output.',
         ],
-        statLabel: 'Lens',
-        statValue: 'Operational',
+        statLabel: 'Quality',
+        statValue: 'High',
       },
       {
-        eyebrow: 'Principles',
-        title: 'How it feels',
-        description: 'Bold, controlled visuals with motion that supports context instead of fighting it.',
+        eyebrow: 'Stack',
+        title: 'Core Technologies',
+        description: 'The foundation of the assessment application.',
         bullets: [
-          'Use motion to reinforce hierarchy, not overwhelm the screen.',
-          'Favor short labels and scan-friendly surfaces.',
+          'Frontend built using React.',
+          'Backend built using Django infrastructure.',
         ],
-        statLabel: 'Style',
-        statValue: 'Intentional',
+        statLabel: 'Stack',
+        statValue: 'Modern',
       },
     ]}
-    footerTitle="Charts over paragraphs"
-    footerText="Pie slices, orbit chips, and rings now carry more of the story with much less copy."
+    footerTitle="Assessment Evaluation"
+    footerText="We will test the hosted version for accuracy and the accuracy must be up to standards."
   />
 )

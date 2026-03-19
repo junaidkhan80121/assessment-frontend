@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Download, RotateCw } from 'lucide-react'
+import { ArrowLeft, Download, Loader2, RotateCw } from 'lucide-react'
 import { useTheme } from 'next-themes'
  
 import { useCreateTripMutation, useGetTripQuery } from '@/api/tripsApi'
@@ -18,6 +18,8 @@ export const TripResults = () => {
   const hasInitializedTheme = useRef(false)
   const [activeTab, setActiveTab] = useState(0)
   const [pollingInterval, setPollingInterval] = useState(5000)
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false)
+  const [downloadProgress, setDownloadProgress] = useState<string | null>(null)
   const [createTrip, { isLoading: isRecalculating }] = useCreateTripMutation()
 
   const { data: trip, isLoading, isError, error } = useGetTripQuery(tripId || '', {
@@ -80,11 +82,15 @@ export const TripResults = () => {
   }
 
   const routeInstructions = trip.route_instructions ?? []
+  const activeLog = trip.daily_logs[activeTab]
 
   const handleDownloadPDF = async () => {
     if (!trip.daily_logs.length) {
       return
     }
+
+    setIsDownloadingPdf(true)
+    setDownloadProgress(`Preparing 1/${trip.daily_logs.length}`)
 
     const pdf = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'letter' })
     const pageWidth = pdf.internal.pageSize.getWidth()
@@ -92,28 +98,44 @@ export const TripResults = () => {
     const margin = 24
     const imgWidth = pageWidth - margin * 2
 
-    for (const [index, log] of trip.daily_logs.entries()) {
-      const offscreenCanvas = document.createElement('canvas')
-      await renderLogSheetCanvas(offscreenCanvas, trip, log, log.day_number)
+    try {
+      for (const [index, log] of trip.daily_logs.entries()) {
+        setDownloadProgress(`Rendering ${index + 1}/${trip.daily_logs.length}`)
+        await yieldToBrowser()
 
-      const imgData = offscreenCanvas.toDataURL('image/png')
-      const imgHeight = (offscreenCanvas.height / offscreenCanvas.width) * imgWidth
+        const offscreenCanvas = document.createElement('canvas')
+        await renderLogSheetCanvas(offscreenCanvas, trip, log, log.day_number, { scale: 3 })
 
-      if (index > 0) {
-        pdf.addPage()
+        setDownloadProgress(`Encoding ${index + 1}/${trip.daily_logs.length}`)
+        await yieldToBrowser()
+
+        const imgData = offscreenCanvas.toDataURL('image/png')
+        const imgHeight = (offscreenCanvas.height / offscreenCanvas.width) * imgWidth
+
+        if (index > 0) {
+          pdf.addPage()
+        }
+
+        setDownloadProgress(`Adding ${index + 1}/${trip.daily_logs.length}`)
+        pdf.addImage(
+          imgData,
+          'PNG',
+          margin,
+          margin,
+          imgWidth,
+          Math.min(imgHeight, pageHeight - margin * 2),
+        )
+
+        await yieldToBrowser()
       }
 
-      pdf.addImage(
-        imgData,
-        'PNG',
-        margin,
-        margin,
-        imgWidth,
-        Math.min(imgHeight, pageHeight - margin * 2),
-      )
+      setDownloadProgress('Saving PDF')
+      await yieldToBrowser()
+      pdf.save(`eld-trip-${tripId}-logs.pdf`)
+    } finally {
+      setIsDownloadingPdf(false)
+      setDownloadProgress(null)
     }
-
-    pdf.save(`eld-trip-${tripId}-logs.pdf`)
   }
 
   const handleRecalculateRoute = async () => {
@@ -175,25 +197,22 @@ export const TripResults = () => {
           </div>
         </section>
 
-        {/* --- MAP SECTION (Max Space) --- */}
-        <section className="flex flex-col rounded-[28px] border border-outline-variant/30 bg-surface/88 p-3 shadow-[0_18px_60px_rgba(15,23,42,0.14)] backdrop-blur-xl sm:p-5">
-          <div className="mb-4 flex items-center justify-between gap-3 px-1 shrink-0">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">Route Map</p>
-              <h2 className="mt-1 text-xl font-bold text-on-surface">Primary route and alternatives</h2>
-            </div>
-            <p className="text-xs text-muted-foreground hidden sm:block">Fullscreen, alternate tiles, interactive markers</p>
-          </div>
-          <div className="h-[55vh] min-h-[480px] w-full overflow-hidden rounded-[24px] border border-outline-variant/25 bg-card">
-            <TripMap trip={trip} />
-          </div>
-        </section>
-
-        {/* --- DETAILS GRID (Instructions + Logs) --- */}
-        <section className="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(420px,0.85fr)] items-start">
+        <section className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(420px,0.85fr)] items-start">
           
-          {/* Left Column (Instructions & Stops) */}
           <div className="flex flex-col gap-4">
+            <section className="flex flex-col rounded-[28px] border border-outline-variant/30 bg-surface/88 p-3 shadow-[0_18px_60px_rgba(15,23,42,0.14)] backdrop-blur-xl sm:p-5">
+              <div className="mb-4 flex items-center justify-between gap-3 px-1 shrink-0">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">Route Map</p>
+                  <h2 className="mt-1 text-xl font-bold text-on-surface">Primary route and alternatives</h2>
+                </div>
+                <p className="text-xs text-muted-foreground hidden sm:block">Large map, route markers, fit to viewport</p>
+              </div>
+              <div className="h-[58vh] min-h-[520px] max-h-[760px] w-full overflow-hidden rounded-[24px] border border-outline-variant/25 bg-card">
+                <TripMap trip={trip} />
+              </div>
+            </section>
+
             <div className="rounded-[28px] border border-outline-variant/30 bg-surface/88 p-4 sm:p-5 shadow-[0_18px_60px_rgba(15,23,42,0.14)] backdrop-blur-xl">
               <div className="flex items-center justify-between gap-3 mb-4">
                 <div>
@@ -258,21 +277,35 @@ export const TripResults = () => {
             </div>
           </div>
 
-          {/* Right Column (Driver Logs) */}
-          <div className="flex flex-col rounded-[28px] border border-outline-variant/30 bg-surface/88 p-3 shadow-[0_18px_60px_rgba(15,23,42,0.14)] backdrop-blur-xl sm:p-5">
+          <div className="flex flex-col rounded-[28px] border border-outline-variant/30 bg-surface/88 p-3 shadow-[0_18px_60px_rgba(15,23,42,0.14)] backdrop-blur-xl sm:p-5 xl:sticky xl:top-28">
             <div className="flex flex-col gap-4 border-b border-outline-variant/25 pb-5">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">Driver Logs</p>
                   <h2 className="mt-1 text-lg font-bold text-on-surface">Daily log sheets</h2>
+                  {activeLog && (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {formatLogHeading(trip.created_at, activeLog.day_number)} · {formatLogTimeRange(activeLog)}
+                    </p>
+                  )}
                 </div>
                 <button
                   onClick={handleDownloadPDF}
+                  disabled={isDownloadingPdf}
                   id="download-pdf"
-                  className="inline-flex h-9 items-center justify-center gap-2 rounded-full bg-primary px-4 text-[10px] font-bold uppercase tracking-[0.16em] text-primary-foreground transition-all hover:scale-[1.02] active:scale-[0.98] shrink-0"
+                  className="inline-flex h-9 items-center justify-center gap-2 rounded-full bg-primary px-4 text-[10px] font-bold uppercase tracking-[0.16em] text-primary-foreground transition-all hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70 shrink-0"
                 >
-                  <Download className="h-3.5 w-3.5" />
-                  Save PDF
+                  {isDownloadingPdf ? (
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      {downloadProgress ?? 'Downloading...'}
+                    </>
+                  ) : (
+                    <>
+                      <Download className="h-3.5 w-3.5" />
+                      Save PDF
+                    </>
+                  )}
                 </button>
               </div>
 
@@ -289,6 +322,9 @@ export const TripResults = () => {
                     }`}
                   >
                     Day {i + 1}
+                    <span className="text-[10px] opacity-80 normal-case tracking-normal">
+                      {formatShortLogDate(trip.created_at, log.day_number)}
+                    </span>
                     {log.recap.available_tomorrow < 5 && (
                       <span className="h-1.5 w-1.5 rounded-full bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.6)]" />
                     )}
@@ -297,12 +333,31 @@ export const TripResults = () => {
               </div>
             </div>
 
-            <div className="mt-5 max-h-[640px] overflow-y-auto pr-1 fancy-scrollbar">
-              {trip.daily_logs[activeTab] && (
+            <div className="mt-4 rounded-[22px] border border-outline-variant/20 bg-surface-container-low/55 px-4 py-3">
+              {activeLog && (
+                <div className="grid grid-cols-3 gap-3 text-xs">
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Date</p>
+                    <p className="mt-1 font-semibold text-on-surface">{formatLogHeading(trip.created_at, activeLog.day_number)}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Drive</p>
+                    <p className="mt-1 font-semibold text-on-surface">{activeLog.totals.DRIVING.toFixed(1)} hrs</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">On Duty</p>
+                    <p className="mt-1 font-semibold text-on-surface">{activeLog.recap.on_duty_today.toFixed(1)} hrs</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-5 max-h-[72vh] overflow-y-auto pr-1 fancy-scrollbar">
+              {activeLog && (
                 <LogSheet
                   trip={trip}
-                  dayLog={trip.daily_logs[activeTab]}
-                  dayNumber={trip.daily_logs[activeTab].day_number}
+                  dayLog={activeLog}
+                  dayNumber={activeLog.day_number}
                 />
               )}
             </div>
@@ -331,4 +386,40 @@ function formatArrivalHour(arrivalHour: number) {
   const suffix = hour24 >= 12 ? 'PM' : 'AM'
   const hour12 = hour24 % 12 || 12
   return `${String(hour12).padStart(2, '0')}:${String(minute).padStart(2, '0')} ${suffix}`
+}
+
+function formatShortLogDate(createdAt: string, dayNumber: number) {
+  const date = resolveLogDate(createdAt, dayNumber)
+  return `${date.getMonth() + 1}/${date.getDate()}`
+}
+
+function formatLogHeading(createdAt: string, dayNumber: number) {
+  const date = resolveLogDate(createdAt, dayNumber)
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
+}
+
+function formatLogTimeRange(log: { duty_entries: { start: string; end: string }[] }) {
+  if (!log.duty_entries.length) {
+    return '24-hour log'
+  }
+  const first = log.duty_entries[0]
+  const last = log.duty_entries[log.duty_entries.length - 1]
+  return `${first.start} - ${last.end}`
+}
+
+function resolveLogDate(createdAt: string, dayNumber: number) {
+  const date = new Date(createdAt || Date.now())
+  date.setHours(0, 0, 0, 0)
+  date.setDate(date.getDate() + (dayNumber - 1))
+  return date
+}
+
+function yieldToBrowser() {
+  return new Promise<void>((resolve) => {
+    window.setTimeout(resolve, 0)
+  })
 }

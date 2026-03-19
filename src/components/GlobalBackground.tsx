@@ -290,10 +290,15 @@ export const GlobalBackground = ({ variant = 'interactive' }: GlobalBackgroundPr
 
           {isInteractive ? (
             <div className="absolute inset-0 z-[500] overflow-hidden pointer-events-none">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_22%,rgba(0,255,163,0.12),transparent_18%),radial-gradient(circle_at_74%_34%,rgba(0,255,163,0.08),transparent_20%),linear-gradient(180deg,rgba(1,8,6,0.04),rgba(1,8,6,0.18))]" />
+              <div className="absolute inset-0" style={{
+                background: isDark
+                  ? 'radial-gradient(circle at 18% 22%,rgba(0,255,163,0.12),transparent 18%),radial-gradient(circle at 74% 34%,rgba(0,255,163,0.08),transparent 20%),linear-gradient(180deg,rgba(1,8,6,0.04),rgba(1,8,6,0.18))'
+                  : 'radial-gradient(circle at 18% 22%,rgba(0,80,40,0.08),transparent 18%),radial-gradient(circle at 74% 34%,rgba(0,80,40,0.06),transparent 20%),linear-gradient(180deg,rgba(240,248,244,0.0),rgba(200,230,210,0.12))'
+              }} />
               <div
                 ref={dotGlowRef}
-                className="absolute left-[12%] top-[16%] h-40 w-40 rounded-full bg-[#00FFA3]/16 blur-3xl"
+                className="absolute left-[12%] top-[16%] h-40 w-40 rounded-full blur-3xl"
+                style={{ background: isDark ? 'rgba(0,255,163,0.16)' : 'rgba(0,100,50,0.14)' }}
               />
               <svg
                 ref={signalLayerRef}
@@ -310,16 +315,16 @@ export const GlobalBackground = ({ variant = 'interactive' }: GlobalBackgroundPr
                         data-signal-path
                         d={route.d}
                         fill="none"
-                        stroke="#00FFA3"
+                        stroke={isDark ? '#00FFA3' : '#005c30'}
                         strokeWidth="1.2"
                         strokeLinecap="round"
                         strokeDasharray="4 18"
-                        opacity="0.12"
+                        opacity={isDark ? '0.12' : '0.22'}
                       />
                       <path
                         d={route.d}
                         fill="none"
-                        stroke="#00FFA3"
+                        stroke={isDark ? '#00FFA3' : '#007a40'}
                         strokeWidth={route.accentWidth}
                         strokeLinecap="round"
                         strokeDasharray={route.dash}
@@ -337,23 +342,23 @@ export const GlobalBackground = ({ variant = 'interactive' }: GlobalBackgroundPr
                         cx={node.x}
                         cy={node.y}
                         r={node.size * 2.6}
-                        fill="#00FFA3"
-                        opacity="0.06"
+                        fill={isDark ? '#00FFA3' : '#00703a'}
+                        opacity={isDark ? '0.07' : '0.12'}
                       />
                       <circle
                         data-signal-node
                         cx={node.x}
                         cy={node.y}
                         r={node.size}
-                        fill="#00FFA3"
-                        opacity="0.44"
+                        fill={isDark ? '#00FFA3' : '#005c30'}
+                        opacity={isDark ? '0.55' : '0.75'}
                       />
                       <circle
                         cx={node.x}
                         cy={node.y}
                         r={node.size * 1.9}
-                        fill="#00FFA3"
-                        opacity="0.12"
+                        fill={isDark ? '#00FFA3' : '#00703a'}
+                        opacity={isDark ? '0.14' : '0.20'}
                         style={{
                           animation: `signalNodePulse ${2.4 + index * 0.2}s ease-in-out ${index * 0.25}s infinite`,
                           transformBox: 'fill-box',
