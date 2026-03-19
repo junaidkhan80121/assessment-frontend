@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Download, Loader2, RotateCw } from 'lucide-react'
-import { useTheme } from 'next-themes'
  
 import { useCreateTripMutation, useGetTripQuery } from '@/api/tripsApi'
 import { StatsBar } from './StatsBar'
@@ -11,10 +10,12 @@ import { TripLoadingScreen } from '@/components/TripLoadingScreen'
 import { jsPDF } from 'jspdf'
 import type { ApiErrorResponse, RouteInstruction } from '@/types/trip'
 
+const PDF_RENDER_SCALE = 2
+const PDF_IMAGE_QUALITY = 0.82
+
 export const TripResults = () => {
   const { tripId } = useParams<{ tripId: string }>()
   const navigate = useNavigate()
-  const { resolvedTheme, setTheme } = useTheme()
   const hasInitializedTheme = useRef(false)
   const [activeTab, setActiveTab] = useState(0)
   const [pollingInterval, setPollingInterval] = useState(5000)
@@ -30,14 +31,8 @@ export const TripResults = () => {
   })
 
   useEffect(() => {
-    if (!hasInitializedTheme.current && resolvedTheme !== 'dark') {
-      setTheme('dark')
-      hasInitializedTheme.current = true
-      return
-    }
-
     hasInitializedTheme.current = true
-  }, [resolvedTheme, setTheme])
+  }, [])
 
   useEffect(() => {
     if (trip?.status === 'COMPUTING' || trip?.status === 'PENDING') {
@@ -92,7 +87,13 @@ export const TripResults = () => {
     setIsDownloadingPdf(true)
     setDownloadProgress(`Preparing 1/${trip.daily_logs.length}`)
 
-    const pdf = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'letter' })
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'pt',
+      format: 'letter',
+      compress: true,
+      putOnlyUsedFonts: true,
+    })
     const pageWidth = pdf.internal.pageSize.getWidth()
     const pageHeight = pdf.internal.pageSize.getHeight()
     const margin = 24
@@ -104,12 +105,12 @@ export const TripResults = () => {
         await yieldToBrowser()
 
         const offscreenCanvas = document.createElement('canvas')
-        await renderLogSheetCanvas(offscreenCanvas, trip, log, log.day_number, { scale: 3 })
+        await renderLogSheetCanvas(offscreenCanvas, trip, log, log.day_number, { scale: PDF_RENDER_SCALE })
 
         setDownloadProgress(`Encoding ${index + 1}/${trip.daily_logs.length}`)
         await yieldToBrowser()
 
-        const imgData = offscreenCanvas.toDataURL('image/png')
+        const imgData = offscreenCanvas.toDataURL('image/jpeg', PDF_IMAGE_QUALITY)
         const imgHeight = (offscreenCanvas.height / offscreenCanvas.width) * imgWidth
 
         if (index > 0) {
@@ -119,11 +120,13 @@ export const TripResults = () => {
         setDownloadProgress(`Adding ${index + 1}/${trip.daily_logs.length}`)
         pdf.addImage(
           imgData,
-          'PNG',
+          'JPEG',
           margin,
           margin,
           imgWidth,
           Math.min(imgHeight, pageHeight - margin * 2),
+          undefined,
+          'FAST',
         )
 
         await yieldToBrowser()
@@ -160,12 +163,12 @@ export const TripResults = () => {
   }
 
   return (
-    <div className="relative z-10 min-h-screen px-4 pb-12 pt-28 sm:px-6 sm:pt-28 lg:px-8 xl:pb-12">
-      <div className="mx-auto flex w-full max-w-[1680px] flex-col gap-4">
+    <div className="relative z-10 min-h-screen px-3 pb-10 pt-24 sm:px-5 sm:pt-26 lg:px-6 xl:px-8 xl:pb-12">
+      <div className="mx-auto flex w-full max-w-[1760px] flex-col gap-4">
         
         {/* --- HEADER --- */}
-        <section className="rounded-[24px] border border-outline-variant/30 bg-surface/88 p-3 shadow-[0_18px_60px_rgba(15,23,42,0.14)] backdrop-blur-xl sm:px-4 sm:py-3 shrink-0">
-          <div className="flex flex-col gap-2 xl:flex-row xl:items-start xl:justify-between">
+        <section className="shrink-0 rounded-[24px] border border-outline-variant/30 bg-surface/88 p-3 shadow-[0_18px_60px_rgba(15,23,42,0.14)] backdrop-blur-xl sm:px-4 sm:py-3">
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
             <div className="flex items-start gap-4">
               <button
                 onClick={() => navigate('/')}
@@ -176,7 +179,7 @@ export const TripResults = () => {
               </button>
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary">Trip Results</p>
-                <p className="mt-0.5 max-w-4xl text-sm text-muted-foreground">
+                <p className="mt-0.5 max-w-4xl text-sm leading-relaxed text-muted-foreground">
                   {trip.current_location} → {trip.pickup_location} → {trip.dropoff_location}
                 </p>
               </div>
@@ -197,18 +200,18 @@ export const TripResults = () => {
           </div>
         </section>
 
-        <section className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(420px,0.85fr)] items-start">
+        <section className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.55fr)_minmax(380px,0.78fr)]">
           
           <div className="flex flex-col gap-4">
-            <section className="flex flex-col rounded-[28px] border border-outline-variant/30 bg-surface/88 p-3 shadow-[0_18px_60px_rgba(15,23,42,0.14)] backdrop-blur-xl sm:p-5">
+            <section className="flex flex-col rounded-[28px] border border-outline-variant/30 bg-surface/88 p-3 shadow-[0_18px_60px_rgba(15,23,42,0.14)] backdrop-blur-xl sm:p-4 xl:p-5">
               <div className="mb-4 flex items-center justify-between gap-3 px-1 shrink-0">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">Route Map</p>
                   <h2 className="mt-1 text-xl font-bold text-on-surface">Primary route and alternatives</h2>
                 </div>
-                <p className="text-xs text-muted-foreground hidden sm:block">Large map, route markers, fit to viewport</p>
+                <p className="hidden text-xs text-muted-foreground lg:block">Large map, route markers, fit to viewport</p>
               </div>
-              <div className="h-[58vh] min-h-[520px] max-h-[760px] w-full overflow-hidden rounded-[24px] border border-outline-variant/25 bg-card">
+              <div className="h-[60vh] min-h-[500px] max-h-[78vh] w-full overflow-hidden rounded-[24px] border border-outline-variant/25 bg-card xl:h-[68vh]">
                 <TripMap trip={trip} />
               </div>
             </section>
@@ -277,7 +280,7 @@ export const TripResults = () => {
             </div>
           </div>
 
-          <div className="flex flex-col rounded-[28px] border border-outline-variant/30 bg-surface/88 p-3 shadow-[0_18px_60px_rgba(15,23,42,0.14)] backdrop-blur-xl sm:p-5 xl:sticky xl:top-28">
+          <div className="flex flex-col rounded-[28px] border border-outline-variant/30 bg-surface/88 p-3 shadow-[0_18px_60px_rgba(15,23,42,0.14)] backdrop-blur-xl sm:p-4 xl:sticky xl:top-24 xl:max-h-[calc(100dvh-7.5rem)]">
             <div className="flex flex-col gap-4 border-b border-outline-variant/25 pb-5">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
@@ -352,7 +355,7 @@ export const TripResults = () => {
               )}
             </div>
 
-            <div className="mt-5 max-h-[72vh] overflow-y-auto pr-1 fancy-scrollbar">
+            <div className="mt-5 min-h-0 flex-1 overflow-y-auto pr-1 fancy-scrollbar">
               {activeLog && (
                 <LogSheet
                   trip={trip}

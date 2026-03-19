@@ -16,7 +16,7 @@ interface StatChipProps {
 }
 
 const StatChip = ({ icon, label, value, unit }: StatChipProps) => (
-  <div className="flex min-h-[68px] items-center gap-3 rounded-2xl border border-outline-variant/30 bg-surface-container-low/78 px-3.5 py-2 shadow-[0_8px_18px_rgba(15,23,42,0.06)]">
+  <div className="flex min-h-[68px] items-center gap-3 rounded-2xl border border-outline-variant/30 bg-surface-container-low/78 px-3.5 py-2 shadow-[0_8px_18px_rgba(15,23,42,0.06)] dark:bg-surface-container-low/78">
     <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-500/12 text-emerald-700 dark:text-emerald-300 [&_svg]:h-[1.35rem] [&_svg]:w-[1.35rem]">{icon}</div>
     <div>
       <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">{label}</p>
@@ -49,7 +49,7 @@ export const StatsBar = ({ trip }: StatsBarProps) => {
   }, [trip])
 
   return (
-    <div ref={containerRef} className="grid grid-cols-2 gap-2 lg:grid-cols-4">
+    <div ref={containerRef} className="grid grid-cols-2 gap-2 xl:grid-cols-4">
       <StatChip
         icon={<Route />}
         label="Total Distance"

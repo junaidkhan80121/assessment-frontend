@@ -49,8 +49,12 @@ export interface Remark {
 
 export interface Recap {
   on_duty_today: number
+  on_duty_last_5_days: number
+  on_duty_last_7_days: number
   on_duty_last_8_days: number
   available_tomorrow: number
+  available_tomorrow_70: number
+  available_tomorrow_60: number
   hours_warning: boolean
   hours_critical: boolean
 }

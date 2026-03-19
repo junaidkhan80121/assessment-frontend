@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { MapPin, Navigation, Clock, ChevronRight, LoaderCircle, Route, ClipboardList, Truck } from 'lucide-react'
@@ -306,6 +306,7 @@ const filterFieldErrors = (
 
 const useLocationSearch = (searchTerm: string) => {
   const [trigger, result] = useLazySearchLocationsQuery()
+  const latestRequestedTerm = useRef('')
   const trimmed = searchTerm.trim()
   const normalized = trimmed.toLowerCase()
   const shouldSearch = trimmed.length >= 3
@@ -317,6 +318,7 @@ const useLocationSearch = (searchTerm: string) => {
     }
 
     const timer = window.setTimeout(() => {
+      latestRequestedTerm.current = normalized
       trigger(trimmed)
     }, 350)
 
@@ -324,12 +326,15 @@ const useLocationSearch = (searchTerm: string) => {
   }, [normalized, shouldSearch, trimmed, trigger])
 
   useEffect(() => {
-    if (normalized && result.data?.length) {
-      searchCache.set(normalized, result.data)
+    const currentData = result.currentData ?? result.data
+    if (latestRequestedTerm.current && currentData) {
+      searchCache.set(latestRequestedTerm.current, currentData)
     }
-  }, [normalized, result.data])
+  }, [result.currentData, result.data])
 
-  const options = shouldSearch ? (cachedOptions.length > 0 ? cachedOptions : result.data ?? []) : []
+  const liveOptions =
+    latestRequestedTerm.current === normalized ? (result.currentData ?? result.data ?? []) : []
+  const options = shouldSearch ? (searchCache.has(normalized) ? cachedOptions : liveOptions) : []
 
   return {
     options,

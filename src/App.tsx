@@ -6,9 +6,11 @@ import { TripResults } from '@/features/trips/TripResults'
 import { GlobalBackground } from '@/components/GlobalBackground'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { AboutPage, GuidelinesPage, ManualPage } from '@/pages/InfoPages'
+import TripHistoryPage from '@/pages/TripHistoryPage'
 
 const NAV_ITEMS = [
   { to: '/', icon: 'map', label: 'Routes' },
+  { to: '/trips', icon: 'history', label: 'History' },
   { to: '/guidelines', icon: 'local_shipping', label: 'Guidelines' },
   { to: '/manual', icon: 'menu_book', label: 'Manual' },
   { to: '/about', icon: 'info', label: 'About Us' },
@@ -124,6 +126,14 @@ function App() {
             element={
               <PageTransition>
                 <TripResults />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/trips"
+            element={
+              <PageTransition>
+                <TripHistoryPage />
               </PageTransition>
             }
           />

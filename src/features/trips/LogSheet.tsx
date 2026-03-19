@@ -51,16 +51,10 @@ const TEMPLATE_FIELDS: Record<string, TemplateField> = {
   vehicle: { x: 70, y: 182, width: 264, size: 8, align: 'center' },
   shipping_doc: { x: 30, y: 739, width: 110, size: 7 },
   commodity: { x: 30, y: 802, width: 110, size: 7 },
-  recap_today_70: { x: 177, y: 955, width: 46, size: 8, align: 'center' },
-  recap_total_70: { x: 331, y: 955, width: 48, size: 8, align: 'center' },
-  recap_available_70: { x: 484, y: 955, width: 50, size: 8, align: 'center' },
-  recap_today_60: { x: 639, y: 955, width: 46, size: 8, align: 'center' },
-  recap_total_60: { x: 793, y: 955, width: 48, size: 8, align: 'center' },
-  recap_available_60: { x: 947, y: 955, width: 54, size: 8, align: 'center' },
   total_hours: { x: 948, y: 369, width: 34, size: 8, align: 'center' },
   pickup: { x: 154, y: 835, width: 122, size: 7, align: 'center' },
   dropoff: { x: 319, y: 835, width: 122, size: 7, align: 'center' },
-  warning: { x: 842, y: 915, width: 96, size: 10, weight: '700', align: 'center' },
+  warning: { x: 912, y: 970, width: 58, size: 9, weight: '700', align: 'left' },
 }
 
 export async function renderLogSheetCanvas(
@@ -123,12 +117,13 @@ export async function renderLogSheetCanvas(
 
   drawTemplateField(ctx, TEMPLATE_FIELDS.shipping_doc, shippingDocument)
   drawTemplateField(ctx, TEMPLATE_FIELDS.commodity, shipperCommodity)
-  drawTemplateField(ctx, TEMPLATE_FIELDS.recap_today_70, dayLog.recap.on_duty_today.toFixed(2))
-  drawTemplateField(ctx, TEMPLATE_FIELDS.recap_total_70, dayLog.recap.on_duty_last_8_days.toFixed(2))
-  drawTemplateField(ctx, TEMPLATE_FIELDS.recap_available_70, dayLog.recap.available_tomorrow.toFixed(2))
-  drawTemplateField(ctx, TEMPLATE_FIELDS.recap_today_60, dayLog.recap.on_duty_today.toFixed(2))
-  drawTemplateField(ctx, TEMPLATE_FIELDS.recap_total_60, dayLog.recap.on_duty_last_8_days.toFixed(2))
-  drawTemplateField(ctx, TEMPLATE_FIELDS.recap_available_60, trip.weekly_hours_remaining.toFixed(2))
+  drawRecapValue(ctx, 116, '', dayLog.recap.on_duty_today.toFixed(2))
+  drawRecapValue(ctx, 282, 'A.', dayLog.recap.on_duty_last_7_days.toFixed(2))
+  drawRecapValue(ctx, 394, 'B.', dayLog.recap.available_tomorrow_70.toFixed(2))
+  drawRecapValue(ctx, 506, 'C.', dayLog.recap.on_duty_last_5_days.toFixed(2))
+  drawRecapValue(ctx, 622, 'A.', dayLog.recap.on_duty_last_8_days.toFixed(2))
+  drawRecapValue(ctx, 734, 'B.', dayLog.recap.available_tomorrow_60.toFixed(2))
+  drawRecapValue(ctx, 846, 'C.', dayLog.recap.on_duty_last_7_days.toFixed(2))
   drawTemplateField(ctx, TEMPLATE_FIELDS.total_hours, totalHours)
   drawTemplateField(ctx, TEMPLATE_FIELDS.pickup, pickupLabel)
   drawTemplateField(ctx, TEMPLATE_FIELDS.dropoff, toLabel)
@@ -267,55 +262,63 @@ function drawRemarksTemplate(ctx: CanvasRenderingContext2D) {
   drawLine(ctx, 37, 771, 145, 771, 1)
 
   setFont(ctx, 8)
-  ctx.fillText('Enter name of place you reported at and where released from work and when and where each change of duty occurred.', 129, 808)
-  ctx.fillText('Use time standard of home terminal.', 387, 824)
+  ctx.fillText('Enter name of place you reported at and where released from work and when and where each change of duty occurred.', 143, 804)
+  ctx.fillText('Use time standard of home terminal.', 392, 821)
 }
 
 function drawRecapTemplate(ctx: CanvasRenderingContext2D) {
   drawLine(ctx, 40, 888, 332, 888, 2.2)
-  drawLine(ctx, 389, 888, 683, 888, 2.2)
-  drawLine(ctx, 740, 888, 996, 888, 2.2)
+  drawLine(ctx, 390, 888, 684, 888, 2.2)
+  drawLine(ctx, 742, 888, 994, 888, 2.2)
 
   setFont(ctx, 9, '700')
-  ctx.fillText('Recap:', 20, 916)
+  ctx.fillText('Recap:', 18, 916)
   setFont(ctx, 8, '600')
-  ctx.fillText('Complete at', 20, 931)
-  ctx.fillText('end of day', 20, 945)
+  ctx.fillText('Complete at', 18, 931)
+  ctx.fillText('end of day', 18, 945)
 
   setFont(ctx, 9, '700')
-  ctx.fillText('70 Hour/', 183, 914)
-  ctx.fillText('8 Day', 196, 928)
-  setFont(ctx, 8, '600')
-  ctx.fillText('Drivers', 243, 942)
+  ctx.fillText('70 Hour/', 198, 913)
+  ctx.fillText('8 Day', 245, 913)
+  ctx.fillText('Drivers', 226, 943)
 
-  setFont(ctx, 9, '700')
-  ctx.fillText('60 Hour /', 535, 914)
-  setFont(ctx, 8, '600')
-  ctx.fillText('7 Day Drivers', 528, 928)
+  ctx.fillText('60 Hour /', 552, 913)
+  ctx.fillText('7 Day', 615, 913)
+  ctx.fillText('Drivers', 585, 943)
 
-  setFont(ctx, 9, '700')
-  ctx.fillText('*If you took', 882, 914)
-  ctx.fillText('34', 946, 928)
+  ctx.fillText('*If you took', 876, 913)
+  ctx.fillText('34', 916, 928)
   setFont(ctx, 8, '600')
-  ctx.fillText('consecutive', 875, 942)
-  ctx.fillText('hours off', 887, 956)
-  ctx.fillText('duty you', 889, 970)
-  ctx.fillText('have 60/70', 876, 984)
-  ctx.fillText('hours', 909, 998)
-  ctx.fillText('available', 888, 1012)
+  const warningTextX = 916
+  ctx.fillText('consecutive', warningTextX, 944)
+  ctx.fillText('hours off', warningTextX, 959)
+  ctx.fillText('duty you', warningTextX, 974)
+  ctx.fillText('have 60/70', warningTextX, 989)
+  ctx.fillText('hours', warningTextX, 1004)
+  ctx.fillText('available', warningTextX, 1019)
 
-  const columns = [
-    { x: 84, label: 'On duty\nhours\ntoday,\nTotal lines\n3 & 4' },
-    { x: 196, label: 'A.\nTotal\nhours on\nduty last 7\ndays\nincluding\ntoday.' },
-    { x: 307, label: 'B.\nTotal\nhours\navailable\ntomorrow\n70 hr.\nminus A*' },
-    { x: 420, label: 'C.\nTotal\nhours on\nduty last 5\ndays\nincluding\ntoday.' },
-    { x: 548, label: 'A.\nTotal\nhours on\nduty last 8\ndays\nincluding\ntoday.' },
-    { x: 660, label: 'B.\nTotal\nhours\navailable\ntomorrow\n60 hr.\nminus A*' },
-    { x: 772, label: 'C.\nTotal\nhours on\nduty last 7\ndays\nincluding\ntoday.' },
+  const recapColumns = [
+    { x: 116, header: '', body: ['On duty', 'hours', 'today,', 'Total lines', '3 & 4'] },
+    { x: 282, header: 'A.', body: ['Total', 'hours on', 'duty last 7', 'days', 'including', 'today.'] },
+    { x: 394, header: 'B.', body: ['Total', 'hours', 'available', 'tomorrow', '70 hr.', 'minus A*'] },
+    { x: 506, header: 'C.', body: ['Total', 'hours on', 'duty last 5', 'days', 'including', 'today.'] },
+    { x: 622, header: 'A.', body: ['Total', 'hours on', 'duty last 8', 'days', 'including', 'today.'] },
+    { x: 734, header: 'B.', body: ['Total', 'hours', 'available', 'tomorrow', '60 hr.', 'minus A*'] },
+    { x: 846, header: 'C.', body: ['Total', 'hours on', 'duty last 7', 'days', 'including', 'today.'] },
   ]
 
-  for (const column of columns) {
-    drawMultiline(ctx, column.label, column.x, 949, 52, 12, 8)
+  setFont(ctx, 8, '600')
+  for (const column of recapColumns) {
+    if (column.header) {
+      ctx.fillText(column.header, column.x, 944)
+      drawLine(ctx, column.x - 2, 948, column.x + 40, 948, 1)
+    } else {
+      drawLine(ctx, column.x - 4, 948, column.x + 48, 948, 1)
+    }
+
+    column.body.forEach((line, index) => {
+      ctx.fillText(line, column.x, 962 + index * 14)
+    })
   }
 }
 
@@ -456,6 +459,27 @@ function drawMultiline(
   value.split('\n').forEach((line, index) => {
     ctx.fillText(line, x, y + index * lineHeight, maxWidth)
   })
+}
+
+function drawRecapValue(
+  ctx: CanvasRenderingContext2D,
+  headerX: number,
+  header: string,
+  value: string,
+) {
+  setFont(ctx, 8, '600')
+
+  if (!header) {
+    ctx.fillText(value, headerX - 2, 944)
+    drawLine(ctx, headerX - 4, 948, headerX + 48, 948, 1)
+    return
+  }
+
+  ctx.fillText(header, headerX, 944)
+  const headerWidth = ctx.measureText(header).width
+  const valueX = headerX + headerWidth + 12
+  ctx.fillText(value, valueX, 944)
+  drawLine(ctx, headerX - 2, 948, headerX + 40, 948, 1)
 }
 
 function setFont(ctx: CanvasRenderingContext2D, size: number, weight = '400') {

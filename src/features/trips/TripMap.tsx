@@ -193,8 +193,9 @@ function splitRouteAtPickup(
 
 export const TripMap = ({ trip }: TripMapProps) => {
   const { theme } = useTheme()
-  const [mapStyle, setMapStyle] = useState<RouteMapStyle>('dark')
+  const [mapStyle, setMapStyle] = useState<RouteMapStyle>(theme === 'light' ? 'voyager' : 'dark')
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [hasManuallyChangedStyle, setHasManuallyChangedStyle] = useState(false)
   const hoverX = useSpring(0, { stiffness: 320, damping: 24, mass: 0.6 })
   const hoverY = useSpring(0, { stiffness: 320, damping: 24, mass: 0.6 })
   const hoverScale = useSpring(1, { stiffness: 280, damping: 22, mass: 0.7 })
@@ -298,8 +299,16 @@ export const TripMap = ({ trip }: TripMapProps) => {
   const overlayHeadingClass = isLightBasemap ? 'text-slate-900' : 'text-white'
   const overlayMutedClass = isLightBasemap ? 'text-slate-600' : 'text-slate-300'
   const overlayCardClass = isLightBasemap
-    ? 'border-slate-200 bg-slate-100/95'
+    ? 'border-white/70 bg-white/72 backdrop-blur-xl'
     : 'border-white/8 bg-white/[0.05]'
+
+  useEffect(() => {
+    if (hasManuallyChangedStyle) {
+      return
+    }
+
+    setMapStyle(theme === 'light' ? 'voyager' : 'dark')
+  }, [hasManuallyChangedStyle, theme])
 
   useEffect(() => {
     if (!isFullscreen) {
@@ -428,7 +437,10 @@ export const TripMap = ({ trip }: TripMapProps) => {
           <button
             key={styleKey}
             type="button"
-            onClick={() => setMapStyle(styleKey)}
+            onClick={() => {
+              setHasManuallyChangedStyle(true)
+              setMapStyle(styleKey)
+            }}
             className={`shrink-0 rounded-full px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] transition-all ${
               mapStyle === styleKey
                 ? 'bg-primary text-on-primary shadow-[0_0_16px_rgba(0,255,163,0.24)]'
@@ -468,6 +480,18 @@ export const TripMap = ({ trip }: TripMapProps) => {
           #trip-map .leaflet-control-zoom a:hover {
             background: rgba(30, 41, 59, 0.96);
             color: white;
+          }
+
+          #trip-map .leaflet-control-attribution {
+            background: rgba(15, 23, 42, 0.68);
+            color: rgba(226, 232, 240, 0.86);
+            border-radius: 10px 0 0 0;
+            padding: 2px 8px;
+            backdrop-filter: blur(10px);
+          }
+
+          #trip-map .leaflet-control-attribution a {
+            color: inherit;
           }
 
           #trip-map .leaflet-bottom.leaflet-right {
