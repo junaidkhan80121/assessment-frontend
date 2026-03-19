@@ -10,6 +10,21 @@ export interface TripStop {
   description: string
 }
 
+export interface RouteInstruction {
+  text: string
+  distance_miles: number
+  duration_hours: number
+  road_name: string
+  maneuver_type: string
+  maneuver_modifier: string
+  location: {
+    lat: number | null
+    lon: number | null
+  }
+  cumulative_distance_miles: number
+  cumulative_duration_hours: number
+}
+
 export interface DutyEntry {
   status: "OFF_DUTY" | "SLEEPER" | "DRIVING" | "ON_DUTY_NOT_DRIVING"
   start: string   // "HH:MM"
@@ -72,6 +87,7 @@ export interface Trip {
   status: "PENDING" | "COMPUTING" | "COMPUTED" | "FAILED"
   error_message: string
   route_geometry: [number, number][]
+  route_instructions: RouteInstruction[]
   route_options?: {
     id: number
     leg1_miles: number
@@ -80,6 +96,7 @@ export interface Trip {
     leg1_duration_hours: number
     leg2_duration_hours: number
     route_geometry: [number, number][]
+    route_instructions?: RouteInstruction[]
     stops: TripStop[]
     daily_logs: DailyLog[]
     total_on_duty_hours: number

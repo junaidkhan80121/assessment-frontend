@@ -1,10 +1,10 @@
 import { Fragment, useEffect, useMemo, useState, type MouseEvent as ReactMouseEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, useSpring } from 'framer-motion'
-import { MapContainer, TileLayer, Polyline, ZoomControl, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, Polyline, ZoomControl, CircleMarker, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import { useTheme } from 'next-themes'
-import { Expand, Minimize } from 'lucide-react'
+import { Expand, Minimize, Truck } from 'lucide-react'
 import type { Trip, TripStop } from '@/types/trip'
 import 'leaflet/dist/leaflet.css'
 
@@ -80,13 +80,12 @@ const createVehicleIcon = (accentColor: string) => L.divIcon({
           <path d="M3 8h11l3 3h4v6h-2a2 2 0 1 1-4 0H9a2 2 0 1 1-4 0H3V8Z" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M14 8v3h6" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
           <circle cx="7" cy="17" r="1.6" fill="white"/>
-          <circle cx="17" cy="17" r="1.6" fill="white"/>
         </svg>
       </div>
     </div>
   `,
   iconSize: [34, 34],
-  iconAnchor: [17, 17],
+  iconAnchor: [24, 26], // Adjusted so truck is just slightly offset from the start marker
 })
 
 function StopMarkers({ stops }: { stops: TripStop[] }) {
@@ -120,36 +119,25 @@ function StopMarkers({ stops }: { stops: TripStop[] }) {
   return null
 }
 
-function AnimatedRouteVehicle({
-  positions,
+function StaticRouteVehicle({
+  position,
   accentColor,
 }: {
-  positions: [number, number][]
+  position: [number, number]
   accentColor: string
 }) {
   const map = useMap()
 
   useEffect(() => {
-    if (positions.length < 2) {
-      return
-    }
-
-    const marker = L.marker(positions[0], {
+    const marker = L.marker(position, {
       icon: createVehicleIcon(accentColor),
       zIndexOffset: 1200,
     }).addTo(map)
 
-    let pointIndex = 0
-    const timer = window.setInterval(() => {
-      pointIndex = (pointIndex + 1) % positions.length
-      marker.setLatLng(positions[pointIndex])
-    }, 140)
-
     return () => {
-      window.clearInterval(timer)
       marker.remove()
     }
-  }, [accentColor, map, positions])
+  }, [accentColor, map, position])
 
   return null
 }
@@ -259,9 +247,17 @@ export const TripMap = ({ trip }: TripMapProps) => {
 
   const routeOptions = useMemo(() => trip.route_options ?? [], [trip.route_options])
   const hasRouteOptions = routeOptions.length > 0
+  const startPosition = useMemo<[number, number]>(
+    () => [trip.current_location_lat, trip.current_location_lon],
+    [trip.current_location_lat, trip.current_location_lon],
+  )
   const pickupPosition = useMemo<[number, number]>(
     () => [trip.pickup_location_lat, trip.pickup_location_lon],
     [trip.pickup_location_lat, trip.pickup_location_lon],
+  )
+  const dropoffPosition = useMemo<[number, number]>(
+    () => [trip.dropoff_location_lat, trip.dropoff_location_lon],
+    [trip.dropoff_location_lat, trip.dropoff_location_lon],
   )
   const fallbackRouteSplit = useMemo(
     () => splitRouteAtPickup(trip.route_geometry as [number, number][], pickupPosition),
@@ -371,8 +367,10 @@ export const TripMap = ({ trip }: TripMapProps) => {
             <span>Dropoff</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#F97316] text-[8px] font-bold text-white">F</span>
-            <span>Fuel/Rest</span>
+            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#F97316] text-white">
+               <Truck className="h-2.5 w-2.5" strokeWidth={3} />
+            </span>
+            <span>Current Location</span>
           </div>
         </div>
         <div className="mt-2.5 space-y-1.5 border-t border-white/10 pt-2">
@@ -568,10 +566,24 @@ export const TripMap = ({ trip }: TripMapProps) => {
                   )}
                 </>
               )}
-          {primaryRoutePositions.length > 1 && (
-            <AnimatedRouteVehicle positions={primaryRoutePositions} accentColor={vehicleAccent} />
-          )}
+
+          <StaticRouteVehicle position={startPosition} accentColor={vehicleAccent} />
           <StopMarkers stops={trip.stops} />
+          <CircleMarker 
+            center={startPosition}
+            pathOptions={{ color: '#3B82F6', fillColor: '#3B82F6', fillOpacity: 1, weight: 2 }}
+            radius={5}
+          />
+          <CircleMarker 
+            center={pickupPosition}
+            pathOptions={{ color: '#22C55E', fillColor: '#22C55E', fillOpacity: 1, weight: 2, className: 'marker-pulse' }}
+            radius={6}
+          />
+          <CircleMarker 
+            center={dropoffPosition}
+            pathOptions={{ color: '#EF4444', fillColor: '#EF4444', fillOpacity: 1, weight: 2, className: 'marker-pulse' }}
+            radius={6}
+          />
           <FitBounds trip={trip} />
         </MapContainer>
       </motion.div>

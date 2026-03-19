@@ -5,6 +5,7 @@ import TripPlanner from '@/pages/HomePage'
 import { TripResults } from '@/features/trips/TripResults'
 import { GlobalBackground } from '@/components/GlobalBackground'
 import { ThemeToggle } from '@/components/ThemeToggle'
+import { AboutPage, GuidelinesPage, ManualPage } from '@/pages/InfoPages'
 
 const NAV_ITEMS = [
   { to: '/', icon: 'map', label: 'Routes' },
@@ -130,23 +131,7 @@ function App() {
             path="/guidelines"
             element={
               <PageTransition>
-                <div className="min-h-screen px-6 pb-32 pt-32">
-                  <div className="mx-auto max-w-4xl rounded-[32px] border border-outline-variant/30 bg-surface/80 p-8 shadow-2xl backdrop-blur-xl">
-                    <span className="material-symbols-outlined mb-4 text-5xl text-primary-container">local_shipping</span>
-                    <h1 className="font-headline text-4xl font-black tracking-tight">Trucker Guidelines</h1>
-                    <p className="mt-3 max-w-2xl text-sm text-on-surface-variant">Reference notes for safe trip planning, pre-trip checks, rest break timing, fuel discipline, and FMCSA-friendly route habits.</p>
-                    <div className="mt-8 grid gap-4 md:grid-cols-2">
-                      {[
-                        'Pre-trip inspection checklist before departure',
-                        'Preferred fuel-stop spacing for long-haul runs',
-                        '8-hour break reminders and reset planning',
-                        'Weather and mountain-grade caution reminders',
-                      ].map((item) => (
-                        <div key={item} className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-sm text-on-surface-variant">{item}</div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+                <GuidelinesPage />
               </PageTransition>
             }
           />
@@ -154,26 +139,7 @@ function App() {
             path="/manual"
             element={
               <PageTransition>
-                <div className="min-h-screen px-6 pb-32 pt-32">
-                  <div className="mx-auto max-w-4xl rounded-[32px] border border-outline-variant/30 bg-surface/80 p-8 shadow-2xl backdrop-blur-xl">
-                    <span className="material-symbols-outlined mb-4 text-5xl text-primary-container">menu_book</span>
-                    <h1 className="font-headline text-4xl font-black tracking-tight">Driver Manual</h1>
-                    <p className="mt-3 max-w-2xl text-sm text-on-surface-variant">A quick-access manual for using route plans, understanding trip logs, reviewing route alternatives, and exporting paperwork.</p>
-                    <div className="mt-8 space-y-4">
-                      {[
-                        'How to choose between fastest and alternative routes',
-                        'What each route marker and stop type means',
-                        'How daily log sheets map to trip events',
-                        'How to export the selected day log as PDF',
-                      ].map((item, index) => (
-                        <div key={item} className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.04] p-4">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/15 text-sm font-bold text-primary">{index + 1}</div>
-                          <div className="text-sm text-on-surface-variant">{item}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+                <ManualPage />
               </PageTransition>
             }
           />
@@ -181,25 +147,7 @@ function App() {
             path="/about"
             element={
               <PageTransition>
-                <div className="min-h-screen px-6 pb-32 pt-32">
-                  <div className="mx-auto max-w-4xl rounded-[32px] border border-outline-variant/30 bg-surface/80 p-8 shadow-2xl backdrop-blur-xl">
-                    <span className="material-symbols-outlined mb-4 text-5xl text-primary-container">info</span>
-                    <h1 className="font-headline text-4xl font-black tracking-tight">About Us</h1>
-                    <p className="mt-3 max-w-2xl text-sm text-on-surface-variant">Vanguard is a concept logistics cockpit focused on route clarity, driver-friendly trip planning, and better visibility into HOS-safe journeys.</p>
-                    <div className="mt-8 grid gap-4 md:grid-cols-3">
-                      {[
-                        ['Mission', 'Reduce planning friction for long-haul drivers and dispatchers.'],
-                        ['Product', 'Surface route options, log sheets, and trip events in one place.'],
-                        ['Approach', 'Blend map clarity, compliance awareness, and simple driver workflows.'],
-                      ].map(([title, description]) => (
-                        <div key={title} className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
-                          <h2 className="text-sm font-bold uppercase tracking-[0.18em] text-primary">{title}</h2>
-                          <p className="mt-3 text-sm text-on-surface-variant">{description}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+                <AboutPage />
               </PageTransition>
             }
           />

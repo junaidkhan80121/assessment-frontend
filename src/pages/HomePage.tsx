@@ -120,17 +120,19 @@ const LocationInput = ({
           }}
           sx={{
             '& .MuiOutlinedInput-root': {
-              backgroundColor: 'var(--surface-container-low)',
+              backgroundColor: 'rgba(var(--surface-color-rgb), 0.4)',
               color: 'var(--on-surface)',
-              borderRadius: '10px',
-              minHeight: '46px',
+              borderRadius: '16px',
+              minHeight: '52px',
               transition: 'all 0.2s ease',
+              backdropFilter: 'blur(16px)',
               '& fieldset': {
-                borderColor: errorText ? 'var(--error)' : 'var(--outline-variant)',
+                borderColor: errorText ? 'var(--error)' : 'rgba(120, 120, 120, 0.2)',
                 borderWidth: '1px',
               },
               '&:hover fieldset': {
                 borderColor: errorText ? 'var(--error)' : 'var(--primary)',
+                backgroundColor: 'rgba(var(--surface-color-rgb), 0.6)',
               },
               '&.Mui-focused fieldset': {
                 borderColor: errorText ? 'var(--error)' : 'var(--primary)',
@@ -141,24 +143,31 @@ const LocationInput = ({
               },
             },
             '& .MuiInputLabel-root': {
-              fontSize: '0.85rem',
-              color: errorText ? 'var(--error)' : 'var(--on-surface-variant)',
+              fontSize: '0.9rem',
+              fontWeight: 500,
+              color: errorText ? 'var(--error)' : 'var(--on-surface)',
+              opacity: 0.8,
               '&.Mui-focused': {
                 color: errorText ? 'var(--error)' : 'var(--primary)',
+                opacity: 1,
               },
             },
             '& .MuiInputBase-input': {
-              fontSize: '0.95rem',
-              paddingTop: '10px',
-              paddingBottom: '10px',
+              fontSize: '1rem',
+              fontWeight: 600,
+              paddingTop: '12px',
+              paddingBottom: '12px',
+              color: 'var(--on-surface)',
             },
             '& .MuiInputBase-input::placeholder': {
-              color: 'var(--on-surface-variant)',
-              opacity: 0.5,
+              color: 'var(--on-surface)',
+              opacity: 0.4,
+              fontWeight: 500,
             },
             '& .MuiFormHelperText-root': {
               minHeight: '1rem',
               fontSize: '0.75rem',
+              fontWeight: 600,
               color: errorText ? 'var(--error)' : 'var(--on-surface-variant)',
               marginLeft: 0,
             },
@@ -525,10 +534,10 @@ const TripPlanner: React.FC = () => {
         </p>
       </div>
 
-      <div className="mx-auto w-full max-w-[43rem] overflow-hidden rounded-[24px] border border-outline-variant/30 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03))] shadow-[0_18px_48px_rgba(0,0,0,0.22)] backdrop-blur-xl">
-        <div className="rounded-[20px] border border-white/10 bg-surface-container/90 p-4 sm:px-4 sm:py-5">
-        <form className="space-y-2.5" onSubmit={(e) => e.preventDefault()}>
-          <div className="grid gap-2.5 md:grid-cols-2">
+      <div className={`mx-auto w-full max-w-[44rem] overflow-hidden rounded-[32px] border ${isLight ? 'border-primary/10 bg-white/40 shadow-[0_32px_80px_rgba(0,0,0,0.08)]' : 'border-white/10 bg-black/20 shadow-[0_32px_80px_rgba(0,0,0,0.4)]'} backdrop-blur-3xl`}>
+        <div className={`rounded-[28px] border ${isLight ? 'border-white/40 bg-white/60' : 'border-white/5 bg-surface/40'} p-5 sm:px-6 sm:py-7 backdrop-blur-xl`}>
+        <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+          <div className="grid gap-3 md:grid-cols-2">
             <LocationInput
               label="Current Position"
               icon={Navigation}
