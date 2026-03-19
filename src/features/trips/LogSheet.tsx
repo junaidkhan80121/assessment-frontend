@@ -389,7 +389,7 @@ export const LogSheet = ({ trip, dayLog, dayNumber }: LogSheetProps) => {
 
   return (
     <div
-      className={`flex min-h-full flex-col rounded-[24px] border p-3 pb-4 shadow-[0_18px_50px_rgba(15,23,42,0.12)] ${
+      className={`flex min-h-full flex-col rounded-[20px] border p-2 shadow-[0_18px_50px_rgba(15,23,42,0.12)] ${
         isDark ? 'border-white/10 bg-slate-950/85' : 'border-slate-200 bg-white'
       }`}
       id={`log-sheet-day-${dayNumber}`}
@@ -397,7 +397,7 @@ export const LogSheet = ({ trip, dayLog, dayNumber }: LogSheetProps) => {
       <div className="shrink-0">
         <canvas
           ref={canvasRef}
-          className="h-auto w-full rounded-md border border-slate-200 bg-white"
+          className="h-auto w-full rounded-sm border border-slate-200 bg-white"
         />
       </div>
     </div>

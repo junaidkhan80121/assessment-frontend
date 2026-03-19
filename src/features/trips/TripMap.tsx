@@ -164,6 +164,26 @@ function FitBounds({ trip }: { trip: Trip }) {
   return null
 }
 
+function MapViewportSync({ syncKey }: { syncKey: string }) {
+  const map = useMap()
+
+  useEffect(() => {
+    let frame = window.requestAnimationFrame(() => {
+      map.invalidateSize(false)
+    })
+    const timeout = window.setTimeout(() => {
+      map.invalidateSize(true)
+    }, 180)
+
+    return () => {
+      window.cancelAnimationFrame(frame)
+      window.clearTimeout(timeout)
+    }
+  }, [map, syncKey])
+
+  return null
+}
+
 function splitRouteAtPickup(
   positions: [number, number][],
   pickup: [number, number],
@@ -324,7 +344,7 @@ export const TripMap = ({ trip }: TripMapProps) => {
   }, [isFullscreen])
 
   const mapShell = (
-    <div className={`${isFullscreen ? 'fixed inset-0 z-[1600] h-screen w-screen bg-background/95 p-3 sm:p-4' : 'relative h-[360px] w-full lg:h-full'}`}>
+    <div className={`${isFullscreen ? 'fixed inset-0 z-[1600] h-screen w-screen bg-background/95 p-3 sm:p-4' : 'relative h-full min-h-[26rem] w-full sm:min-h-[30rem] lg:min-h-0'}`}>
       <div
         className={`relative h-full w-full overflow-hidden border border-border shadow-2xl ${
           isLightBasemap ? 'bg-[#dbe5ef]' : 'bg-slate-950'
@@ -527,6 +547,7 @@ export const TripMap = ({ trip }: TripMapProps) => {
             attribution={attribution}
             url={tileUrl}
           />
+          <MapViewportSync syncKey={`${isFullscreen}-${mapStyle}-${trip.id}-${trip.stops.length}-${routeOptions.length}`} />
           {hasRouteOptions
             ? routeOptions.map((option) => {
                 const isFastest = Boolean(option.is_fastest)

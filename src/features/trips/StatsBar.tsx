@@ -16,13 +16,13 @@ interface StatChipProps {
 }
 
 const StatChip = ({ icon, label, value, unit }: StatChipProps) => (
-  <div className="flex min-h-[68px] items-center gap-3 rounded-2xl border border-outline-variant/30 bg-surface-container-low/78 px-3.5 py-2 shadow-[0_8px_18px_rgba(15,23,42,0.06)] dark:bg-surface-container-low/78">
-    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-500/12 text-emerald-700 dark:text-emerald-300 [&_svg]:h-[1.35rem] [&_svg]:w-[1.35rem]">{icon}</div>
+  <div className="flex min-h-[56px] items-center gap-2.5 rounded-[20px] border border-outline-variant/25 bg-surface-container-low/72 px-3 py-1.5 shadow-[0_6px_14px_rgba(15,23,42,0.05)] dark:bg-surface-container-low/72">
+    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/12 text-emerald-700 dark:text-emerald-300 [&_svg]:h-[1.1rem] [&_svg]:w-[1.1rem]">{icon}</div>
     <div>
-      <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">{label}</p>
-      <p className="mt-1 text-lg font-bold font-mono leading-none text-emerald-700 dark:text-emerald-300 sm:text-[1.6rem]">
+      <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-emerald-700 dark:text-emerald-300">{label}</p>
+      <p className="mt-0.5 text-[1.35rem] font-bold font-mono leading-none text-emerald-700 dark:text-emerald-300 sm:text-[1.45rem]">
         <span data-count-up={value}>0</span>
-        <span className="ml-1 text-[11px] font-normal text-emerald-700/75 dark:text-emerald-300/75">{unit}</span>
+        <span className="ml-1 text-[10px] font-normal text-emerald-700/75 dark:text-emerald-300/75">{unit}</span>
       </p>
     </div>
   </div>
@@ -68,20 +68,20 @@ export const StatsBar = ({ trip }: StatsBarProps) => {
         value={trip.daily_logs.length}
         unit="days"
       />
-      <div className="flex min-h-[68px] items-center rounded-2xl border border-outline-variant/30 bg-surface-container-low/78 px-3.5 py-2 shadow-[0_8px_18px_rgba(15,23,42,0.06)]">
-        <div className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold ${
+      <div className="flex min-h-[56px] items-center rounded-[20px] border border-outline-variant/25 bg-surface-container-low/72 px-3 py-1.5 shadow-[0_6px_14px_rgba(15,23,42,0.05)]">
+        <div className={`inline-flex items-center gap-2 rounded-full px-2.5 py-1.5 text-[11px] font-semibold ${
           trip.hos_compliant
             ? "bg-emerald-500/18 text-emerald-700 dark:text-emerald-300"
             : "bg-destructive/20 text-destructive"
         }`}>
           {trip.hos_compliant ? (
             <>
-              <ShieldCheck className="h-4.5 w-4.5" />
+              <ShieldCheck className="h-4 w-4" />
               HOS Compliant
             </>
           ) : (
             <>
-              <AlertTriangle className="h-4.5 w-4.5" />
+              <AlertTriangle className="h-4 w-4" />
               Check Hours
             </>
           )}

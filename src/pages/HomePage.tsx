@@ -38,6 +38,7 @@ interface LocationInputProps {
   onFocus: () => void
   onBlur: () => void
   errorText?: string
+  helperText?: string
   tabIndex: number
   accentColor: string
   accentGlow: string
@@ -56,10 +57,13 @@ const LocationInput = ({
   onFocus,
   onBlur,
   errorText,
+  helperText,
   tabIndex,
   accentColor,
   accentGlow,
 }: LocationInputProps) => {
+  const selectedOption = options.find((option) => option.display_name === value) ?? null
+
   return (
     <Autocomplete
       freeSolo
@@ -67,12 +71,22 @@ const LocationInput = ({
       options={options}
       getOptionLabel={(option) => (typeof option === 'string' ? option : option.display_name || '')}
       filterOptions={(x) => x}
-      autoComplete
+      autoHighlight
+      clearOnBlur={false}
+      blurOnSelect={false}
       includeInputInList
       filterSelectedOptions
       open={isOpen}
-      value={value}
-      onInputChange={(_, newValue) => {
+      value={selectedOption ?? undefined}
+      inputValue={value}
+      isOptionEqualToValue={(option, autocompleteValue) =>
+        typeof autocompleteValue !== 'string' && option.place_id === autocompleteValue.place_id
+      }
+      onInputChange={(_, newValue, reason) => {
+        if (reason === 'blur') {
+          return
+        }
+
         onChange(newValue)
       }}
       onChange={(_, newValue) => {
@@ -95,7 +109,7 @@ const LocationInput = ({
           variant="outlined"
           fullWidth
           error={Boolean(errorText)}
-          helperText={errorText || ' '}
+          helperText={errorText || helperText || ' '}
           inputProps={{
             ...params.inputProps,
             tabIndex,
@@ -190,6 +204,14 @@ const LocationInput = ({
           {children}
         </div>
       )}
+      slotProps={{
+        listbox: {
+          className: 'max-h-80 overflow-y-auto fancy-scrollbar',
+        },
+        paper: {
+          elevation: 0,
+        },
+      }}
     />
   )
 }
@@ -342,6 +364,37 @@ const useLocationSearch = (searchTerm: string) => {
     isFetching: result.isFetching,
     isError: result.isError,
   }
+}
+
+const getLocationHelperText = (
+  value: string,
+  coordsReady: boolean,
+  isFetching: boolean,
+  options: GeocodingLocation[],
+) => {
+  const trimmed = value.trim()
+
+  if (trimmed.length === 0) {
+    return undefined
+  }
+
+  if (trimmed.length < 3) {
+    return 'Type at least 3 characters for suggestions.'
+  }
+
+  if (coordsReady) {
+    return 'Suggestion selected.'
+  }
+
+  if (isFetching) {
+    return 'Searching matching places...'
+  }
+
+  if (options.length > 0) {
+    return 'Choose the closest suggestion for best accuracy.'
+  }
+
+  return 'No suggestions yet. Try city, state, ZIP, or a longer phrase.'
 }
 
 const TripPlanner: React.FC = () => {
@@ -528,6 +581,12 @@ const TripPlanner: React.FC = () => {
                 markTouched('current_location')
               }}
               errorText={fieldErrors.current_location}
+              helperText={getLocationHelperText(
+                formValues.current_location,
+                Boolean(formValues.current_location_lat && formValues.current_location_lon),
+                currentSearch.isFetching,
+                currentSearch.options,
+              )}
               tabIndex={1}
               accentColor={accentColor}
               accentGlow={accentGlow}
@@ -548,6 +607,12 @@ const TripPlanner: React.FC = () => {
                 markTouched('pickup_location')
               }}
               errorText={fieldErrors.pickup_location}
+              helperText={getLocationHelperText(
+                formValues.pickup_location,
+                Boolean(formValues.pickup_location_lat && formValues.pickup_location_lon),
+                pickupSearch.isFetching,
+                pickupSearch.options,
+              )}
               tabIndex={2}
               accentColor={accentColor}
               accentGlow={accentGlow}
@@ -570,6 +635,12 @@ const TripPlanner: React.FC = () => {
                 markTouched('dropoff_location')
               }}
               errorText={fieldErrors.dropoff_location}
+              helperText={getLocationHelperText(
+                formValues.dropoff_location,
+                Boolean(formValues.dropoff_location_lat && formValues.dropoff_location_lon),
+                dropoffSearch.isFetching,
+                dropoffSearch.options,
+              )}
               tabIndex={3}
               accentColor={accentColor}
               accentGlow={accentGlow}

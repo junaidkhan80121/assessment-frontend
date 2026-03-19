@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Download, Loader2, RotateCw } from 'lucide-react'
+import { ArrowLeft, Download, Fuel, Loader2, Map, Route as RouteIcon, RotateCw, ScrollText } from 'lucide-react'
  
 import { useCreateTripMutation, useGetTripQuery } from '@/api/tripsApi'
 import { StatsBar } from './StatsBar'
@@ -12,12 +12,14 @@ import type { ApiErrorResponse, RouteInstruction } from '@/types/trip'
 
 const PDF_RENDER_SCALE = 2
 const PDF_IMAGE_QUALITY = 0.82
+type TripWorkspaceTab = 'map' | 'logs' | 'guide' | 'stops'
 
 export const TripResults = () => {
   const { tripId } = useParams<{ tripId: string }>()
   const navigate = useNavigate()
   const hasInitializedTheme = useRef(false)
   const [activeTab, setActiveTab] = useState(0)
+  const [activeWorkspaceTab, setActiveWorkspaceTab] = useState<TripWorkspaceTab>('map')
   const [pollingInterval, setPollingInterval] = useState(5000)
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false)
   const [downloadProgress, setDownloadProgress] = useState<string | null>(null)
@@ -78,6 +80,12 @@ export const TripResults = () => {
 
   const routeInstructions = trip.route_instructions ?? []
   const activeLog = trip.daily_logs[activeTab]
+  const workspaceTabs: { id: TripWorkspaceTab; label: string; icon: typeof Map }[] = [
+    { id: 'map', label: 'Map', icon: Map },
+    { id: 'logs', label: 'Logs', icon: ScrollText },
+    { id: 'guide', label: 'Guide', icon: RouteIcon },
+    { id: 'stops', label: 'Stops', icon: Fuel },
+  ]
 
   const handleDownloadPDF = async () => {
     if (!trip.daily_logs.length) {
@@ -200,170 +208,235 @@ export const TripResults = () => {
           </div>
         </section>
 
-        <section className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.55fr)_minmax(380px,0.78fr)]">
-          
+        <section className="rounded-[28px] border border-outline-variant/30 bg-surface/88 p-3 shadow-[0_18px_60px_rgba(15,23,42,0.14)] backdrop-blur-xl sm:p-4 xl:p-5">
           <div className="flex flex-col gap-4">
-            <section className="flex flex-col rounded-[28px] border border-outline-variant/30 bg-surface/88 p-3 shadow-[0_18px_60px_rgba(15,23,42,0.14)] backdrop-blur-xl sm:p-4 xl:p-5">
-              <div className="mb-4 flex items-center justify-between gap-3 px-1 shrink-0">
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">Route Map</p>
-                  <h2 className="mt-1 text-xl font-bold text-on-surface">Primary route and alternatives</h2>
-                </div>
-                <p className="hidden text-xs text-muted-foreground lg:block">Large map, route markers, fit to viewport</p>
-              </div>
-              <div className="h-[60vh] min-h-[500px] max-h-[78vh] w-full overflow-hidden rounded-[24px] border border-outline-variant/25 bg-card xl:h-[68vh]">
-                <TripMap trip={trip} />
-              </div>
-            </section>
-
-            <div className="rounded-[28px] border border-outline-variant/30 bg-surface/88 p-4 sm:p-5 shadow-[0_18px_60px_rgba(15,23,42,0.14)] backdrop-blur-xl">
-              <div className="flex items-center justify-between gap-3 mb-4">
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">Route Instructions</p>
-                  <h3 className="mt-1 text-lg font-bold text-on-surface">Turn-by-turn guidance</h3>
-                </div>
-                <div className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-primary shadow-[0_0_15px_rgba(0,255,163,0.15)]">
-                  {routeInstructions.length} steps
-                </div>
-              </div>
-              <div className="max-h-[380px] space-y-3 overflow-y-auto pr-2 fancy-scrollbar">
-                {routeInstructions.map((instruction, index) => (
-                  <div
-                    key={`${instruction.text}-${index}`}
-                    className="rounded-2xl border border-outline-variant/20 bg-surface px-4 py-3.5 transition-colors hover:bg-surface-container"
-                  >
-                    <div className="flex items-start gap-4">
-                      <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground shadow-[0_0_10px_rgba(0,255,163,0.2)]">
-                        {index + 1}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-semibold text-on-surface leading-snug">{instruction.text}</p>
-                        <p className="mt-1.5 text-xs text-muted-foreground inline-flex items-center gap-1.5">
-                          <span className="h-1 w-1 rounded-full bg-primary/50" />
-                          {formatInstructionMeta(instruction)}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                {routeInstructions.length === 0 && (
-                  <div className="rounded-2xl border border-dashed border-outline-variant/30 bg-surface px-4 py-6 text-center text-sm text-muted-foreground">
-                    Route steps were not available for this trip record.
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="rounded-[28px] border border-outline-variant/30 bg-surface/88 p-4 sm:p-5 shadow-[0_18px_60px_rgba(15,23,42,0.14)] backdrop-blur-xl">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">Stops & Rest</p>
-              <h3 className="mt-1 text-lg font-bold text-on-surface">Trip stop summary</h3>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-                {trip.stops.map((stop, index) => (
-                  <div
-                    key={`${stop.type}-${stop.arrival_hour}-${index}`}
-                    className="rounded-[20px] border border-outline-variant/20 bg-surface px-4 py-4"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="text-[13px] font-bold tracking-wide text-on-surface">{formatStopType(stop.type)}</p>
-                        <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">{stop.location}</p>
-                      </div>
-                      <div className="text-right text-[11px] font-medium text-muted-foreground shrink-0 rounded-lg bg-surface-container-low px-2 py-1">
-                        <p className="text-on-surface">{formatArrivalHour(stop.arrival_hour)}</p>
-                        <p>{stop.duration_minutes} min</p>
-                      </div>
-                    </div>
-                    <p className="mt-3 border-t border-outline-variant/10 pt-2 text-[11px] text-muted-foreground">{stop.description}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-col rounded-[28px] border border-outline-variant/30 bg-surface/88 p-3 shadow-[0_18px_60px_rgba(15,23,42,0.14)] backdrop-blur-xl sm:p-4 xl:sticky xl:top-24 xl:max-h-[calc(100dvh-7.5rem)]">
-            <div className="flex flex-col gap-4 border-b border-outline-variant/25 pb-5">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">Driver Logs</p>
-                  <h2 className="mt-1 text-lg font-bold text-on-surface">Daily log sheets</h2>
-                  {activeLog && (
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {formatLogHeading(trip.created_at, activeLog.day_number)} · {formatLogTimeRange(activeLog)}
-                    </p>
-                  )}
-                </div>
+            <div className="flex flex-wrap gap-2">
+              {workspaceTabs.map(({ id, label, icon: Icon }) => (
                 <button
-                  onClick={handleDownloadPDF}
-                  disabled={isDownloadingPdf}
-                  id="download-pdf"
-                  className="inline-flex h-9 items-center justify-center gap-2 rounded-full bg-primary px-4 text-[10px] font-bold uppercase tracking-[0.16em] text-primary-foreground transition-all hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70 shrink-0"
+                  key={id}
+                  type="button"
+                  onClick={() => setActiveWorkspaceTab(id)}
+                  className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] transition-all ${
+                    activeWorkspaceTab === id
+                      ? 'bg-primary text-primary-foreground shadow-[0_0_15px_rgba(0,255,163,0.28)]'
+                      : 'border border-outline-variant/30 bg-surface-container-low text-muted-foreground hover:bg-surface-container hover:text-on-surface'
+                  }`}
                 >
-                  {isDownloadingPdf ? (
-                    <>
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      {downloadProgress ?? 'Downloading...'}
-                    </>
-                  ) : (
-                    <>
-                      <Download className="h-3.5 w-3.5" />
-                      Save PDF
-                    </>
-                  )}
+                  <Icon className="h-3.5 w-3.5" />
+                  {label}
                 </button>
-              </div>
-
-              <div className="flex overflow-x-auto gap-2 pb-1 fancy-scrollbar">
-                {trip.daily_logs.map((log, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setActiveTab(i)}
-                    id={`tab-day-${i + 1}`}
-                    className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] whitespace-nowrap transition-colors ${
-                      activeTab === i
-                        ? 'bg-primary text-primary-foreground shadow-[0_0_15px_rgba(0,255,163,0.3)]'
-                        : 'border border-outline-variant/30 bg-surface-container-low text-muted-foreground hover:bg-surface-container hover:text-on-surface'
-                    }`}
-                  >
-                    Day {i + 1}
-                    <span className="text-[10px] opacity-80 normal-case tracking-normal">
-                      {formatShortLogDate(trip.created_at, log.day_number)}
-                    </span>
-                    {log.recap.available_tomorrow < 5 && (
-                      <span className="h-1.5 w-1.5 rounded-full bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.6)]" />
-                    )}
-                  </button>
-                ))}
-              </div>
+              ))}
             </div>
 
-            <div className="mt-4 rounded-[22px] border border-outline-variant/20 bg-surface-container-low/55 px-4 py-3">
-              {activeLog && (
-                <div className="grid grid-cols-3 gap-3 text-xs">
-                  <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Date</p>
-                    <p className="mt-1 font-semibold text-on-surface">{formatLogHeading(trip.created_at, activeLog.day_number)}</p>
+            {activeWorkspaceTab === 'map' && (
+              <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.58fr)_minmax(320px,0.72fr)]">
+                <section className="flex flex-col rounded-[24px] border border-outline-variant/25 bg-card/40 p-3 sm:p-4">
+                  <div className="h-[48vh] min-h-[360px] max-h-[64vh] w-full overflow-hidden rounded-[24px] border border-outline-variant/25 bg-card sm:h-[52vh] sm:min-h-[400px] lg:h-[56vh] xl:h-[calc(100vh-22rem)] xl:min-h-[500px] xl:max-h-[68vh]">
+                    <TripMap trip={trip} />
                   </div>
-                  <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Drive</p>
-                    <p className="mt-1 font-semibold text-on-surface">{activeLog.totals.DRIVING.toFixed(1)} hrs</p>
+                </section>
+
+                <div className="flex flex-col gap-3 xl:max-h-[calc(100vh-22rem)] xl:min-h-[500px] xl:overflow-y-auto xl:pr-1 fancy-scrollbar">
+                  <div className="rounded-[20px] border border-outline-variant/20 bg-surface-container-low/40 p-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">Route Snapshot</p>
+                    <div className="mt-2.5 grid grid-cols-2 gap-2.5 text-sm">
+                      <div className="rounded-[18px] border border-outline-variant/15 bg-surface px-3 py-2.5">
+                        <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Distance</p>
+                        <p className="mt-1 text-[13px] font-semibold text-on-surface">{trip.total_distance_miles.toFixed(1)} mi</p>
+                      </div>
+                      <div className="rounded-[18px] border border-outline-variant/15 bg-surface px-3 py-2.5">
+                        <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Drive Time</p>
+                        <p className="mt-1 text-[13px] font-semibold text-on-surface">{trip.total_drive_hours.toFixed(1)} hrs</p>
+                      </div>
+                      <div className="rounded-[18px] border border-outline-variant/15 bg-surface px-3 py-2.5">
+                        <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Stops</p>
+                        <p className="mt-1 text-[13px] font-semibold text-on-surface">{trip.stops.length}</p>
+                      </div>
+                      <div className="rounded-[18px] border border-outline-variant/15 bg-surface px-3 py-2.5">
+                        <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Log Days</p>
+                        <p className="mt-1 text-[13px] font-semibold text-on-surface">{trip.daily_logs.length}</p>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">On Duty</p>
-                    <p className="mt-1 font-semibold text-on-surface">{activeLog.recap.on_duty_today.toFixed(1)} hrs</p>
+
+                  <div className="rounded-[20px] border border-outline-variant/20 bg-surface-container-low/40 p-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">Upcoming Stops</p>
+                    <div className="mt-2.5 space-y-2.5">
+                      {trip.stops.slice(0, 4).map((stop, index) => (
+                        <div key={`${stop.type}-${stop.arrival_hour}-${index}`} className="rounded-[18px] border border-outline-variant/15 bg-surface px-3 py-2.5">
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <p className="text-[13px] font-semibold text-on-surface">{formatStopType(stop.type)}</p>
+                              <p className="mt-0.5 text-[11px] text-muted-foreground line-clamp-1">{stop.location}</p>
+                            </div>
+                            <span className="rounded-lg bg-surface-container-low px-2 py-1 text-[10px] text-muted-foreground">
+                              {formatArrivalHour(stop.arrival_hour)}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
 
-            <div className="mt-5 min-h-0 flex-1 overflow-y-auto pr-1 fancy-scrollbar">
-              {activeLog && (
-                <LogSheet
-                  trip={trip}
-                  dayLog={activeLog}
-                  dayNumber={activeLog.day_number}
-                />
-              )}
-            </div>
+            {activeWorkspaceTab === 'guide' && (
+              <div className="rounded-[24px] border border-outline-variant/25 bg-card/40 p-4 sm:p-5">
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">Route Instructions</p>
+                    <h3 className="mt-1 text-lg font-bold text-on-surface">Turn-by-turn guidance</h3>
+                  </div>
+                  <div className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-primary shadow-[0_0_15px_rgba(0,255,163,0.15)]">
+                    {routeInstructions.length} steps
+                  </div>
+                </div>
+                <div className="max-h-[70vh] space-y-3 overflow-y-auto pr-2 fancy-scrollbar">
+                  {routeInstructions.map((instruction, index) => (
+                    <div
+                      key={`${instruction.text}-${index}`}
+                      className="rounded-2xl border border-outline-variant/20 bg-surface px-4 py-3.5 transition-colors hover:bg-surface-container"
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground shadow-[0_0_10px_rgba(0,255,163,0.2)]">
+                          {index + 1}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold text-on-surface leading-snug">{instruction.text}</p>
+                          <p className="mt-1.5 inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <span className="h-1 w-1 rounded-full bg-primary/50" />
+                            {formatInstructionMeta(instruction)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {routeInstructions.length === 0 && (
+                    <div className="rounded-2xl border border-dashed border-outline-variant/30 bg-surface px-4 py-6 text-center text-sm text-muted-foreground">
+                      Route steps were not available for this trip record.
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {activeWorkspaceTab === 'stops' && (
+              <div className="rounded-[24px] border border-outline-variant/25 bg-card/40 p-4 sm:p-5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">Stops & Rest</p>
+                <h3 className="mt-1 text-lg font-bold text-on-surface">Trip stop summary</h3>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                  {trip.stops.map((stop, index) => (
+                    <div
+                      key={`${stop.type}-${stop.arrival_hour}-${index}`}
+                      className="rounded-[20px] border border-outline-variant/20 bg-surface px-4 py-4"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-[13px] font-bold tracking-wide text-on-surface">{formatStopType(stop.type)}</p>
+                          <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">{stop.location}</p>
+                        </div>
+                        <div className="text-right text-[11px] font-medium text-muted-foreground shrink-0 rounded-lg bg-surface-container-low px-2 py-1">
+                          <p className="text-on-surface">{formatArrivalHour(stop.arrival_hour)}</p>
+                          <p>{stop.duration_minutes} min</p>
+                        </div>
+                      </div>
+                      <p className="mt-3 border-t border-outline-variant/10 pt-2 text-[11px] text-muted-foreground">{stop.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {activeWorkspaceTab === 'logs' && (
+              <div className="rounded-[24px] border border-outline-variant/25 bg-card/40 p-2.5 sm:p-3">
+                <div className="flex flex-col rounded-[24px] border border-outline-variant/20 bg-surface/65 p-3 shadow-[0_12px_34px_rgba(15,23,42,0.08)] sm:p-4">
+                  <div className="flex flex-col gap-2.5 border-b border-outline-variant/25 pb-2.5">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">Driver Logs</p>
+                        <h2 className="mt-0.5 text-[15px] font-bold text-on-surface">Daily log sheets</h2>
+                        {activeLog && (
+                          <p className="mt-0.5 text-xs text-muted-foreground">
+                            {formatLogHeading(trip.created_at, activeLog.day_number)} · {formatLogTimeRange(activeLog)}
+                          </p>
+                        )}
+                      </div>
+                      <button
+                        onClick={handleDownloadPDF}
+                        disabled={isDownloadingPdf}
+                        id="download-pdf"
+                        className="inline-flex h-9 items-center justify-center gap-2 rounded-full bg-primary px-4 text-[10px] font-bold uppercase tracking-[0.16em] text-primary-foreground transition-all hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70 shrink-0"
+                      >
+                        {isDownloadingPdf ? (
+                          <>
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            {downloadProgress ?? 'Downloading...'}
+                          </>
+                        ) : (
+                          <>
+                            <Download className="h-3.5 w-3.5" />
+                            Save PDF
+                          </>
+                        )}
+                      </button>
+                    </div>
+                    <div className="flex overflow-x-auto gap-2 pb-0.5 fancy-scrollbar">
+                      {trip.daily_logs.map((log, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setActiveTab(i)}
+                          id={`tab-day-${i + 1}`}
+                          className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] whitespace-nowrap transition-colors ${
+                            activeTab === i
+                              ? 'bg-primary text-primary-foreground shadow-[0_0_15px_rgba(0,255,163,0.3)]'
+                              : 'border border-outline-variant/30 bg-surface-container-low text-muted-foreground hover:bg-surface-container hover:text-on-surface'
+                          }`}
+                        >
+                          Day {i + 1}
+                          <span className="text-[10px] opacity-80 normal-case tracking-normal">
+                            {formatShortLogDate(trip.created_at, log.day_number)}
+                          </span>
+                          {log.recap.available_tomorrow < 5 && (
+                            <span className="h-1.5 w-1.5 rounded-full bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.6)]" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="mt-2.5 rounded-[20px] border border-outline-variant/20 bg-surface-container-low/55 px-3 py-2">
+                    {activeLog && (
+                      <div className="grid grid-cols-3 gap-3 text-xs">
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Date</p>
+                          <p className="mt-1 font-semibold text-on-surface">{formatLogHeading(trip.created_at, activeLog.day_number)}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Drive</p>
+                          <p className="mt-1 font-semibold text-on-surface">{activeLog.totals.DRIVING.toFixed(1)} hrs</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">On Duty</p>
+                          <p className="mt-1 font-semibold text-on-surface">{activeLog.recap.on_duty_today.toFixed(1)} hrs</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-2.5 flex h-[50vh] min-h-[300px] max-h-[64vh] justify-center overflow-auto rounded-[22px] border border-outline-variant/20 bg-surface-container-low/30 p-2 fancy-scrollbar sm:h-[54vh] lg:h-[58vh] xl:h-[calc(100vh-20rem)] xl:min-h-[500px] xl:max-h-[68vh] sm:p-3">
+                    <div className="w-full max-w-[900px]">
+                      {activeLog && (
+                        <LogSheet
+                          trip={trip}
+                          dayLog={activeLog}
+                          dayNumber={activeLog.day_number}
+                        />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </section>
       </div>

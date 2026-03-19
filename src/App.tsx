@@ -5,7 +5,7 @@ import TripPlanner from '@/pages/HomePage'
 import { TripResults } from '@/features/trips/TripResults'
 import { GlobalBackground } from '@/components/GlobalBackground'
 import { ThemeToggle } from '@/components/ThemeToggle'
-import { AboutPage, GuidelinesPage, ManualPage } from '@/pages/InfoPages'
+import { AboutPage, GuidelinesPage, ManualPage, ContactPage } from '@/pages/InfoPages'
 import TripHistoryPage from '@/pages/TripHistoryPage'
 
 const NAV_ITEMS = [
@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { to: '/guidelines', icon: 'local_shipping', label: 'Guidelines' },
   { to: '/manual', icon: 'menu_book', label: 'Manual' },
   { to: '/about', icon: 'info', label: 'About Us' },
+  { to: '/contact', icon: 'mail', label: 'Contact Us' },
 ]
 
 function VanguardLogo() {
@@ -158,6 +159,14 @@ function App() {
             element={
               <PageTransition>
                 <AboutPage />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/contact"
+            element={
+              <PageTransition>
+                <ContactPage />
               </PageTransition>
             }
           />
