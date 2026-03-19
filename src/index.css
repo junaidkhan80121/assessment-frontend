@@ -71,6 +71,12 @@
     --outline-variant: #3a4a3f;
     --secondary-container: #14d1ff;
     --primary-fixed: #52ffac;
+
+    /* Primary-tinted borders (Tailwind primary/20 is too faint on light backgrounds) */
+    --primary-ui-border-muted: rgba(0, 255, 163, 0.32);
+    --primary-ui-border: rgba(0, 255, 163, 0.45);
+    --primary-ui-border-strong: rgba(0, 255, 163, 0.62);
+    --primary-ui-border-focus: rgba(0, 255, 163, 0.75);
   }
 
   /* ── LIGHT MODE ────────────────────────────────────── */
@@ -111,6 +117,12 @@
     --surface-container-lowest: #ffffff;
     --surface-variant: #dcfce7;
     --surface-container-low: #f0fdf4;
+
+    /* Stronger green borders so UI chrome stays visible on pale mint/white */
+    --primary-ui-border-muted: rgb(21 128 61 / 0.42);
+    --primary-ui-border: rgb(21 128 61 / 0.58);
+    --primary-ui-border-strong: rgb(22 101 52 / 0.78);
+    --primary-ui-border-focus: rgb(21 128 61 / 0.92);
   }
 }
 

@@ -31,7 +31,7 @@ const HistoryLoadingVisual = () => {
               delay: i * 0.6,
               ease: "easeOut"
             }}
-            className="absolute h-full w-full rounded-full border border-primary/40 bg-primary/5"
+            className="absolute h-full w-full rounded-full border border-primary-ui-border-strong bg-primary/5"
           />
         ))}
         {/* Central Icon */}
@@ -102,7 +102,7 @@ export default function TripHistoryPage() {
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Search by terminal, status, or node..."
-                className="h-12 w-full rounded-2xl border border-outline-variant/30 bg-surface-container-low pl-11 pr-4 text-sm text-on-surface outline-none transition-colors focus:border-primary/40 shadow-sm"
+                className="h-12 w-full rounded-2xl border border-outline-variant/30 bg-surface-container-low pl-11 pr-4 text-sm text-on-surface outline-none transition-colors focus:border-primary-ui-border-strong shadow-sm"
               />
             </div>
           </div>
@@ -127,12 +127,12 @@ export default function TripHistoryPage() {
                   <Link
                     key={trip.id}
                     to={`/trip/${trip.id}`}
-                    className="group rounded-[24px] border border-outline-variant/20 bg-surface-container-low/70 p-4 transition-all hover:border-primary/25 hover:bg-surface-container"
+                    className="group rounded-[24px] border border-outline-variant/20 bg-surface-container-low/70 p-4 transition-all hover:border-primary-ui-border hover:bg-surface-container"
                   >
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">
+                          <span className="rounded-full border border-primary-ui-border-muted bg-primary/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">
                             {trip.status}
                           </span>
                           <span className="inline-flex items-center gap-1.5 text-xs text-on-surface">
@@ -156,7 +156,7 @@ export default function TripHistoryPage() {
                         </div>
                       </div>
 
-                      <div className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap self-start rounded-full border border-outline-variant/25 bg-surface px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-on-surface transition-colors group-hover:border-primary/25 group-hover:text-primary">
+                      <div className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap self-start rounded-full border border-outline-variant/25 bg-surface px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-on-surface transition-colors group-hover:border-primary-ui-border group-hover:text-primary">
                         <MapPinned className="h-3.5 w-3.5 shrink-0" />
                         Open Trip
                         <ChevronRight className="h-3.5 w-3.5 shrink-0" />

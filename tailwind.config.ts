@@ -12,6 +12,11 @@ const config: Config = {
         background: 'var(--background)',
         foreground: 'hsl(var(--foreground))',
         primary: { DEFAULT: 'var(--primary)', foreground: 'var(--on-primary)' },
+        /** Theme-tuned greens; use instead of border-primary/20 in light mode */
+        'primary-ui-border-muted': 'var(--primary-ui-border-muted)',
+        'primary-ui-border': 'var(--primary-ui-border)',
+        'primary-ui-border-strong': 'var(--primary-ui-border-strong)',
+        'primary-ui-border-focus': 'var(--primary-ui-border-focus)',
         secondary: { DEFAULT: 'var(--secondary)', foreground: 'var(--on-secondary)' },
         accent: { DEFAULT: 'hsl(var(--accent))', foreground: 'hsl(var(--accent-foreground))' },
         muted: { DEFAULT: 'hsl(var(--muted))', foreground: 'hsl(var(--muted-foreground))' },

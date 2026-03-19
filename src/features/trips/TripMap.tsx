@@ -355,7 +355,7 @@ export const TripMap = ({ trip }: TripMapProps) => {
         isFullscreen ? 'left-3 top-16 sm:left-4 sm:top-20' : 'left-3 top-3'
       } ${overlaySurfaceClass}`}>
         {hasRouteOptions && routeOptions.some((option) => option.is_fastest) && (
-          <div className={`mb-2 inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.18em] ${isLightBasemap ? 'border-primary/25 bg-primary/10 text-emerald-700' : 'border-primary/20 bg-primary/12 text-primary'}`}>
+          <div className={`mb-2 inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.18em] ${isLightBasemap ? 'border-primary-ui-border bg-primary/10 text-emerald-800' : 'border-primary-ui-border-muted bg-primary/12 text-primary'}`}>
             <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_10px_rgba(0,255,163,0.55)]" />
             Fastest route highlighted
           </div>

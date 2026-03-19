@@ -389,15 +389,16 @@ export const LogSheet = ({ trip, dayLog, dayNumber }: LogSheetProps) => {
 
   return (
     <div
-      className={`flex min-h-full flex-col rounded-[20px] border p-2 shadow-[0_18px_50px_rgba(15,23,42,0.12)] ${
+      className={`w-full shrink-0 rounded-[20px] border p-2 shadow-[0_18px_50px_rgba(15,23,42,0.12)] ${
         isDark ? 'border-white/10 bg-slate-950/85' : 'border-slate-200 bg-white'
       }`}
       id={`log-sheet-day-${dayNumber}`}
     >
-      <div className="shrink-0">
+      {/* No overflow-hidden — canvas is scaled to full width; full height scrolls in parent */}
+      <div className="flex w-full justify-center">
         <canvas
           ref={canvasRef}
-          className="h-auto w-full rounded-sm border border-slate-200 bg-white"
+          className="block h-auto max-h-none w-full rounded-sm border border-slate-200 bg-white"
         />
       </div>
     </div>

@@ -65,18 +65,21 @@ function Layout({ children, pathname }: { children: React.ReactNode; pathname: s
   return (
     <>
       <GlobalBackground variant={backgroundVariant} />
-      <header className="fixed left-0 right-0 top-0 z-50 border-b border-outline-variant/20 bg-surface/95 shadow-[0_10px_30px_rgba(0,0,0,0.16)] backdrop-blur-md dark:bg-[#0E0E0E]/96">
-        <div className="mx-auto flex h-20 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl bg-surface-container-highest ring-1 ring-white/10">
-              <VanguardLogo />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-headline text-xl font-black uppercase tracking-tighter text-primary">Vanguard</span>
-              <span className="hidden text-[10px] uppercase tracking-[0.22em] text-on-surface-variant sm:block">Route planning cockpit</span>
+      <header className="fixed left-0 right-0 top-0 z-50 border-b border-slate-300/80 bg-surface/95 shadow-[0_10px_30px_rgba(0,0,0,0.16)] backdrop-blur-md dark:border-outline-variant/20 dark:bg-[#0E0E0E]/96">
+        <div className="relative flex h-20 w-full items-center justify-between px-1 sm:px-3 lg:px-4">
+          <div className="z-10 shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl bg-surface-container-highest ring-1 ring-slate-300/70 dark:ring-white/10">
+                <VanguardLogo />
+              </div>
+              <div className="hidden flex-col sm:flex">
+                <span className="font-headline text-xl font-black uppercase tracking-tighter text-primary">Vanguard</span>
+                <span className="hidden text-[10px] uppercase tracking-[0.22em] text-on-surface-variant lg:block">Route planning cockpit</span>
+              </div>
             </div>
           </div>
-          <nav className="flex items-center gap-2 rounded-full border border-outline-variant/30 bg-surface-container-low px-2 py-2">
+          <div className="absolute left-1/2 top-1/2 flex w-full -translate-x-1/2 -translate-y-1/2 justify-center px-16 sm:px-28 lg:px-40">
+          <nav className="flex max-w-full items-center gap-2 overflow-x-auto rounded-full border border-slate-300/80 bg-surface-container-low px-2 py-2 fancy-scrollbar dark:border-outline-variant/30">
             {NAV_ITEMS.map((item) => (
               <NavLink
                 key={item.to}
@@ -94,8 +97,9 @@ function Layout({ children, pathname }: { children: React.ReactNode; pathname: s
               </NavLink>
             ))}
           </nav>
-          <div className="flex items-center gap-2">
-            <div className="rounded-full border border-outline-variant/30 bg-surface-container-low px-1 py-1">
+          </div>
+          <div className="z-10 flex shrink-0 items-center gap-2">
+            <div className="rounded-full border border-slate-300/80 bg-surface-container-low px-1 py-1 dark:border-outline-variant/30">
               <ThemeToggle />
             </div>
           </div>

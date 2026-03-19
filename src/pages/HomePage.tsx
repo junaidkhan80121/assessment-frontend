@@ -506,7 +506,7 @@ const TripPlanner: React.FC = () => {
     try {
       const payload = buildTripPayload(formValues)
       const trip = await createTrip(payload).unwrap()
-      navigate(`/trip/${trip.id}`)
+      navigate(`/trip/${trip.id}`, { state: { trip } })
     } catch (err: unknown) {
       const apiError = (err as { data?: ApiErrorResponse; message?: string })?.data
       const message =
@@ -532,7 +532,7 @@ const TripPlanner: React.FC = () => {
       <div className="relative z-10 mx-auto w-full max-w-7xl">
       <div className="mb-8 text-center">
         <div className="mb-4 flex flex-wrap items-center justify-center gap-3 text-[11px] font-semibold uppercase tracking-[0.2em]">
-          <span className={`rounded-full border px-3 py-1 ${isLight ? 'border-primary/30 bg-primary/10 text-[#005c30]' : 'border-primary/20 bg-primary/10 text-primary'}`}>Smart geocoding</span>
+          <span className={`rounded-full border px-3 py-1 ${isLight ? 'border-primary-ui-border bg-primary/10 text-[#005c30]' : 'border-primary-ui-border-muted bg-primary/10 text-primary'}`}>Smart geocoding</span>
           <span className={`rounded-full border px-3 py-1 ${isLight ? 'border-black/10 bg-black/5 text-gray-700' : 'border-white/10 bg-white/5 text-on-surface-variant'}`}>Alternative routes</span>
           <span className={`rounded-full border px-3 py-1 ${isLight ? 'border-black/10 bg-black/5 text-gray-700' : 'border-white/10 bg-white/5 text-on-surface-variant'}`}>HOS-aware logs</span>
         </div>

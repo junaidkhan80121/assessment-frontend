@@ -69,7 +69,7 @@ const GuidelinesVisual = () => {
       {/* Widget 2: Lane Density Histogram */}
       <AnimatedVisualWrapper className="p-6">
         <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.24em] text-primary">Lane Density</p>
-        <div className="relative flex h-24 items-end gap-2 border-b border-primary/20 pb-2 px-2">
+        <div className="relative flex h-24 items-end gap-2 border-b border-primary-ui-border-muted pb-2 px-2">
           {[0.4, 0.7, 0.5, 0.9, 0.6, 0.3, 0.8].map((val, i) => (
             <div data-hist-bar data-value={val} key={i} className="flex-1 rounded-t-md bg-gradient-to-t from-primary/10 to-primary/80" style={{ height: '10%' }} />
           ))}
@@ -128,7 +128,7 @@ const ManualVisual = () => {
       {/* Widget 1: Routing Engine */}
       <AnimatedVisualWrapper className="p-6 text-center">
         <p className="mb-8 text-[10px] font-bold uppercase tracking-[0.24em] text-primary">Routing Engine</p>
-        <div data-tilt className="relative mx-auto flex h-48 w-48 items-center justify-center rounded-full border border-primary/20 bg-surface/50 shadow-lg preserve-3d">
+        <div data-tilt className="relative mx-auto flex h-48 w-48 items-center justify-center rounded-full border border-primary-ui-border-muted bg-surface/50 shadow-lg preserve-3d">
            <svg viewBox="0 0 200 200" className="absolute inset-0 h-full w-full">
               <circle data-ring cx="100" cy="100" r="80" fill="none" stroke="currentColor" className="text-primary/30" strokeWidth="2" strokeDasharray="4 8" />
               <circle data-ring cx="100" cy="100" r="60" fill="none" stroke="currentColor" className="text-cyan-400/30" strokeWidth="1" strokeDasharray="12 4" />
@@ -266,7 +266,7 @@ const ContactVisual = () => {
     <AnimatedVisualWrapper className="min-h-[300px] h-full items-center justify-center text-center">
       <div ref={rootRef} className="p-6 flex flex-col items-center">
          <div className="relative mb-6 flex h-32 w-32 items-center justify-center rounded-full bg-primary/10">
-            <div className="absolute inset-0 rounded-full border border-primary/20" />
+            <div className="absolute inset-0 rounded-full border border-primary-ui-border-muted" />
             <div data-mail-pulse className="absolute inset-2 rounded-full border border-cyan-400/30" />
             <Mail className="h-12 w-12 text-primary" />
          </div>
@@ -375,7 +375,7 @@ const InfoPageLayout = ({
         className={`mx-auto flex max-w-6xl flex-col ${fillViewport ? 'h-full gap-4' : 'gap-6'}`}
       >
         {/* Live Network Ticker */}
-        <div className="flex h-8 items-center gap-6 overflow-hidden rounded-full border border-primary/20 bg-surface/50 px-4 backdrop-blur-md">
+        <div className="flex h-8 items-center gap-6 overflow-hidden rounded-full border border-primary-ui-border-muted bg-surface/50 px-4 backdrop-blur-md">
           <div className="flex shrink-0 items-center gap-2">
             <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary shadow-[0_0_8px_rgba(0,255,163,1)]" />
             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-on-surface">System Live</span>
@@ -477,7 +477,7 @@ const InfoSection = ({
       <div className="absolute inset-0 z-0 bg-gradient-to-b from-surface/90 to-surface/40" />
       
       <div className="relative z-10 flex items-start gap-5">
-        <div data-neon-badge className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 to-cyan-400/10 text-primary transition-transform duration-[1500ms]">
+        <div data-neon-badge className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-primary-ui-border-muted bg-gradient-to-br from-primary/10 to-cyan-400/10 text-primary transition-transform duration-[1500ms]">
           <Icon className="h-7 w-7" />
         </div>
         <div>
@@ -688,16 +688,16 @@ export const ContactPage = () => {
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
               <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface">Full Name</label>
-              <input required type="text" className="rounded-xl border border-outline-variant/30 bg-surface-container-low p-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary/50" placeholder="Jane Doe" />
+              <input required type="text" className="rounded-xl border border-outline-variant/30 bg-surface-container-low p-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary-ui-border-focus" placeholder="Jane Doe" />
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface">Email</label>
-              <input required type="email" className="rounded-xl border border-outline-variant/30 bg-surface-container-low p-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary/50" placeholder="jane@company.com" />
+              <input required type="email" className="rounded-xl border border-outline-variant/30 bg-surface-container-low p-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary-ui-border-focus" placeholder="jane@company.com" />
             </div>
           </div>
           <div className="flex flex-col gap-1.5">
             <label className="text-[10px] font-bold uppercase tracking-widest text-on-surface">Message</label>
-            <textarea required rows={3} className="resize-none rounded-xl border border-outline-variant/30 bg-surface-container-low p-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary/50" placeholder="How can we help?" />
+            <textarea required rows={3} className="resize-none rounded-xl border border-outline-variant/30 bg-surface-container-low p-2.5 text-sm text-on-surface outline-none transition-colors focus:border-primary-ui-border-focus" placeholder="How can we help?" />
           </div>
           <button type="submit" className="mt-auto inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-[0_0_15px_rgba(0,255,163,0.3)] transition-all hover:bg-primary/90 hover:shadow-[0_0_25px_rgba(0,255,163,0.5)]">
             <Send className="h-4 w-4" />
