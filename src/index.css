@@ -85,7 +85,7 @@
     --foreground: #052e16;
     --card: #ffffff;
     --card-foreground: #052e16;
-    --border: #bbf7d0;
+    --border: #86efac;
     --input: #f0fdf4;
     --ring: #15803d;
     --primary: #15803d;
@@ -95,7 +95,8 @@
     --accent: #047857;
     --accent-foreground: #ffffff;
     --muted: #f0fdf4;
-    --muted-foreground: #22c55e;
+    /* Readable secondary text on mint backgrounds (pure green was too loud for UI chrome) */
+    --muted-foreground: #3d6849;
     --destructive: #ef4444;
     --destructive-foreground: #ffffff;
     --success: #22c55e;
@@ -112,17 +113,17 @@
     --on-primary-container: #14532d;
     --on-surface: #052e16;
     --surface-container-highest: #bbf7d0;
-    --outline: #22c55e;
-    --outline-variant: #bbf7d0;
+    --outline: #15803d;
+    --outline-variant: #86efac;
     --surface-container-lowest: #ffffff;
     --surface-variant: #dcfce7;
     --surface-container-low: #f0fdf4;
 
     /* Stronger green borders so UI chrome stays visible on pale mint/white */
-    --primary-ui-border-muted: rgb(21 128 61 / 0.42);
-    --primary-ui-border: rgb(21 128 61 / 0.58);
-    --primary-ui-border-strong: rgb(22 101 52 / 0.78);
-    --primary-ui-border-focus: rgb(21 128 61 / 0.92);
+    --primary-ui-border-muted: rgb(21 128 61 / 0.6);
+    --primary-ui-border: rgb(21 128 61 / 0.78);
+    --primary-ui-border-strong: rgb(22 101 52 / 0.92);
+    --primary-ui-border-focus: rgb(21 128 61 / 1);
   }
 }
 

@@ -1,20 +1,20 @@
-import { Routes, Route, useLocation, NavLink } from 'react-router-dom'
+import { Routes, Route, useLocation, Link } from 'react-router-dom'
+import { useEffect } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { PageTransition } from '@/components/PageTransition'
 import TripPlanner from '@/pages/HomePage'
 import { TripResults } from '@/features/trips/TripResults'
 import { GlobalBackground } from '@/components/GlobalBackground'
 import { ThemeToggle } from '@/components/ThemeToggle'
-import { AboutPage, GuidelinesPage, ManualPage, ContactPage } from '@/pages/InfoPages'
 import TripHistoryPage from '@/pages/TripHistoryPage'
 
 const NAV_ITEMS = [
-  { to: '/', icon: 'map', label: 'Routes' },
+  { to: '/#planner', icon: 'map', label: 'Planner' },
   { to: '/trips', icon: 'history', label: 'History' },
-  { to: '/guidelines', icon: 'local_shipping', label: 'Guidelines' },
-  { to: '/manual', icon: 'menu_book', label: 'Manual' },
-  { to: '/about', icon: 'info', label: 'About Us' },
-  { to: '/contact', icon: 'mail', label: 'Contact Us' },
+  { to: '/#guidelines', icon: 'local_shipping', label: 'Guidelines' },
+  { to: '/#manual', icon: 'menu_book', label: 'Manual' },
+  { to: '/#about', icon: 'info', label: 'About Us' },
+  { to: '/#contact', icon: 'mail', label: 'Contact' },
 ]
 
 function VanguardLogo() {
@@ -61,6 +61,17 @@ function VanguardLogo() {
 
 function Layout({ children, pathname }: { children: React.ReactNode; pathname: string }) {
   const backgroundVariant = pathname.startsWith('/trip/') ? 'static' : 'interactive'
+  const location = useLocation()
+
+  useEffect(() => {
+    if (location.pathname !== '/' || !location.hash) return
+    const targetId = location.hash.replace('#', '')
+    const target = document.getElementById(targetId)
+    if (!target) return
+    window.setTimeout(() => {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 50)
+  }, [location.pathname, location.hash])
 
   return (
     <>
@@ -79,24 +90,27 @@ function Layout({ children, pathname }: { children: React.ReactNode; pathname: s
             </div>
           </div>
           <div className="absolute left-1/2 top-1/2 flex w-full -translate-x-1/2 -translate-y-1/2 justify-center px-16 sm:px-28 lg:px-40">
-          <nav className="flex max-w-full items-center gap-2 overflow-x-auto rounded-full border border-slate-300/80 bg-surface-container-low px-2 py-2 fancy-scrollbar dark:border-outline-variant/30">
-            {NAV_ITEMS.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                className={({ isActive }) =>
-                  `group flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] transition-all ${
-                    isActive
-                      ? 'bg-primary text-on-primary shadow-[0_0_18px_rgba(0,255,163,0.22)]'
-                      : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary'
-                  }`
-                }
-              >
-                <span className="material-symbols-outlined text-[18px]">{item.icon}</span>
-                <span className="hidden sm:inline">{item.label}</span>
-              </NavLink>
-            ))}
-          </nav>
+            <nav className="flex max-w-full items-center gap-2 overflow-x-auto rounded-full border border-slate-300/80 bg-surface-container-low px-2 py-2 fancy-scrollbar dark:border-outline-variant/30">
+              {NAV_ITEMS.map((item) => {
+                const isActive = item.to.startsWith('/#')
+                  ? location.pathname === '/' && location.hash === item.to.slice(1)
+                  : location.pathname === item.to
+                return (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    className={`group flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] transition-all ${
+                      isActive
+                        ? 'bg-primary text-on-primary shadow-[0_0_18px_rgba(0,255,163,0.22)]'
+                        : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-[18px]">{item.icon}</span>
+                    <span className="hidden sm:inline">{item.label}</span>
+                  </Link>
+                )
+              })}
+            </nav>
           </div>
           <div className="z-10 flex shrink-0 items-center gap-2">
             <div className="rounded-full border border-slate-300/80 bg-surface-container-low px-1 py-1 dark:border-outline-variant/30">
@@ -139,38 +153,6 @@ function App() {
             element={
               <PageTransition>
                 <TripHistoryPage />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/guidelines"
-            element={
-              <PageTransition>
-                <GuidelinesPage />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/manual"
-            element={
-              <PageTransition>
-                <ManualPage />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/about"
-            element={
-              <PageTransition>
-                <AboutPage />
-              </PageTransition>
-            }
-          />
-          <Route
-            path="/contact"
-            element={
-              <PageTransition>
-                <ContactPage />
               </PageTransition>
             }
           />

@@ -84,11 +84,11 @@ export async function renderLogSheetCanvas(
   drawTemplate(ctx)
 
   const [monthLabel, dayLabel, yearLabel] = splitLogDate(trip.created_at, dayNumber)
-  const fromLabel = shortLocation(trip.current_location)
-  const toLabel = shortLocation(trip.dropoff_location)
+  const fromLabel = shortLocation(resolveLogBoundary(dayLog, trip.current_location, 'start'))
+  const toLabel = shortLocation(resolveLogBoundary(dayLog, trip.dropoff_location, 'end'))
   const pickupLabel = shortLocation(trip.pickup_location)
-  const officeLabel = 'Chicago, IL'
-  const carrierLabel = 'Vanguard Fleet Ops'
+  const officeLabel = shortLocation(trip.current_location)
+  const carrierLabel = 'Generated Property Carrier Plan'
   const vehicleNumbers = `TRK-${trip.id.slice(0, 4).toUpperCase()} / TRL-${trip.id.slice(4, 8).toUpperCase()}`
   const shippingDocument = `DOC-${trip.id.slice(0, 8).toUpperCase()}`
   const shipperCommodity = `${pickupLabel} to ${toLabel}`
@@ -118,12 +118,12 @@ export async function renderLogSheetCanvas(
   drawTemplateField(ctx, TEMPLATE_FIELDS.shipping_doc, shippingDocument)
   drawTemplateField(ctx, TEMPLATE_FIELDS.commodity, shipperCommodity)
   drawRecapValue(ctx, 116, '', dayLog.recap.on_duty_today.toFixed(2))
-  drawRecapValue(ctx, 282, 'A.', dayLog.recap.on_duty_last_7_days.toFixed(2))
+  drawRecapValue(ctx, 282, 'A.', dayLog.recap.on_duty_last_8_days.toFixed(2))
   drawRecapValue(ctx, 394, 'B.', dayLog.recap.available_tomorrow_70.toFixed(2))
   drawRecapValue(ctx, 506, 'C.', dayLog.recap.on_duty_last_5_days.toFixed(2))
-  drawRecapValue(ctx, 622, 'A.', dayLog.recap.on_duty_last_8_days.toFixed(2))
+  drawRecapValue(ctx, 622, 'A.', dayLog.recap.on_duty_last_7_days.toFixed(2))
   drawRecapValue(ctx, 734, 'B.', dayLog.recap.available_tomorrow_60.toFixed(2))
-  drawRecapValue(ctx, 846, 'C.', dayLog.recap.on_duty_last_7_days.toFixed(2))
+  drawRecapValue(ctx, 846, 'C.', dayLog.recap.on_duty_last_5_days.toFixed(2))
   drawTemplateField(ctx, TEMPLATE_FIELDS.total_hours, totalHours)
   drawTemplateField(ctx, TEMPLATE_FIELDS.pickup, pickupLabel)
   drawTemplateField(ctx, TEMPLATE_FIELDS.dropoff, toLabel)
@@ -599,6 +599,16 @@ function shortLocation(value: string) {
 function shortRemarkText(note: string, location: string) {
   const raw = `${note} - ${shortLocation(location)}`
   return raw.length > 70 ? `${raw.slice(0, 67)}...` : raw
+}
+
+function resolveLogBoundary(dayLog: DailyLog, fallback: string, boundary: 'start' | 'end') {
+  const remarks = dayLog.remarks.filter((remark) => remark.location?.trim())
+  if (remarks.length === 0) {
+    return fallback
+  }
+
+  const remark = boundary === 'start' ? remarks[0] : remarks[remarks.length - 1]
+  return remark.location || fallback
 }
 
 function formatTemplateDate(month: string, day: string, year: string) {

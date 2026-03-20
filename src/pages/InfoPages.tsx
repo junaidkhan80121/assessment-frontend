@@ -29,7 +29,7 @@ const AnimatedVisualWrapper = ({ children, className = "" }: { children: React.R
   </div>
 )
 
-const GuidelinesVisual = () => {
+export const GuidelinesVisual = () => {
   const rootRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -105,7 +105,7 @@ const GuidelinesVisual = () => {
   )
 }
 
-const ManualVisual = () => {
+export const ManualVisual = () => {
   const rootRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
     if (!rootRef.current) return
@@ -166,7 +166,7 @@ const ManualVisual = () => {
   )
 }
 
-const AboutVisual = () => {
+export const AboutVisual = () => {
   const rootRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
     if (!rootRef.current) return
@@ -248,7 +248,7 @@ const AboutVisual = () => {
   )
 }
 
-const ContactVisual = () => {
+export const ContactVisual = () => {
   const rootRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
     if (!rootRef.current) return
@@ -429,7 +429,7 @@ const InfoPageLayout = ({
   )
 }
 
-const InfoSection = ({ 
+export const InfoSection = ({ 
   title, 
   description, 
   icon: Icon,

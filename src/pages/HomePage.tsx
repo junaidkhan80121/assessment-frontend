@@ -1,7 +1,25 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import { MapPin, Navigation, Clock, ChevronRight, LoaderCircle, Route, ClipboardList, Truck } from 'lucide-react'
+import {
+  MapPin,
+  Navigation,
+  Clock,
+  ChevronRight,
+  LoaderCircle,
+  Route,
+  ClipboardList,
+  Truck,
+  Scale,
+  Monitor,
+  FileText,
+  Globe,
+  Users,
+  Mail,
+  Phone,
+  Send,
+  CheckCircle2,
+} from 'lucide-react'
 import { Slider, Button, TextField, Autocomplete, InputAdornment } from '@mui/material'
 import { useTheme } from 'next-themes'
 import { ZodError } from 'zod'
@@ -12,6 +30,7 @@ import { useToast } from '@/components/ToastProvider'
 import { TypewriterText } from '@/components/TypewriterText'
 import type { ApiErrorResponse, TripCreatePayload } from '@/types/trip'
 import { buildTripPayload, tripFormSchema } from '@/utils/tripValidation'
+import { GuidelinesVisual, ManualVisual, AboutVisual, ContactVisual, InfoSection } from './InfoPages'
 
 type TripField = 'current_location' | 'pickup_location' | 'dropoff_location'
 type TripFormState = TripCreatePayload
@@ -405,6 +424,7 @@ const TripPlanner: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [activeField, setActiveField] = useState<TripField | null>(null)
   const [showAllErrors, setShowAllErrors] = useState(false)
+  const [contactStatus, setContactStatus] = useState<string | null>(null)
   const [touchedFields, setTouchedFields] = useState<Partial<Record<TripField | 'current_cycle_used', boolean>>>({})
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const [formValues, setFormValues] = useState<TripFormState>({
@@ -417,7 +437,7 @@ const TripPlanner: React.FC = () => {
     dropoff_location: '',
     dropoff_location_lat: undefined,
     dropoff_location_lon: undefined,
-    current_cycle_used: 45,
+    current_cycle_used: 0,
   })
 
   const isLight = theme === 'light'
@@ -525,11 +545,52 @@ const TripPlanner: React.FC = () => {
     }
   }
 
+  const handleContactSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setContactStatus('Message sent successfully! A dispatcher will reach out shortly.')
+    window.setTimeout(() => setContactStatus(null), 4000)
+  }
+
   return (
-    <div className="relative min-h-screen overflow-hidden px-4 pb-16 pt-28 sm:px-6">
+    <div id="planner" className="relative min-h-screen overflow-hidden px-4 pb-16 pt-28 sm:px-6">
       {isLoading && <LoadingModal />}
 
       <div className="relative z-10 mx-auto w-full max-w-7xl">
+      <section className="flex min-h-[calc(100dvh-8rem)] flex-col justify-center pb-6">
+      <style>{`
+        @keyframes marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+      `}</style>
+      {/* Neon-style live ticker (inspired by Neon.com) */}
+      <div className="mb-6 flex h-9 items-center justify-between gap-4 overflow-hidden rounded-full border border-primary-ui-border-muted bg-surface/40 px-4 backdrop-blur-md sm:px-6">
+        <div className="flex items-center gap-2 whitespace-nowrap">
+          <span className="h-2 w-2 rounded-full bg-primary shadow-[0_0_12px_rgba(0,255,163,0.35)]" aria-hidden />
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-on-surface-variant">System Live</span>
+        </div>
+        <div className="relative flex-1 overflow-hidden">
+          <div className="whitespace-nowrap animate-[marquee_18s_linear_infinite]">
+            {[
+              'Network Load: 12% • Latency: 4ms • Node-7: Active',
+              'Routing Engine: 99.98% precision • HOS synchronized',
+              'Secure Data Stream: Encrypted • API Gateway: Normal',
+              'Autoscaling: instances stable • Replicas healthy',
+            ]
+              .concat([
+                'Network Load: 12% • Latency: 4ms • Node-7: Active',
+                'Routing Engine: 99.98% precision • HOS synchronized',
+                'Secure Data Stream: Encrypted • API Gateway: Normal',
+                'Autoscaling: instances stable • Replicas healthy',
+              ])
+              .map((msg, idx) => (
+                <span key={idx} className="mr-10 text-[10px] font-bold uppercase tracking-wider text-primary">
+                  {msg}
+                </span>
+              ))}
+          </div>
+        </div>
+      </div>
       <div className="mb-8 text-center">
         <div className="mb-4 flex flex-wrap items-center justify-center gap-3 text-[11px] font-semibold uppercase tracking-[0.2em]">
           <span className={`rounded-full border px-3 py-1 ${isLight ? 'border-primary-ui-border bg-primary/10 text-[#005c30]' : 'border-primary-ui-border-muted bg-primary/10 text-primary'}`}>Smart geocoding</span>
@@ -765,6 +826,148 @@ const TripPlanner: React.FC = () => {
           <span className="text-[10px] uppercase tracking-widest font-bold">Latency</span>
           <span className="font-headline text-xl font-bold text-on-surface">12ms</span>
         </div>
+      </div>
+      </section>
+
+      <div className="mt-12 space-y-8">
+        <section id="guidelines" className="relative min-h-[calc(100dvh-7rem)] rounded-[32px] border border-primary-ui-border bg-gradient-to-br from-surface/95 via-surface-container-low/55 to-surface/85 p-5 shadow-[0_24px_76px_rgba(15,23,42,0.12)] backdrop-blur-xl sm:p-7">
+          <div className="pointer-events-none absolute inset-0 -z-[1] rounded-[32px] bg-[conic-gradient(from_0deg,transparent_0_60%,rgba(0,255,163,0.35)_75%,transparent_88%)] opacity-35 blur-[2px] animate-[spin_14s_linear_infinite]" aria-hidden />
+          <div className="pointer-events-none absolute inset-0 -z-[1] rounded-[32px] bg-[conic-gradient(from_180deg,transparent_0_65%,rgba(34,211,238,0.28)_78%,transparent_90%)] opacity-25 blur-[2px] animate-[spin_20s_linear_infinite]" aria-hidden />
+          <div className="pointer-events-none absolute -right-24 -top-20 h-52 w-52 rounded-full bg-primary/10 blur-[80px]" />
+          <div className="absolute right-5 top-5 rounded-full border border-primary-ui-border-strong bg-primary/15 px-3 py-1 text-xs font-black uppercase tracking-[0.2em] text-primary">Guidelines</div>
+          <div className="grid h-full items-center gap-6 lg:grid-cols-[0.92fr_1.08fr]">
+            <div className="order-2 lg:order-1">
+              <GuidelinesVisual />
+            </div>
+            <div className="order-1 lg:order-2">
+              <p className="text-sm font-black uppercase tracking-[0.28em] text-primary">Guidelines</p>
+              <h2 className="mt-2 font-headline text-4xl font-black tracking-tight text-on-surface sm:text-5xl">Safety & compliance standards</h2>
+              <p className="mt-2 text-sm text-on-surface-variant">Operational guardrails for reliable freight movement.</p>
+              <div className="mt-5">
+                <InfoSection
+                  icon={Scale}
+                  title="Driver Wellness & Compliance"
+                  description="Our core operational mandate for fleet safety."
+                  cardStyle="glow-pulse"
+                  items={[
+                    'We enforce strict 70-hour / 8-day operational cycle limits.',
+                    'Drivers are monitored for safe property-carrying hours.',
+                    'Mandatory fueling checks run at least every 1,000 miles.',
+                    'Pre-trip walkaround inspections are required before engine turn-over.',
+                  ]}
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="manual" className="relative min-h-[calc(100dvh-7rem)] rounded-[32px] border border-primary-ui-border bg-gradient-to-br from-surface/95 via-surface-container-low/55 to-surface/85 p-5 shadow-[0_24px_76px_rgba(15,23,42,0.12)] backdrop-blur-xl sm:p-7">
+          <div className="pointer-events-none absolute inset-0 -z-[1] rounded-[32px] bg-[conic-gradient(from_0deg,transparent_0_60%,rgba(34,211,238,0.35)_75%,transparent_88%)] opacity-32 blur-[2px] animate-[spin_14s_linear_infinite]" aria-hidden />
+          <div className="pointer-events-none absolute inset-0 -z-[1] rounded-[32px] bg-[conic-gradient(from_180deg,transparent_0_65%,rgba(0,255,163,0.28)_78%,transparent_90%)] opacity-22 blur-[2px] animate-[spin_20s_linear_infinite]" aria-hidden />
+          <div className="pointer-events-none absolute -left-20 top-10 h-56 w-56 rounded-full bg-cyan-400/10 blur-[80px]" />
+          <div className="absolute right-5 top-5 rounded-full border border-primary-ui-border-strong bg-primary/15 px-3 py-1 text-xs font-black uppercase tracking-[0.2em] text-primary">Manual</div>
+          <div className="grid h-full items-center gap-6 lg:grid-cols-[1.08fr_0.92fr]">
+            <div>
+              <p className="text-sm font-black uppercase tracking-[0.28em] text-primary">Manual</p>
+              <h2 className="mt-2 font-headline text-4xl font-black tracking-tight text-on-surface sm:text-5xl">How Vanguard routing works</h2>
+              <p className="mt-2 text-sm text-on-surface-variant">From order intake to fully compliant day-by-day logs.</p>
+              <div className="mt-5">
+                <InfoSection
+                  icon={Monitor}
+                  title="Workflow Stack"
+                  description="How a dispatch request becomes a compliant trip."
+                  cardStyle="neon-sweep"
+                  items={[
+                    '1. Order parameterization with location and cycle constraints.',
+                    '2. Millisecond route and stop computations across alternatives.',
+                    '3. Automated ELD log rendering for each trip day.',
+                    '4. Export and handoff to driver operations.',
+                  ]}
+                />
+              </div>
+            </div>
+            <div>
+              <ManualVisual />
+            </div>
+          </div>
+        </section>
+
+        <section id="about" className="relative min-h-[calc(100dvh-7rem)] rounded-[32px] border border-primary-ui-border bg-gradient-to-br from-surface/95 via-surface-container-low/55 to-surface/85 p-5 shadow-[0_24px_76px_rgba(15,23,42,0.12)] backdrop-blur-xl sm:p-7">
+          <div className="pointer-events-none absolute inset-0 -z-[1] rounded-[32px] bg-[conic-gradient(from_0deg,transparent_0_60%,rgba(0,255,163,0.35)_75%,transparent_88%)] opacity-28 blur-[2px] animate-[spin_16s_linear_infinite]" aria-hidden />
+          <div className="pointer-events-none absolute inset-0 -z-[1] rounded-[32px] bg-[conic-gradient(from_180deg,transparent_0_65%,rgba(34,211,238,0.24)_78%,transparent_90%)] opacity-20 blur-[2px] animate-[spin_22s_linear_infinite]" aria-hidden />
+          <div className="pointer-events-none absolute -right-20 bottom-8 h-56 w-56 rounded-full bg-primary/10 blur-[80px]" />
+          <div className="absolute right-5 top-5 rounded-full border border-primary-ui-border-strong bg-primary/15 px-3 py-1 text-xs font-black uppercase tracking-[0.2em] text-primary">About</div>
+          <div className="grid h-full items-center gap-6 lg:grid-cols-[0.92fr_1.08fr]">
+            <div className="order-2 lg:order-1">
+              <AboutVisual />
+            </div>
+            <div className="order-1 lg:order-2">
+              <p className="text-sm font-black uppercase tracking-[0.28em] text-primary">About Us</p>
+              <h2 className="mt-2 font-headline text-4xl font-black tracking-tight text-on-surface sm:text-5xl">Built for modern freight teams</h2>
+              <p className="mt-2 text-sm text-on-surface-variant">Performance-focused tooling for dispatch and driver workflows.</p>
+              <div className="mt-5">
+                <InfoSection
+                  icon={Users}
+                  title="Mission & capabilities"
+                  description="What drives Vanguard engineering."
+                  cardStyle="glass-shimmer"
+                  items={[
+                    'We bridge interstate law and practical routing operations.',
+                    'We design high-clarity tools that keep dispatch focused.',
+                    'We prioritize fatigue prevention through compliant stop planning.',
+                    'We ship resilient React + Django systems for fleet teams.',
+                  ]}
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="contact" className="relative min-h-[calc(100dvh-7rem)] rounded-[32px] border border-primary-ui-border bg-gradient-to-br from-surface/95 via-surface-container-low/55 to-surface/85 p-5 shadow-[0_24px_76px_rgba(15,23,42,0.12)] backdrop-blur-xl sm:p-7">
+          <div className="pointer-events-none absolute inset-0 -z-[1] rounded-[32px] bg-[conic-gradient(from_0deg,transparent_0_60%,rgba(34,211,238,0.35)_75%,transparent_88%)] opacity-26 blur-[2px] animate-[spin_16s_linear_infinite]" aria-hidden />
+          <div className="pointer-events-none absolute inset-0 -z-[1] rounded-[32px] bg-[conic-gradient(from_180deg,transparent_0_65%,rgba(0,255,163,0.28)_78%,transparent_90%)] opacity-18 blur-[2px] animate-[spin_22s_linear_infinite]" aria-hidden />
+          <div className="absolute right-5 top-5 rounded-full border border-primary-ui-border-strong bg-primary/15 px-3 py-1 text-xs font-black uppercase tracking-[0.2em] text-primary">Contact</div>
+          <div className="grid h-full items-center gap-6 lg:grid-cols-[1.06fr_0.94fr]">
+            <div>
+              <p className="text-sm font-black uppercase tracking-[0.28em] text-primary">Contact</p>
+              <h2 className="mt-2 font-headline text-4xl font-black tracking-tight text-on-surface sm:text-5xl">Talk to Vanguard operations</h2>
+              <div className="mt-5 grid gap-3 md:grid-cols-3">
+                <div className="rounded-2xl border border-primary-ui-border-muted/80 bg-surface px-4 py-3 text-sm text-on-surface">
+                  <Phone className="mb-2 h-4 w-4 text-primary" />
+                  1-800-VANGUARD
+                </div>
+                <div className="rounded-2xl border border-primary-ui-border-muted/80 bg-surface px-4 py-3 text-sm text-on-surface">
+                  <Mail className="mb-2 h-4 w-4 text-primary" />
+                  ops@vanguard.io
+                </div>
+                <div className="rounded-2xl border border-primary-ui-border-muted/80 bg-surface px-4 py-3 text-sm text-on-surface">
+                  <MapPin className="mb-2 h-4 w-4 text-primary" />
+                  Chicago HQ
+                </div>
+              </div>
+              <form onSubmit={handleContactSubmit} className="mt-4 space-y-3 rounded-2xl border border-primary-ui-border-muted/70 bg-surface/70 p-4">
+                {contactStatus && (
+                  <div className="flex items-center gap-2 rounded-xl bg-primary/10 px-3 py-2 text-sm font-medium text-primary">
+                    <CheckCircle2 className="h-4 w-4" />
+                    {contactStatus}
+                  </div>
+                )}
+                <div className="grid gap-3 md:grid-cols-2">
+                  <input required className="rounded-xl border border-primary-ui-border-muted bg-surface px-3 py-2 text-sm text-on-surface outline-none focus:border-primary-ui-border-focus" placeholder="Full name" />
+                  <input required type="email" className="rounded-xl border border-primary-ui-border-muted bg-surface px-3 py-2 text-sm text-on-surface outline-none focus:border-primary-ui-border-focus" placeholder="Email address" />
+                </div>
+                <textarea required rows={3} className="w-full resize-none rounded-xl border border-primary-ui-border-muted bg-surface px-3 py-2 text-sm text-on-surface outline-none focus:border-primary-ui-border-focus" placeholder="How can we help?" />
+                <button type="submit" className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">
+                  <Send className="h-4 w-4" />
+                  Send message
+                </button>
+              </form>
+            </div>
+            <div>
+              <ContactVisual />
+            </div>
+          </div>
+        </section>
       </div>
       </div>
     </div>

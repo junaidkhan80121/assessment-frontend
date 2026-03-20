@@ -6,7 +6,7 @@ import { motion, Variants } from 'framer-motion'
 import { MapPin, Clock, Truck, Loader2 } from 'lucide-react'
  
 import { useCreateTripMutation } from '@/api/tripsApi'
-import type { TripFormValues } from '@/types/trip'
+import type { ApiErrorResponse, TripFormValues } from '@/types/trip'
 import { useToast } from '@/components/ToastProvider'
 import { buildTripPayload, tripFormSchema } from '@/utils/tripValidation'
 
@@ -53,11 +53,16 @@ export const TripForm = () => {
       const result = await createTrip(buildTripPayload(data)).unwrap()
       navigate(`/trip/${result.id}`)
     } catch (err: unknown) {
-      const error = err as { data?: { error?: string } }
-      const message = error?.data?.error || 'An unexpected error occurred. Please try again.'
+      const apiResponse = err as { status?: number; data?: ApiErrorResponse; message?: string }
+      const isRateLimited = apiResponse?.status === 429
+      const message = isRateLimited
+        ? 'Too many trip planning requests in a short window. Please wait a moment and try again.'
+        : apiResponse?.data?.message ||
+          apiResponse?.data?.error ||
+          'An unexpected error occurred. Please try again.'
       setServerError(message)
       toast.error({
-        title: 'Trip planning failed',
+        title: isRateLimited ? 'Rate limit reached' : 'Trip planning failed',
         description: message,
       })
     }
