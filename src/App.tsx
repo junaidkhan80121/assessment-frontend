@@ -79,7 +79,7 @@ function Layout({ children, pathname }: { children: React.ReactNode; pathname: s
       <header className="fixed left-0 right-0 top-0 z-50 border-b border-slate-300/80 bg-surface/95 shadow-[0_10px_30px_rgba(0,0,0,0.16)] backdrop-blur-md dark:border-outline-variant/20 dark:bg-[#0E0E0E]/96">
         <div className="relative flex h-20 w-full items-center justify-between px-1 sm:px-3 lg:px-4">
           <div className="z-10 shrink-0">
-            <div className="flex items-center gap-3">
+            <Link to="/" className="flex items-center gap-3 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35">
               <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl bg-surface-container-highest ring-1 ring-slate-300/70 dark:ring-white/10">
                 <VanguardLogo />
               </div>
@@ -87,7 +87,7 @@ function Layout({ children, pathname }: { children: React.ReactNode; pathname: s
                 <span className="font-headline text-xl font-black uppercase tracking-tighter text-primary">Vanguard</span>
                 <span className="hidden text-[10px] uppercase tracking-[0.22em] text-on-surface-variant lg:block">Route planning cockpit</span>
               </div>
-            </div>
+            </Link>
           </div>
           <div className="absolute left-1/2 top-1/2 flex w-full -translate-x-1/2 -translate-y-1/2 justify-center px-16 sm:px-28 lg:px-40">
             <nav className="flex max-w-full items-center gap-2 overflow-x-auto rounded-full border border-slate-300/80 bg-surface-container-low px-2 py-2 fancy-scrollbar dark:border-outline-variant/30">
