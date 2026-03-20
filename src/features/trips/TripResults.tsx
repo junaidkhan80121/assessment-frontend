@@ -88,6 +88,12 @@ export const TripResults = () => {
   }
 
   const routeInstructions = tripData.route_instructions ?? []
+  const routeOptions = tripData.route_options ?? []
+  const hasAlternatives = routeOptions.length > 1
+  const routeAvailabilityCopy = hasAlternatives ? `${routeOptions.length} viable routes found` : 'No alternate routes available'
+  const routePolicyCopy = hasAlternatives
+    ? 'Only distinct, viable alternatives are shown. Longer or near-duplicate paths may be filtered out.'
+    : 'The planner only shows distinct, viable alternatives. Longer or low-value paths may be discarded.'
   const activeLog = tripData.daily_logs[activeTab]
   const workspaceHeightClass = 'xl:flex-1 xl:min-h-0'
   const panelHeightClass = 'xl:h-full xl:min-h-0'
@@ -391,6 +397,10 @@ export const TripResults = () => {
                         <p className="mt-1 font-mono text-[13px] font-semibold tabular-nums text-on-surface">{v}</p>
                       </div>
                     ))}
+                  </div>
+                  <div className="mt-3 rounded-2xl border border-primary-ui-border-muted/45 bg-surface/90 px-3 py-3 dark:border-white/[0.05] dark:bg-surface-container/45">
+                    <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-primary">{routeAvailabilityCopy}</p>
+                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{routePolicyCopy}</p>
                   </div>
                 </div>
 

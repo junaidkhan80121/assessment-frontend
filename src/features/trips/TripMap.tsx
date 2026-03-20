@@ -268,6 +268,13 @@ export const TripMap = ({ trip }: TripMapProps) => {
 
   const routeOptions = useMemo(() => trip.route_options ?? [], [trip.route_options])
   const hasRouteOptions = routeOptions.length > 0
+  const hasAlternatives = routeOptions.length > 1
+  const routeAvailabilityCopy = hasAlternatives
+    ? `${routeOptions.length} viable routes shown`
+    : 'No alternate routes available'
+  const routePolicyCopy = hasAlternatives
+    ? 'Only distinct, viable alternatives are shown. Longer or near-duplicate paths may be filtered out.'
+    : 'The planner only shows distinct, viable alternatives. Longer or low-value paths may be discarded.'
   const startPosition = useMemo<[number, number]>(
     () => [trip.current_location_lat, trip.current_location_lon],
     [trip.current_location_lat, trip.current_location_lon],
@@ -360,6 +367,10 @@ export const TripMap = ({ trip }: TripMapProps) => {
             Fastest route highlighted
           </div>
         )}
+        <div className={`mb-2.5 rounded-xl border px-2.5 py-2 ${overlayCardClass}`}>
+          <p className={`text-[8.5px] font-bold uppercase tracking-[0.16em] ${overlayHeadingClass}`}>{routeAvailabilityCopy}</p>
+          <p className={`mt-1 text-[10px] normal-case leading-relaxed ${overlayMutedClass}`}>{routePolicyCopy}</p>
+        </div>
         <div className="grid grid-cols-2 gap-x-3 gap-y-2">
           <div className={`flex items-center gap-2 text-[9px] font-semibold uppercase tracking-[0.14em] ${overlayHeadingClass}`}>
             <span className="inline-block h-[3px] w-6 rounded-full bg-[#0284C7]" />
@@ -369,7 +380,7 @@ export const TripMap = ({ trip }: TripMapProps) => {
             <span className="inline-block h-[3px] w-6 rounded-full bg-[#059669]" />
             <span>To dropoff</span>
           </div>
-          {hasRouteOptions ? (
+          {hasAlternatives ? (
             <>
               <div className={`flex items-center gap-2 text-[9px] font-semibold uppercase tracking-[0.14em] ${overlayMutedClass}`}>
                 <span className="inline-block w-6 border-t-[3px] border-dashed border-[#7DD3FC] opacity-90" />
