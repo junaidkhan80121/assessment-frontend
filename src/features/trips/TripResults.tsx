@@ -275,7 +275,7 @@ export const TripResults = () => {
                       type="button"
                       aria-pressed={activeSection === id}
                       onClick={() => setActiveSection(id)}
-                      className={`group relative flex w-full cursor-pointer items-center justify-between overflow-hidden rounded-[22px] border px-3.5 py-3 text-left transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35 focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+                      className={`group relative flex w-full cursor-pointer items-center justify-between overflow-hidden rounded-[20px] border px-3 py-2.5 text-left transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35 focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                         activeSection === id
                           ? 'border-primary-ui-border-strong bg-[linear-gradient(125deg,rgba(0,255,163,0.18),rgba(255,255,255,0.06))] shadow-[0_12px_32px_rgba(0,255,163,0.14)] dark:shadow-[0_12px_40px_rgba(0,255,163,0.12)]'
                           : 'border-primary-ui-border-muted/70 bg-surface/75 hover:-translate-y-0.5 hover:border-primary-ui-border-muted hover:bg-surface-container/90 dark:border-white/[0.06] dark:bg-surface-container/40 dark:hover:border-primary-ui-border-muted'
@@ -290,25 +290,25 @@ export const TripResults = () => {
                           backgroundSize: '200% 100%',
                         }}
                       />
-                      <span className="relative flex min-w-0 items-center gap-3">
+                      <span className="relative flex min-w-0 flex-1 items-center gap-3">
                         <span
-                          className={`relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl transition-all ${
+                          className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl transition-all ${
                             activeSection === id
                               ? 'bg-primary text-primary-foreground shadow-[0_6px_20px_rgba(0,255,163,0.35)]'
                               : 'bg-primary/10 text-primary group-hover:bg-primary/18 dark:bg-primary/15'
                           }`}
                         >
-                          <Icon className="h-[18px] w-[18px]" />
+                          <Icon className="h-[17px] w-[17px]" />
                         </span>
-                        <span className="min-w-0">
-                          <span className="block text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Section</span>
-                          <span className="block text-sm font-semibold text-on-surface">{label}</span>
-                          <span className="mt-0.5 block text-xs leading-snug text-muted-foreground">{description}</span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-[7px] font-bold uppercase tracking-[0.22em] text-muted-foreground">Section</span>
+                          <span className="mt-0.5 block text-[0.98rem] font-semibold leading-none text-on-surface">{label}</span>
+                          <span className="mt-1 block max-w-[11rem] text-[11px] leading-4 text-muted-foreground">{description}</span>
                         </span>
                       </span>
-                      <span className="relative flex shrink-0 flex-col items-end gap-1">
+                      <span className="relative ml-2.5 flex shrink-0 flex-col items-end gap-1">
                         <span
-                          className={`rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
+                          className={`rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-[0.16em] ${
                             activeSection === id
                               ? 'bg-primary/15 text-primary dark:bg-primary/25'
                               : 'border border-dashed border-primary-ui-border-muted/60 bg-surface/80 text-muted-foreground dark:border-white/10'
@@ -317,12 +317,12 @@ export const TripResults = () => {
                           {activeSection === id ? 'Active' : 'Open'}
                         </span>
                         <span
-                          className={`flex items-center gap-0.5 text-[11px] font-semibold ${
+                          className={`flex items-center gap-0.5 text-[10px] font-semibold leading-none ${
                             activeSection === id ? 'text-primary' : 'text-muted-foreground group-hover:text-on-surface'
                           }`}
                         >
                           {activeSection === id ? 'Pinned' : 'Focus'}
-                          <ChevronRight className="h-3.5 w-3.5 opacity-70" />
+                          <ChevronRight className="h-3 w-3 opacity-70" />
                         </span>
                       </span>
                     </button>
