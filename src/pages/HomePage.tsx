@@ -243,7 +243,19 @@ const toFieldErrors = (error: ZodError<TripFormState>): FieldErrors =>
 
 const validateTripForm = (values: TripFormState): FieldErrors => {
   const result = tripFormSchema.safeParse(buildTripPayload(values))
-  return result.success ? {} : toFieldErrors(result.error)
+  const errors = result.success ? {} : toFieldErrors(result.error)
+
+  ;([
+    ['current_location', values.current_location_lat, values.current_location_lon],
+    ['pickup_location', values.pickup_location_lat, values.pickup_location_lon],
+    ['dropoff_location', values.dropoff_location_lat, values.dropoff_location_lon],
+  ] as const).forEach(([field, lat, lon]) => {
+    if (values[field].trim() && (lat == null || lon == null)) {
+      errors[field] = 'Choose a suggested location so we can route precisely.'
+    }
+  })
+
+  return errors
 }
 
 const filterFieldErrors = (
@@ -356,7 +368,7 @@ const getLocationHelperText = (
     return 'Choose the closest suggestion for best accuracy.'
   }
 
-  return 'No suggestions yet. Try city, state, ZIP, or a longer phrase.'
+  return 'Pick a suggestion before planning so route calculation can start immediately.'
 }
 
 const TripPlanner: React.FC = () => {
@@ -705,6 +717,7 @@ const TripPlanner: React.FC = () => {
             variant="contained"
             disabled={isLoading}
             onClick={handlePlanTrip}
+            disableRipple
             sx={{
               minWidth: { lg: '184px' },
               width: { xs: '100%', lg: '184px' },
@@ -719,10 +732,10 @@ const TripPlanner: React.FC = () => {
               boxShadow: isLoading ? 'none' : accentButtonGlow,
               transition: 'all 0.2s',
               '&:hover': {
-                backgroundColor: 'var(--primary)',
-                opacity: 0.9,
-                transform: 'scale(1.02)',
-                boxShadow: accentStrongGlow,
+                backgroundColor: isLoading ? 'var(--surface-container-highest)' : 'var(--primary)',
+                opacity: isLoading ? 1 : 0.9,
+                transform: isLoading ? 'none' : 'scale(1.02)',
+                boxShadow: isLoading ? 'none' : accentStrongGlow,
               },
               '&.Mui-disabled': {
                 backgroundColor: 'var(--surface-container-highest)',
@@ -731,8 +744,8 @@ const TripPlanner: React.FC = () => {
             }}
           >
             {isLoading ? (
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-base animate-spin drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">progress_activity</span>
+              <div className="flex items-center gap-2 whitespace-nowrap">
+                <Loader2 className="h-4 w-4 animate-spin" />
                 <span>Optimizing Route...</span>
               </div>
             ) : (

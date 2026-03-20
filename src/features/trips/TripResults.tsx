@@ -42,7 +42,7 @@ export const TripResults = () => {
 
   useEffect(() => {
     if (tripData?.status === 'COMPUTING' || tripData?.status === 'PENDING') {
-      setPollingInterval(5000)
+      setPollingInterval(1500)
       return
     }
 
