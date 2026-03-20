@@ -8,6 +8,7 @@ import { GlobalBackground } from '@/components/GlobalBackground'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import TripHistoryPage from '@/pages/TripHistoryPage'
 import { AboutPage, ContactPage } from '@/pages/InfoPages'
+import NotFoundPage from '@/pages/NotFoundPage'
 import { History as HistoryIcon, Info as InfoIcon, Map as MapIcon, Mail as MailIcon } from 'lucide-react'
 
 const NAV_ITEMS = [
@@ -169,6 +170,14 @@ function App() {
             element={
               <PageTransition>
                 <TripHistoryPage />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="*"
+            element={
+              <PageTransition>
+                <NotFoundPage />
               </PageTransition>
             }
           />
