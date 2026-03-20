@@ -6,10 +6,7 @@ import {
   Navigation,
   Clock,
   ChevronRight,
-  LoaderCircle,
   Loader2,
-  Route,
-  ClipboardList,
   Truck,
   Scale,
   Monitor,
@@ -232,109 +229,6 @@ const LocationInput = ({
         },
       }}
     />
-  )
-}
-
-const LoadingModal = () => {
-  const steps = [
-    {
-      label: 'Loading locations',
-      icon: MapPin,
-      subtitle: 'Geocoding current, pickup, and dropoff nodes.',
-    },
-    {
-      label: 'Calculating shortest routes',
-      icon: Route,
-      subtitle: 'Computing the fastest legs and viable alternatives.',
-    },
-    {
-      label: 'Planning stops & rests',
-      icon: MapPin,
-      subtitle: 'Fueling checkpoints, pickup/dropoff timing, and off-duty blocks.',
-    },
-    {
-      label: 'Generating ELD log sheets',
-      icon: ClipboardList,
-      subtitle: 'Rendering FMCSA driver daily logs day-by-day.',
-    },
-  ] as const
-
-  const [activeStep, setActiveStep] = useState(0)
-
-  useEffect(() => {
-    // Cycle the messaging so users see progress and it feels “alive”.
-    const timer = window.setInterval(() => {
-      setActiveStep((current) => (current + 1) % steps.length)
-    }, 1700)
-    return () => window.clearInterval(timer)
-  }, [steps.length])
-
-  return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[200] flex items-center justify-center bg-black/55 px-4 py-6 backdrop-blur-md"
-      >
-        <motion.div
-          initial={{ scale: 0.98, opacity: 0, y: 10 }}
-          animate={{ scale: 1, opacity: 1, y: 0 }}
-          transition={{ duration: 0.22, ease: 'easeOut' }}
-          className="flex w-full max-w-[26rem] flex-col rounded-[28px] border border-outline-variant/50 bg-surface-container px-5 py-5 shadow-2xl"
-        >
-          <div className="rounded-[22px] border border-outline-variant/35 bg-[linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0.01))] p-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/12 text-primary">
-                <LoaderCircle className="h-5 w-5 animate-spin" />
-              </div>
-              <div>
-                <p className="text-[12px] uppercase tracking-[0.22em] text-on-surface-variant">Starting Trip Build</p>
-                <p className="mt-0.5 text-base leading-relaxed text-on-surface-variant">{steps[activeStep].subtitle}</p>
-              </div>
-            </div>
-
-            <div className="relative mt-4 h-2 overflow-hidden rounded-full bg-white/8">
-              <motion.div
-                animate={{ x: ['-100%', '260%'] }}
-                transition={{ duration: 1.45, repeat: Infinity, ease: 'easeInOut' }}
-                className="absolute inset-y-0 w-1/2 rounded-full bg-[linear-gradient(90deg,rgba(0,255,163,0),rgba(0,255,163,0.95),rgba(166,230,255,0))]"
-              />
-            </div>
-
-            <div className="mt-4 flex flex-wrap items-stretch justify-center gap-2">
-              {steps.map(({ label, icon: Icon }, index) => (
-                <motion.div
-                  key={label}
-                  animate={{ y: [0, -2, 0], opacity: index === activeStep ? 1 : index < activeStep ? 0.92 : 0.55 }}
-                  transition={{ duration: 1.8, repeat: Infinity, delay: index * 0.16 }}
-                  className="min-w-[7.8rem] rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-center"
-                >
-                  <Icon className="mx-auto h-5 w-5 text-primary" />
-                  <p className="mt-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-on-surface-variant">{label}</p>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-
-          <h3 className="mt-5 text-center font-headline text-[1.95rem] leading-none font-bold text-on-surface">
-            <AnimatePresence mode="wait">
-              <motion.span
-                key={steps[activeStep].label}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.22, ease: 'easeOut' }}
-                className="inline-block"
-              >
-                <TypewriterText text={steps[activeStep].label} speed={36} />
-              </motion.span>
-            </AnimatePresence>
-          </h3>
-          <p className="mt-1.5 text-center text-base text-on-surface-variant">{steps[activeStep].subtitle}</p>
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
   )
 }
 
@@ -595,8 +489,6 @@ const TripPlanner: React.FC = () => {
 
   return (
     <div id="planner" className="relative min-h-[calc(100dvh-7rem)] px-4 pt-20 sm:px-6">
-      {isLoading && <LoadingModal />}
-
       <div className="relative z-10 mx-auto w-full max-w-7xl">
       <section className="flex min-h-[calc(100dvh-7rem)] flex-col justify-center pb-0">
       <style>{`
