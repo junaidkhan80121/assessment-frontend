@@ -90,6 +90,10 @@ export default function TripHistoryPage() {
   }, [query, trips])
 
   const isFiltering = query.trim().length > 0
+  const historyGridStyle =
+    filteredTrips.length > 0
+      ? { gridTemplateRows: `repeat(${filteredTrips.length}, minmax(0, 1fr))` }
+      : undefined
 
   return (
     <div className="relative z-10 h-[100dvh] overflow-hidden px-4 pb-6 pt-24 sm:px-6 lg:px-8">
@@ -130,14 +134,17 @@ export default function TripHistoryPage() {
           {!isLoading && !isError ? (
             filteredTrips.length > 0 ? (
               <>
-                <div className="grid min-h-0 flex-1 auto-rows-min gap-3 overflow-y-auto pr-1 fancy-scrollbar">
+                <div
+                  className="grid min-h-0 flex-1 gap-3 overflow-hidden"
+                  style={historyGridStyle}
+                >
                   {filteredTrips.map((trip) => (
                     <Link
                       key={trip.id}
                       to={`/trip/${trip.id}`}
-                      className="group rounded-[24px] border border-outline-variant/20 bg-surface-container-low/70 p-4 transition-all hover:border-primary-ui-border hover:bg-surface-container"
+                      className="group flex min-h-0 flex-col justify-center rounded-[24px] border border-outline-variant/20 bg-surface-container-low/70 p-3.5 transition-all hover:border-primary-ui-border hover:bg-surface-container sm:p-4"
                     >
-                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="flex min-h-0 flex-col gap-2.5 sm:flex-row sm:items-start sm:justify-between">
                         <div className="min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
                             <span className="rounded-full border border-primary-ui-border-muted bg-primary/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">
@@ -148,10 +155,10 @@ export default function TripHistoryPage() {
                               {formatDate(trip.created_at)}
                             </span>
                           </div>
-                          <p className="mt-3 text-sm font-bold text-on-surface">
+                          <p className="mt-2.5 line-clamp-2 text-sm font-bold text-on-surface">
                             {trip.current_location} → {trip.pickup_location} → {trip.dropoff_location}
                           </p>
-                          <div className="mt-3 flex flex-wrap gap-2 text-xs text-on-surface font-medium">
+                          <div className="mt-2.5 flex flex-wrap gap-2 text-xs text-on-surface font-medium">
                             <span className="rounded-full bg-surface px-2.5 py-1">
                               {trip.log_days} log day{trip.log_days === 1 ? '' : 's'}
                             </span>
