@@ -7,6 +7,7 @@ import {
   Clock,
   ChevronRight,
   LoaderCircle,
+  Loader2,
   Route,
   ClipboardList,
   Truck,
@@ -30,7 +31,6 @@ import { useToast } from '@/components/ToastProvider'
 import { TypewriterText } from '@/components/TypewriterText'
 import type { ApiErrorResponse, TripCreatePayload } from '@/types/trip'
 import { buildTripPayload, tripFormSchema } from '@/utils/tripValidation'
-import { GuidelinesVisual, ManualVisual, AboutVisual, ContactVisual, InfoSection } from './InfoPages'
 
 type TripField = 'current_location' | 'pickup_location' | 'dropoff_location'
 type TripFormState = TripCreatePayload
@@ -146,7 +146,7 @@ const LocationInput = ({
             ),
             endAdornment: (
               <>
-                {loading ? <span className="material-symbols-outlined h-4 w-4 animate-spin text-on-surface-variant">sync</span> : null}
+                {loading ? <Loader2 className="h-4 w-4 animate-spin text-on-surface-variant" /> : null}
                 {params.InputProps.endAdornment}
               </>
             ),
@@ -237,10 +237,37 @@ const LocationInput = ({
 
 const LoadingModal = () => {
   const steps = [
-    { label: 'Routing', icon: Route },
-    { label: 'Stops', icon: MapPin },
-    { label: 'Logs', icon: ClipboardList },
-  ]
+    {
+      label: 'Loading locations',
+      icon: MapPin,
+      subtitle: 'Geocoding current, pickup, and dropoff nodes.',
+    },
+    {
+      label: 'Calculating shortest routes',
+      icon: Route,
+      subtitle: 'Computing the fastest legs and viable alternatives.',
+    },
+    {
+      label: 'Planning stops & rests',
+      icon: MapPin,
+      subtitle: 'Fueling checkpoints, pickup/dropoff timing, and off-duty blocks.',
+    },
+    {
+      label: 'Generating ELD log sheets',
+      icon: ClipboardList,
+      subtitle: 'Rendering FMCSA driver daily logs day-by-day.',
+    },
+  ] as const
+
+  const [activeStep, setActiveStep] = useState(0)
+
+  useEffect(() => {
+    // Cycle the messaging so users see progress and it feels “alive”.
+    const timer = window.setInterval(() => {
+      setActiveStep((current) => (current + 1) % steps.length)
+    }, 1700)
+    return () => window.clearInterval(timer)
+  }, [steps.length])
 
   return (
     <AnimatePresence>
@@ -262,10 +289,8 @@ const LoadingModal = () => {
                 <LoaderCircle className="h-5 w-5 animate-spin" />
               </div>
               <div>
-                <p className="text-[11px] uppercase tracking-[0.2em] text-on-surface-variant">Starting Trip Build</p>
-                <p className="mt-0.5 text-sm text-on-surface-variant">
-                  Computing the best route and preparing compliant logs.
-                </p>
+                <p className="text-[12px] uppercase tracking-[0.22em] text-on-surface-variant">Starting Trip Build</p>
+                <p className="mt-0.5 text-base leading-relaxed text-on-surface-variant">{steps[activeStep].subtitle}</p>
               </div>
             </div>
 
@@ -277,40 +302,36 @@ const LoadingModal = () => {
               />
             </div>
 
-            <div className="mt-4 grid grid-cols-3 gap-2">
+            <div className="mt-4 flex flex-wrap items-stretch justify-center gap-2">
               {steps.map(({ label, icon: Icon }, index) => (
                 <motion.div
                   key={label}
-                  animate={{ y: [0, -2, 0] }}
+                  animate={{ y: [0, -2, 0], opacity: index === activeStep ? 1 : index < activeStep ? 0.92 : 0.55 }}
                   transition={{ duration: 1.8, repeat: Infinity, delay: index * 0.16 }}
-                  className="rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-3 text-center"
+                  className="min-w-[7.8rem] rounded-2xl border border-white/8 bg-white/[0.03] px-4 py-3 text-center"
                 >
-                  <Icon className="mx-auto h-4 w-4 text-primary" />
-                  <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-on-surface-variant">{label}</p>
+                  <Icon className="mx-auto h-5 w-5 text-primary" />
+                  <p className="mt-2 text-[12px] font-semibold uppercase tracking-[0.16em] text-on-surface-variant">{label}</p>
                 </motion.div>
               ))}
             </div>
           </div>
 
-          <h3 className="mt-5 text-center font-headline text-[1.55rem] font-bold text-on-surface">
-            <TypewriterText text="Computing Routes" speed={40} />
+          <h3 className="mt-5 text-center font-headline text-[1.95rem] leading-none font-bold text-on-surface">
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={steps[activeStep].label}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.22, ease: 'easeOut' }}
+                className="inline-block"
+              >
+                <TypewriterText text={steps[activeStep].label} speed={36} />
+              </motion.span>
+            </AnimatePresence>
           </h3>
-          <p className="mt-1.5 text-center text-sm text-on-surface-variant">
-            Route search, stop planning, and log generation are underway.
-          </p>
-
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-[11px] font-medium text-on-surface-variant">
-            {['Finding routes', 'Checking HOS', 'Preparing logs'].map((step, index) => (
-              <div key={step} className="flex items-center gap-2 rounded-full border border-white/8 bg-white/[0.03] px-3 py-1.5">
-                <motion.span
-                  animate={{ opacity: [0.35, 1, 0.35], scale: [0.9, 1, 0.9] }}
-                  transition={{ duration: 1.4, repeat: Infinity, delay: index * 0.18 }}
-                  className="h-1.5 w-1.5 rounded-full bg-primary"
-                />
-                <span>{step}</span>
-              </div>
-            ))}
-          </div>
+          <p className="mt-1.5 text-center text-base text-on-surface-variant">{steps[activeStep].subtitle}</p>
         </motion.div>
       </motion.div>
     </AnimatePresence>
@@ -346,42 +367,70 @@ const filterFieldErrors = (
 }
 
 const useLocationSearch = (searchTerm: string) => {
-  const [trigger, result] = useLazySearchLocationsQuery()
+  const [trigger] = useLazySearchLocationsQuery()
   const latestRequestedTerm = useRef('')
   const trimmed = searchTerm.trim()
   const normalized = trimmed.toLowerCase()
   const shouldSearch = trimmed.length >= 3
-  const cachedOptions = shouldSearch ? searchCache.get(normalized) ?? [] : []
+  const [options, setOptions] = useState<GeocodingLocation[]>([])
+  const [isFetching, setIsFetching] = useState(false)
+  const [isError, setIsError] = useState(false)
 
   useEffect(() => {
-    if (!shouldSearch || searchCache.has(normalized)) {
+    latestRequestedTerm.current = normalized
+
+    if (!shouldSearch) {
+      setOptions([])
+      setIsFetching(false)
+      setIsError(false)
       return
     }
 
+    const cachedOptions = searchCache.get(normalized)
+    if (cachedOptions) {
+      setOptions(cachedOptions)
+      setIsFetching(false)
+      setIsError(false)
+      return
+    }
+
+    setOptions([])
+    setIsError(false)
+
     const timer = window.setTimeout(() => {
-      latestRequestedTerm.current = normalized
-      trigger(trimmed)
+      setIsFetching(true)
+      const requestTerm = normalized
+
+      trigger(trimmed, true)
+        .unwrap()
+        .then((data) => {
+          searchCache.set(requestTerm, data)
+          if (latestRequestedTerm.current === requestTerm) {
+            setOptions(data)
+            setIsError(false)
+          }
+        })
+        .catch(() => {
+          if (latestRequestedTerm.current === requestTerm) {
+            setOptions([])
+            setIsError(true)
+          }
+        })
+        .finally(() => {
+          if (latestRequestedTerm.current === requestTerm) {
+            setIsFetching(false)
+          }
+        })
     }, 350)
 
     return () => window.clearTimeout(timer)
   }, [normalized, shouldSearch, trimmed, trigger])
 
-  useEffect(() => {
-    const currentData = result.currentData ?? result.data
-    if (latestRequestedTerm.current && currentData) {
-      searchCache.set(latestRequestedTerm.current, currentData)
-    }
-  }, [result.currentData, result.data])
-
-  const liveOptions =
-    latestRequestedTerm.current === normalized ? (result.currentData ?? result.data ?? []) : []
-  const options = shouldSearch ? (searchCache.has(normalized) ? cachedOptions : liveOptions) : []
-
   return {
     options,
-    isOpen: shouldSearch && (result.isFetching || options.length > 0),
-    isFetching: result.isFetching,
-    isError: result.isError,
+    isOpen: shouldSearch && (isFetching || options.length > 0),
+    isFetching,
+    isError,
   }
 }
 
@@ -424,7 +473,6 @@ const TripPlanner: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [activeField, setActiveField] = useState<TripField | null>(null)
   const [showAllErrors, setShowAllErrors] = useState(false)
-  const [contactStatus, setContactStatus] = useState<string | null>(null)
   const [touchedFields, setTouchedFields] = useState<Partial<Record<TripField | 'current_cycle_used', boolean>>>({})
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const [formValues, setFormValues] = useState<TripFormState>({
@@ -545,18 +593,12 @@ const TripPlanner: React.FC = () => {
     }
   }
 
-  const handleContactSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setContactStatus('Message sent successfully! A dispatcher will reach out shortly.')
-    window.setTimeout(() => setContactStatus(null), 4000)
-  }
-
   return (
-    <div id="planner" className="relative min-h-screen overflow-hidden px-4 pb-16 pt-28 sm:px-6">
+    <div id="planner" className="relative min-h-[calc(100dvh-7rem)] px-4 pt-20 sm:px-6">
       {isLoading && <LoadingModal />}
 
       <div className="relative z-10 mx-auto w-full max-w-7xl">
-      <section className="flex min-h-[calc(100dvh-8rem)] flex-col justify-center pb-6">
+      <section className="flex min-h-[calc(100dvh-7rem)] flex-col justify-center pb-0">
       <style>{`
         @keyframes marquee {
           0% { transform: translateX(0); }
@@ -828,147 +870,6 @@ const TripPlanner: React.FC = () => {
         </div>
       </div>
       </section>
-
-      <div className="mt-12 space-y-8">
-        <section id="guidelines" className="relative min-h-[calc(100dvh-7rem)] rounded-[32px] border border-primary-ui-border bg-gradient-to-br from-surface/95 via-surface-container-low/55 to-surface/85 p-5 shadow-[0_24px_76px_rgba(15,23,42,0.12)] backdrop-blur-xl sm:p-7">
-          <div className="pointer-events-none absolute inset-0 -z-[1] rounded-[32px] bg-[conic-gradient(from_0deg,transparent_0_60%,rgba(0,255,163,0.35)_75%,transparent_88%)] opacity-35 blur-[2px] animate-[spin_14s_linear_infinite]" aria-hidden />
-          <div className="pointer-events-none absolute inset-0 -z-[1] rounded-[32px] bg-[conic-gradient(from_180deg,transparent_0_65%,rgba(34,211,238,0.28)_78%,transparent_90%)] opacity-25 blur-[2px] animate-[spin_20s_linear_infinite]" aria-hidden />
-          <div className="pointer-events-none absolute -right-24 -top-20 h-52 w-52 rounded-full bg-primary/10 blur-[80px]" />
-          <div className="absolute right-5 top-5 rounded-full border border-primary-ui-border-strong bg-primary/15 px-3 py-1 text-xs font-black uppercase tracking-[0.2em] text-primary">Guidelines</div>
-          <div className="grid h-full items-center gap-6 lg:grid-cols-[0.92fr_1.08fr]">
-            <div className="order-2 lg:order-1">
-              <GuidelinesVisual />
-            </div>
-            <div className="order-1 lg:order-2">
-              <p className="text-sm font-black uppercase tracking-[0.28em] text-primary">Guidelines</p>
-              <h2 className="mt-2 font-headline text-4xl font-black tracking-tight text-on-surface sm:text-5xl">Safety & compliance standards</h2>
-              <p className="mt-2 text-sm text-on-surface-variant">Operational guardrails for reliable freight movement.</p>
-              <div className="mt-5">
-                <InfoSection
-                  icon={Scale}
-                  title="Driver Wellness & Compliance"
-                  description="Our core operational mandate for fleet safety."
-                  cardStyle="glow-pulse"
-                  items={[
-                    'We enforce strict 70-hour / 8-day operational cycle limits.',
-                    'Drivers are monitored for safe property-carrying hours.',
-                    'Mandatory fueling checks run at least every 1,000 miles.',
-                    'Pre-trip walkaround inspections are required before engine turn-over.',
-                  ]}
-                />
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="manual" className="relative min-h-[calc(100dvh-7rem)] rounded-[32px] border border-primary-ui-border bg-gradient-to-br from-surface/95 via-surface-container-low/55 to-surface/85 p-5 shadow-[0_24px_76px_rgba(15,23,42,0.12)] backdrop-blur-xl sm:p-7">
-          <div className="pointer-events-none absolute inset-0 -z-[1] rounded-[32px] bg-[conic-gradient(from_0deg,transparent_0_60%,rgba(34,211,238,0.35)_75%,transparent_88%)] opacity-32 blur-[2px] animate-[spin_14s_linear_infinite]" aria-hidden />
-          <div className="pointer-events-none absolute inset-0 -z-[1] rounded-[32px] bg-[conic-gradient(from_180deg,transparent_0_65%,rgba(0,255,163,0.28)_78%,transparent_90%)] opacity-22 blur-[2px] animate-[spin_20s_linear_infinite]" aria-hidden />
-          <div className="pointer-events-none absolute -left-20 top-10 h-56 w-56 rounded-full bg-cyan-400/10 blur-[80px]" />
-          <div className="absolute right-5 top-5 rounded-full border border-primary-ui-border-strong bg-primary/15 px-3 py-1 text-xs font-black uppercase tracking-[0.2em] text-primary">Manual</div>
-          <div className="grid h-full items-center gap-6 lg:grid-cols-[1.08fr_0.92fr]">
-            <div>
-              <p className="text-sm font-black uppercase tracking-[0.28em] text-primary">Manual</p>
-              <h2 className="mt-2 font-headline text-4xl font-black tracking-tight text-on-surface sm:text-5xl">How Vanguard routing works</h2>
-              <p className="mt-2 text-sm text-on-surface-variant">From order intake to fully compliant day-by-day logs.</p>
-              <div className="mt-5">
-                <InfoSection
-                  icon={Monitor}
-                  title="Workflow Stack"
-                  description="How a dispatch request becomes a compliant trip."
-                  cardStyle="neon-sweep"
-                  items={[
-                    '1. Order parameterization with location and cycle constraints.',
-                    '2. Millisecond route and stop computations across alternatives.',
-                    '3. Automated ELD log rendering for each trip day.',
-                    '4. Export and handoff to driver operations.',
-                  ]}
-                />
-              </div>
-            </div>
-            <div>
-              <ManualVisual />
-            </div>
-          </div>
-        </section>
-
-        <section id="about" className="relative min-h-[calc(100dvh-7rem)] rounded-[32px] border border-primary-ui-border bg-gradient-to-br from-surface/95 via-surface-container-low/55 to-surface/85 p-5 shadow-[0_24px_76px_rgba(15,23,42,0.12)] backdrop-blur-xl sm:p-7">
-          <div className="pointer-events-none absolute inset-0 -z-[1] rounded-[32px] bg-[conic-gradient(from_0deg,transparent_0_60%,rgba(0,255,163,0.35)_75%,transparent_88%)] opacity-28 blur-[2px] animate-[spin_16s_linear_infinite]" aria-hidden />
-          <div className="pointer-events-none absolute inset-0 -z-[1] rounded-[32px] bg-[conic-gradient(from_180deg,transparent_0_65%,rgba(34,211,238,0.24)_78%,transparent_90%)] opacity-20 blur-[2px] animate-[spin_22s_linear_infinite]" aria-hidden />
-          <div className="pointer-events-none absolute -right-20 bottom-8 h-56 w-56 rounded-full bg-primary/10 blur-[80px]" />
-          <div className="absolute right-5 top-5 rounded-full border border-primary-ui-border-strong bg-primary/15 px-3 py-1 text-xs font-black uppercase tracking-[0.2em] text-primary">About</div>
-          <div className="grid h-full items-center gap-6 lg:grid-cols-[0.92fr_1.08fr]">
-            <div className="order-2 lg:order-1">
-              <AboutVisual />
-            </div>
-            <div className="order-1 lg:order-2">
-              <p className="text-sm font-black uppercase tracking-[0.28em] text-primary">About Us</p>
-              <h2 className="mt-2 font-headline text-4xl font-black tracking-tight text-on-surface sm:text-5xl">Built for modern freight teams</h2>
-              <p className="mt-2 text-sm text-on-surface-variant">Performance-focused tooling for dispatch and driver workflows.</p>
-              <div className="mt-5">
-                <InfoSection
-                  icon={Users}
-                  title="Mission & capabilities"
-                  description="What drives Vanguard engineering."
-                  cardStyle="glass-shimmer"
-                  items={[
-                    'We bridge interstate law and practical routing operations.',
-                    'We design high-clarity tools that keep dispatch focused.',
-                    'We prioritize fatigue prevention through compliant stop planning.',
-                    'We ship resilient React + Django systems for fleet teams.',
-                  ]}
-                />
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="contact" className="relative min-h-[calc(100dvh-7rem)] rounded-[32px] border border-primary-ui-border bg-gradient-to-br from-surface/95 via-surface-container-low/55 to-surface/85 p-5 shadow-[0_24px_76px_rgba(15,23,42,0.12)] backdrop-blur-xl sm:p-7">
-          <div className="pointer-events-none absolute inset-0 -z-[1] rounded-[32px] bg-[conic-gradient(from_0deg,transparent_0_60%,rgba(34,211,238,0.35)_75%,transparent_88%)] opacity-26 blur-[2px] animate-[spin_16s_linear_infinite]" aria-hidden />
-          <div className="pointer-events-none absolute inset-0 -z-[1] rounded-[32px] bg-[conic-gradient(from_180deg,transparent_0_65%,rgba(0,255,163,0.28)_78%,transparent_90%)] opacity-18 blur-[2px] animate-[spin_22s_linear_infinite]" aria-hidden />
-          <div className="absolute right-5 top-5 rounded-full border border-primary-ui-border-strong bg-primary/15 px-3 py-1 text-xs font-black uppercase tracking-[0.2em] text-primary">Contact</div>
-          <div className="grid h-full items-center gap-6 lg:grid-cols-[1.06fr_0.94fr]">
-            <div>
-              <p className="text-sm font-black uppercase tracking-[0.28em] text-primary">Contact</p>
-              <h2 className="mt-2 font-headline text-4xl font-black tracking-tight text-on-surface sm:text-5xl">Talk to Vanguard operations</h2>
-              <div className="mt-5 grid gap-3 md:grid-cols-3">
-                <div className="rounded-2xl border border-primary-ui-border-muted/80 bg-surface px-4 py-3 text-sm text-on-surface">
-                  <Phone className="mb-2 h-4 w-4 text-primary" />
-                  1-800-VANGUARD
-                </div>
-                <div className="rounded-2xl border border-primary-ui-border-muted/80 bg-surface px-4 py-3 text-sm text-on-surface">
-                  <Mail className="mb-2 h-4 w-4 text-primary" />
-                  ops@vanguard.io
-                </div>
-                <div className="rounded-2xl border border-primary-ui-border-muted/80 bg-surface px-4 py-3 text-sm text-on-surface">
-                  <MapPin className="mb-2 h-4 w-4 text-primary" />
-                  Chicago HQ
-                </div>
-              </div>
-              <form onSubmit={handleContactSubmit} className="mt-4 space-y-3 rounded-2xl border border-primary-ui-border-muted/70 bg-surface/70 p-4">
-                {contactStatus && (
-                  <div className="flex items-center gap-2 rounded-xl bg-primary/10 px-3 py-2 text-sm font-medium text-primary">
-                    <CheckCircle2 className="h-4 w-4" />
-                    {contactStatus}
-                  </div>
-                )}
-                <div className="grid gap-3 md:grid-cols-2">
-                  <input required className="rounded-xl border border-primary-ui-border-muted bg-surface px-3 py-2 text-sm text-on-surface outline-none focus:border-primary-ui-border-focus" placeholder="Full name" />
-                  <input required type="email" className="rounded-xl border border-primary-ui-border-muted bg-surface px-3 py-2 text-sm text-on-surface outline-none focus:border-primary-ui-border-focus" placeholder="Email address" />
-                </div>
-                <textarea required rows={3} className="w-full resize-none rounded-xl border border-primary-ui-border-muted bg-surface px-3 py-2 text-sm text-on-surface outline-none focus:border-primary-ui-border-focus" placeholder="How can we help?" />
-                <button type="submit" className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">
-                  <Send className="h-4 w-4" />
-                  Send message
-                </button>
-              </form>
-            </div>
-            <div>
-              <ContactVisual />
-            </div>
-          </div>
-        </section>
-      </div>
       </div>
     </div>
   )

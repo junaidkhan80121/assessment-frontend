@@ -21,6 +21,8 @@ const normalizeQuery = (value: string) => value.trim().toLowerCase()
 const MAX_PROVIDER_RESULTS = 20
 const MAX_DISPLAY_RESULTS = 16
 
+const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
 const CURATED_US_LOCATIONS: GeocodingLocation[] = [
   { place_id: 100001, display_name: 'New York, New York, United States', lat: '40.7128', lon: '-74.0060' },
   { place_id: 100002, display_name: 'Newark, New Jersey, United States', lat: '40.7357', lon: '-74.1724' },
@@ -42,11 +44,26 @@ const scoreLocation = (query: string, displayName: string) => {
   const normalizedQuery = normalizeQuery(query)
   const normalizedDisplay = normalizeQuery(displayName)
   const tokens = normalizedQuery.split(/\s+/).filter(Boolean)
+  const firstSegment = normalizedDisplay.split(',')[0]?.trim() ?? normalizedDisplay
+  const wholeQueryRegex = new RegExp(`\\b${escapeRegex(normalizedQuery)}\\b`)
+  const queryPrefixRegex = new RegExp(`\\b${escapeRegex(normalizedQuery)}`)
 
   let score = 0
 
+  if (firstSegment === normalizedQuery) {
+    score += 420
+  }
+
   if (normalizedDisplay.startsWith(normalizedQuery)) {
     score += 260
+  }
+
+  if (queryPrefixRegex.test(firstSegment)) {
+    score += 220
+  }
+
+  if (wholeQueryRegex.test(firstSegment)) {
+    score += 180
   }
 
   if (normalizedDisplay.includes(normalizedQuery)) {
@@ -59,20 +76,22 @@ const scoreLocation = (query: string, displayName: string) => {
   }
 
   tokens.forEach((token) => {
-    if (normalizedDisplay.startsWith(token)) {
-      score += 50
+    const wholeTokenRegex = new RegExp(`\\b${escapeRegex(token)}\\b`)
+    const tokenPrefixRegex = new RegExp(`\\b${escapeRegex(token)}`)
+
+    if (tokenPrefixRegex.test(firstSegment)) {
+      score += 70
+    } else if (wholeTokenRegex.test(normalizedDisplay)) {
+      score += 36
     } else if (normalizedDisplay.includes(token)) {
-      score += 22
+      score += 16
     }
   })
 
-  const firstSegment = normalizedDisplay.split(',')[0]?.trim() ?? normalizedDisplay
-  if (firstSegment === normalizedQuery) {
-    score += 160
-  } else if (firstSegment.startsWith(normalizedQuery)) {
+  if (firstSegment.startsWith(normalizedQuery)) {
     score += 110
   } else if (firstSegment.includes(normalizedQuery)) {
-    score += 70
+    score += 35
   }
 
   return score - normalizedDisplay.length * 0.02

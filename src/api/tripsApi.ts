@@ -1,5 +1,5 @@
 import { baseApi } from "./baseApi"
-import type { Trip, TripCreatePayload } from "@/types/trip"
+import type { PaginatedResponse, Trip, TripCreatePayload, TripHistoryItem } from "@/types/trip"
 
 export const tripsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -17,8 +17,14 @@ export const tripsApi = baseApi.injectEndpoints({
       providesTags: (_, __, id) => [{ type: "Trip", id }],
     }),
 
-    listTrips: builder.query<Trip[], void>({
-      query: () => "/trips/",
+    listTrips: builder.query<PaginatedResponse<TripHistoryItem>, { page?: number; pageSize?: number } | void>({
+      query: (params) => ({
+        url: "/trips/",
+        params: {
+          page: params?.page ?? 1,
+          page_size: params?.pageSize ?? 5,
+        },
+      }),
       providesTags: ["Trip"],
     }),
   }),

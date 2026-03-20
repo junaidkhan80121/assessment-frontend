@@ -18,7 +18,7 @@ interface TemplateField {
   width: number
   size: number
   weight?: string
-  align?: 'left' | 'center'
+  align?: 'left' | 'center' | 'right'
 }
 
 const STATUS_ROWS: Record<string, number> = {
@@ -114,6 +114,7 @@ export async function renderLogSheetCanvas(
 
   drawDutyLines(ctx, dayLog)
   drawRemarks(ctx, dayLog)
+  drawDutyRowTotals(ctx, dayLog)
 
   drawTemplateField(ctx, TEMPLATE_FIELDS.shipping_doc, shippingDocument)
   drawTemplateField(ctx, TEMPLATE_FIELDS.commodity, shipperCommodity)
@@ -373,6 +374,21 @@ function drawRemarks(ctx: CanvasRenderingContext2D, dayLog: DailyLog) {
   drawWrappedText(ctx, lines, 40, 554, 396, 8, 15, 8)
 }
 
+function drawDutyRowTotals(ctx: CanvasRenderingContext2D, dayLog: DailyLog) {
+  const rightEdge = 980
+  const lineWidth = 52
+  const rows = [
+    { value: dayLog.totals.OFF_DUTY.toFixed(2), y: GRAPH_Y + GRAPH_ROW_HEIGHT * 0.5 },
+    { value: dayLog.totals.SLEEPER.toFixed(2), y: GRAPH_Y + GRAPH_ROW_HEIGHT * 1.5 },
+    { value: dayLog.totals.DRIVING.toFixed(2), y: GRAPH_Y + GRAPH_ROW_HEIGHT * 2.5 },
+    { value: dayLog.totals.ON_DUTY_NOT_DRIVING.toFixed(2), y: GRAPH_Y + GRAPH_ROW_HEIGHT * 3.5 },
+  ]
+
+  rows.forEach(({ value, y }) => {
+    fillTextFitted(ctx, value, rightEdge - lineWidth, y - 5, lineWidth, 8, '600', 'right')
+  })
+}
+
 export const LogSheet = ({ trip, dayLog, dayNumber }: LogSheetProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const { resolvedTheme } = useTheme()
@@ -495,7 +511,7 @@ function fillTextFitted(
   maxWidth: number,
   startSize: number,
   weight = '400',
-  align: 'left' | 'center' = 'left',
+  align: 'left' | 'center' | 'right' = 'left',
 ) {
   let fontSize = startSize
   const text = value.trim()
@@ -519,11 +535,18 @@ function drawAlignedText(
   x: number,
   y: number,
   maxWidth: number,
-  align: 'left' | 'center',
+  align: 'left' | 'center' | 'right',
 ) {
   if (align === 'center') {
     const width = ctx.measureText(value).width
     const startX = x + Math.max((maxWidth - width) / 2, 0)
+    ctx.fillText(value, startX, y, maxWidth)
+    return
+  }
+
+  if (align === 'right') {
+    const width = ctx.measureText(value).width
+    const startX = x + Math.max(maxWidth - width, 0)
     ctx.fillText(value, startX, y, maxWidth)
     return
   }

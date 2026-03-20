@@ -363,7 +363,10 @@ const InfoPageLayout = ({
   }, [])
 
   return (
-    <div ref={layoutRef} className={`relative z-10 ${fillViewport ? 'h-[calc(100vh-80px)] overflow-hidden' : ''} min-h-screen px-4 pb-12 pt-24 sm:px-6 lg:px-8`}>
+    <div
+      ref={layoutRef}
+      className={`relative z-10 overflow-x-hidden ${fillViewport ? 'h-[calc(100vh-80px)] overflow-hidden' : ''} min-h-screen px-4 pb-12 pt-24 sm:px-6 lg:px-8`}
+    >
       {/* Ambient Background Orbs */}
       <div data-ambient-orb className="pointer-events-none absolute -left-64 top-[10%] h-[600px] w-[600px] rounded-full bg-primary/10 blur-[150px]" />
       <div data-ambient-orb-alt className="pointer-events-none absolute -right-64 top-[40%] h-[700px] w-[700px] rounded-full bg-cyan-400/10 blur-[150px]" />
@@ -602,34 +605,58 @@ export const ManualPage = () => {
 // ----------------------------------------------------------------------
 export const AboutPage = () => {
   return (
-    <InfoPageLayout
-      eyebrow="Who We Are"
-      title="About Vanguard"
-      subtitle="We build next-generation freight routing systems combining real-time telematics with automated law-compliant logging."
-      visual={<AboutVisual />}
-    >
-      <InfoSection
-        icon={Globe}
-        title="Our Mission"
-        description="What drives our innovation."
-        cardStyle="glass-shimmer"
-        items={[
-          "We engineer the most advanced logistics software in the transportation sector.",
-          "Bridging the gap between messy interstate law and clean, intelligent software.",
-          "Empowering drivers with tools that prevent fatigue and prioritize health.",
-        ]}
-      />
-      <InfoSection
-        icon={Users}
-        title="Our Capabilities"
-        description="We handle the heavy lifting of modern logistics."
-        cardStyle="glass-shimmer"
-        items={[
-          "Deploying highly resilient, globally distributed systems via React and Django.",
-          "Producing high-aesthetic interfaces that keep dispatchers focused and efficient.",
-        ]}
-      />
-    </InfoPageLayout>
+    // About page uses a simpler layout (not InfoPageLayout) to avoid
+    // layout/height interactions that can create extra scrollbars.
+    <div className="relative z-10 min-h-screen overflow-x-hidden px-4 pb-12 pt-24 sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-6xl flex-col gap-6">
+        <header className="relative overflow-hidden rounded-[32px] border border-outline-variant/20 bg-gradient-to-b from-surface/90 to-surface/50 p-6 shadow-[0_24px_60px_rgba(0,0,0,0.06),inset_0_1px_1px_rgba(255,255,255,0.06)] backdrop-blur-3xl sm:p-10">
+          <div className="relative z-10">
+            <p className="text-[12px] font-black uppercase tracking-[0.25em] text-primary">Who We Are</p>
+            <div className="mt-4">
+              <h1 className="bg-gradient-to-br from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-4xl font-extrabold text-transparent sm:text-5xl">
+                About Vanguard
+              </h1>
+              <p className="mt-3 max-w-2xl text-lg leading-relaxed text-slate-800 dark:text-on-surface sm:text-xl">
+                We build next-generation freight routing systems combining real-time telematics with automated law-compliant logging.
+              </p>
+            </div>
+          </div>
+        </header>
+
+        <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
+          <div className="flex flex-col gap-6">
+            <InfoSection
+              icon={Globe}
+              title="Our Mission"
+              description="What drives our innovation."
+              cardStyle="glass-shimmer"
+              items={[
+                "We engineer the most advanced logistics software in the transportation sector.",
+                "Bridging the gap between messy interstate law and clean, intelligent software.",
+                "Empowering drivers with tools that prevent fatigue and prioritize health.",
+              ]}
+            />
+            <InfoSection
+              icon={Users}
+              title="Our Capabilities"
+              description="We handle the heavy lifting of modern logistics."
+              cardStyle="glass-shimmer"
+              items={[
+                "Deploying highly resilient, globally distributed systems via React and Django.",
+                "Producing high-aesthetic interfaces that keep dispatchers focused and efficient.",
+              ]}
+            />
+          </div>
+
+          <div className="hidden lg:flex lg:flex-col lg:gap-6 lg:sticky lg:top-28 lg:h-max">
+            <AboutVisual />
+          </div>
+          <div className="block lg:hidden">
+            <AboutVisual />
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
 

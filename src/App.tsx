@@ -7,14 +7,14 @@ import { TripResults } from '@/features/trips/TripResults'
 import { GlobalBackground } from '@/components/GlobalBackground'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import TripHistoryPage from '@/pages/TripHistoryPage'
+import { AboutPage, ContactPage } from '@/pages/InfoPages'
+import { History as HistoryIcon, Info as InfoIcon, Map as MapIcon, Mail as MailIcon } from 'lucide-react'
 
 const NAV_ITEMS = [
-  { to: '/#planner', icon: 'map', label: 'Planner' },
-  { to: '/trips', icon: 'history', label: 'History' },
-  { to: '/#guidelines', icon: 'local_shipping', label: 'Guidelines' },
-  { to: '/#manual', icon: 'menu_book', label: 'Manual' },
-  { to: '/#about', icon: 'info', label: 'About Us' },
-  { to: '/#contact', icon: 'mail', label: 'Contact' },
+  { to: '/', icon: MapIcon, label: 'Planner' },
+  { to: '/trips', icon: HistoryIcon, label: 'History' },
+  { to: '/about', icon: InfoIcon, label: 'About Us' },
+  { to: '/contact', icon: MailIcon, label: 'Contact' },
 ]
 
 function VanguardLogo() {
@@ -105,7 +105,7 @@ function Layout({ children, pathname }: { children: React.ReactNode; pathname: s
                         : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary'
                     }`}
                   >
-                    <span className="material-symbols-outlined text-[18px]">{item.icon}</span>
+                    <item.icon className="h-[18px] w-[18px]" aria-hidden="true" />
                     <span className="hidden sm:inline">{item.label}</span>
                   </Link>
                 )
@@ -137,6 +137,22 @@ function App() {
             element={
               <PageTransition>
                 <TripPlanner />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/about"
+            element={
+              <PageTransition>
+                <AboutPage />
+              </PageTransition>
+            }
+          />
+          <Route
+            path="/contact"
+            element={
+              <PageTransition>
+                <ContactPage />
               </PageTransition>
             }
           />

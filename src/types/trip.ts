@@ -127,6 +127,30 @@ export interface Trip {
   updated_at: string
 }
 
+export interface TripHistoryItem {
+  id: string
+  current_location: string
+  pickup_location: string
+  dropoff_location: string
+  current_cycle_used: number
+  status: "PENDING" | "COMPUTING" | "COMPUTED" | "FAILED"
+  error_message: string
+  total_distance_miles: number
+  total_drive_hours: number
+  hos_compliant: boolean
+  created_at: string
+  updated_at: string
+  log_days: number
+  stop_count: number
+}
+
+export interface PaginatedResponse<T> {
+  count: number
+  next: string | null
+  previous: string | null
+  results: T[]
+}
+
 export interface TripCreatePayload {
   current_location: string
   current_location_lat?: number

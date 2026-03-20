@@ -256,10 +256,10 @@ export const TripResults = () => {
           className={`relative overflow-hidden rounded-2xl border border-primary-ui-border-muted/70 bg-gradient-to-br from-card via-surface to-surface-container-low/70 p-2.5 shadow-md ring-1 ring-black/[0.03] backdrop-blur-xl before:pointer-events-none before:absolute before:inset-0 before:rounded-2xl before:p-px before:content-[''] before:[background:linear-gradient(135deg,rgba(21,128,61,0.14),transparent_45%,transparent)] sm:p-3 xl:flex xl:min-h-0 xl:flex-col xl:overflow-hidden xl:p-4 dark:border-white/[0.06] dark:from-surface-container/88 dark:via-surface/78 dark:to-surface-container-low/35 dark:shadow-[0_28px_80px_rgba(0,0,0,0.5)] dark:ring-white/[0.04] dark:before:[background:linear-gradient(135deg,rgba(0,255,163,0.18),transparent_50%,transparent)] ${workspaceHeightClass}`}
         >
           <div className={`grid min-h-0 gap-3 xl:grid-cols-[272px_minmax(0,1fr)] xl:min-h-0 xl:flex-1 xl:gap-4 ${workspaceHeightClass}`}>
-            <aside className={`relative min-h-0 overflow-hidden ${workspaceHeightClass}`}>
+            <aside className={`relative min-h-0 xl:overflow-y-auto xl:pr-1 fancy-scrollbar ${workspaceHeightClass}`}>
               <div className="absolute left-0 top-6 hidden h-[calc(100%-3rem)] w-1 rounded-full bg-gradient-to-b from-primary/60 via-primary/20 to-transparent xl:block" aria-hidden />
               <div
-                className={`relative h-full rounded-[26px] border border-primary-ui-border-muted/60 bg-gradient-to-b from-surface-container-low/50 via-surface/40 to-surface-container/30 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.45)] xl:flex xl:flex-col xl:overflow-hidden dark:border-white/[0.06] dark:from-surface-container/40 dark:via-surface-container-low/25 dark:to-surface/20 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]`}
+                className={`relative h-full rounded-[26px] border border-primary-ui-border-muted/60 bg-gradient-to-b from-surface-container-low/50 via-surface/40 to-surface-container/30 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.45)] xl:flex xl:flex-col dark:border-white/[0.06] dark:from-surface-container/40 dark:via-surface-container-low/25 dark:to-surface/20 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]`}
               >
                 <p className="text-[10px] font-bold uppercase tracking-[0.26em] text-primary">Workspace</p>
                 <h2 className="mt-1.5 font-headline text-lg font-bold tracking-tight text-on-surface">Pick your lens</h2>
@@ -548,7 +548,7 @@ export const TripResults = () => {
                       onClick={handleDownloadPDF}
                       disabled={isDownloadingPdf}
                       id="download-pdf"
-                      className="inline-flex h-10 shrink-0 items-center justify-center gap-2 self-stretch rounded-2xl bg-gradient-to-r from-primary to-primary/90 px-4 text-[10px] font-bold uppercase tracking-[0.18em] text-primary-foreground shadow-[0_8px_26px_rgba(21,128,61,0.28)] transition-all hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(21,128,61,0.35)] active:translate-y-0 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-65 dark:shadow-[0_8px_28px_rgba(0,255,163,0.22)] sm:self-start"
+                      className="inline-flex h-10 shrink-0 items-center justify-center gap-2 self-stretch rounded-2xl border border-primary-ui-border-strong/55 bg-surface px-4 pr-5 text-[10px] font-bold uppercase tracking-[0.18em] text-primary shadow-[0_8px_24px_rgba(15,23,42,0.08)] transition-all hover:-translate-y-0.5 hover:border-primary-ui-border-strong hover:bg-surface-container-low active:translate-y-0 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-65 dark:border-primary-ui-border-muted dark:bg-surface-container dark:text-primary sm:self-start"
                     >
                       {isDownloadingPdf ? (
                         <>

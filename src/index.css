@@ -130,6 +130,10 @@
 * { @apply border-outline-variant; }
 body { @apply bg-background text-on-surface antialiased; min-height: max(884px, 100dvh); }
 
+/* Prevent duplicate scrollbars created when background/absolute visuals expand. */
+html { overflow-x: hidden; overflow-y: auto; }
+body { overflow-x: hidden; overflow-y: hidden; }
+
 /* Smooth theme transition */
 *, *::before, *::after {
   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.15s ease;
