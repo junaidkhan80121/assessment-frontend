@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
+import { Trip, DailyLog } from '@/types/trip'
 import { useTheme } from 'next-themes'
-import type { DailyLog, Trip } from '@/types/trip'
 
 interface LogSheetProps {
   trip: Trip
@@ -49,9 +50,8 @@ const TEMPLATE_FIELDS: Record<string, TemplateField> = {
   office: { x: 623, y: 171, width: 240, size: 8, align: 'center' },
   terminal: { x: 623, y: 210, width: 240, size: 8, align: 'center' },
   vehicle: { x: 70, y: 182, width: 264, size: 8, align: 'center' },
-  shipping_doc: { x: 30, y: 739, width: 110, size: 7 },
-  commodity: { x: 30, y: 802, width: 110, size: 7 },
-  total_hours: { x: 948, y: 369, width: 34, size: 8, align: 'center' },
+  shipping_doc: { x: 40, y: 730, width: 100, size: 8 },
+  commodity: { x: 40, y: 790, width: 95, size: 8 },
   pickup: { x: 154, y: 835, width: 122, size: 7, align: 'center' },
   dropoff: { x: 319, y: 835, width: 122, size: 7, align: 'center' },
   warning: { x: 912, y: 970, width: 58, size: 9, weight: '700', align: 'left' },
@@ -92,12 +92,6 @@ export async function renderLogSheetCanvas(
   const vehicleNumbers = `TRK-${trip.id.slice(0, 4).toUpperCase()} / TRL-${trip.id.slice(4, 8).toUpperCase()}`
   const shippingDocument = `DOC-${trip.id.slice(0, 8).toUpperCase()}`
   const shipperCommodity = `${pickupLabel} to ${toLabel}`
-  const totalHours = (
-    dayLog.totals.OFF_DUTY +
-    dayLog.totals.SLEEPER +
-    dayLog.totals.DRIVING +
-    dayLog.totals.ON_DUTY_NOT_DRIVING
-  ).toFixed(2)
   const [monthDisplay, dayDisplay, yearDisplay] = formatTemplateDate(monthLabel, dayLabel, yearLabel)
 
   drawTemplateField(ctx, TEMPLATE_FIELDS.from, fromLabel)
@@ -118,14 +112,13 @@ export async function renderLogSheetCanvas(
 
   drawTemplateField(ctx, TEMPLATE_FIELDS.shipping_doc, shippingDocument)
   drawTemplateField(ctx, TEMPLATE_FIELDS.commodity, shipperCommodity)
-  drawRecapValue(ctx, 116, '', dayLog.recap.on_duty_today.toFixed(2))
-  drawRecapValue(ctx, 282, 'A.', dayLog.recap.on_duty_last_8_days.toFixed(2))
-  drawRecapValue(ctx, 394, 'B.', dayLog.recap.available_tomorrow_70.toFixed(2))
-  drawRecapValue(ctx, 506, 'C.', dayLog.recap.on_duty_last_5_days.toFixed(2))
-  drawRecapValue(ctx, 622, 'A.', dayLog.recap.on_duty_last_7_days.toFixed(2))
-  drawRecapValue(ctx, 734, 'B.', dayLog.recap.available_tomorrow_60.toFixed(2))
-  drawRecapValue(ctx, 846, 'C.', dayLog.recap.on_duty_last_5_days.toFixed(2))
-  drawTemplateField(ctx, TEMPLATE_FIELDS.total_hours, totalHours)
+  drawRecapValue(ctx, 104, '', dayLog.recap.on_duty_today.toFixed(2))
+  drawRecapValue(ctx, 260, 'A.', dayLog.recap.on_duty_last_8_days.toFixed(2))
+  drawRecapValue(ctx, 350, 'B.', dayLog.recap.available_tomorrow_70.toFixed(2))
+  drawRecapValue(ctx, 440, 'C.', dayLog.recap.on_duty_last_5_days.toFixed(2))
+  drawRecapValue(ctx, 610, 'A.', dayLog.recap.on_duty_last_7_days.toFixed(2))
+  drawRecapValue(ctx, 700, 'B.', dayLog.recap.available_tomorrow_60.toFixed(2))
+  drawRecapValue(ctx, 790, 'C.', dayLog.recap.on_duty_last_5_days.toFixed(2))
   drawTemplateField(ctx, TEMPLATE_FIELDS.pickup, pickupLabel)
   drawTemplateField(ctx, TEMPLATE_FIELDS.dropoff, toLabel)
 
@@ -231,15 +224,17 @@ function drawGraphTemplate(ctx: CanvasRenderingContext2D) {
     const x = GRAPH_X + quarter * (GRAPH_WIDTH / (24 * 4))
     const tickHeight = quarter % 4 === 0 ? 18 : quarter % 2 === 0 ? 12 : 7
     for (let row = 0; row < 4; row += 1) {
-      const baseY = GRAPH_Y + row * GRAPH_ROW_HEIGHT
-      drawLine(ctx, x, baseY, x, baseY + tickHeight, 0.7)
+      const isTopDown = row < 2
+      const baseY = GRAPH_Y + (isTopDown ? row : row + 1) * GRAPH_ROW_HEIGHT
+      const endY = isTopDown ? baseY + tickHeight : baseY - tickHeight
+      drawLine(ctx, x, baseY, x, endY, 0.7)
     }
   }
 
   const totalHoursLineX1 = 928
   const totalHoursLineX2 = 980
   for (let i = 0; i < 4; i += 1) {
-    const y = GRAPH_Y + GRAPH_ROW_HEIGHT * (i + 0.5)
+    const y = GRAPH_Y + GRAPH_ROW_HEIGHT * (i + 1)
     drawLine(ctx, totalHoursLineX1, y, totalHoursLineX2, y, 1.2)
   }
   drawLine(ctx, totalHoursLineX1, GRAPH_Y + GRAPH_HEIGHT + 37, totalHoursLineX2, GRAPH_Y + GRAPH_HEIGHT + 37, 1.2)
@@ -254,16 +249,16 @@ function drawRemarksTemplate(ctx: CanvasRenderingContext2D) {
   setFont(ctx, 10, '700')
   ctx.fillText('Shipping', 38, 610)
   ctx.fillText('Documents:', 38, 624)
-  drawLine(ctx, 37, 636, 145, 636, 1)
+  drawLine(ctx, 35, 636, 145, 636, 1)
   setFont(ctx, 8, '600')
   ctx.fillText('DVL or Manifest No.', 40, 675)
   ctx.fillText('or', 40, 689)
-  drawLine(ctx, 37, 699, 145, 699, 1)
+  drawLine(ctx, 35, 699, 145, 699, 1)
   ctx.fillText('Shipper & Commodity', 38, 760)
-  drawLine(ctx, 37, 771, 145, 771, 1)
+  drawLine(ctx, 35, 771, 145, 771, 1)
 
   setFont(ctx, 8)
-  ctx.fillText('Enter name of place you reported at and where released from work and when and where each change of duty occurred.', 143, 804)
+  ctx.fillText('Enter name of place you reported and where released from work and when and where each change of duty occurred.', 143, 804)
   ctx.fillText('Use time standard of home terminal.', 392, 821)
 }
 
@@ -275,50 +270,49 @@ function drawRecapTemplate(ctx: CanvasRenderingContext2D) {
   setFont(ctx, 9, '700')
   ctx.fillText('Recap:', 18, 916)
   setFont(ctx, 8, '600')
-  ctx.fillText('Complete at', 18, 931)
-  ctx.fillText('end of day', 18, 945)
+  ctx.fillText('Complete at', 18, 928)
+  ctx.fillText('end of day', 18, 940)
 
   setFont(ctx, 9, '700')
-  ctx.fillText('70 Hour/', 198, 913)
-  ctx.fillText('8 Day', 245, 913)
-  ctx.fillText('Drivers', 226, 943)
+  ctx.fillText('70 Hour/', 185, 916)
+  ctx.fillText('8 Day', 185, 928)
+  ctx.fillText('Drivers', 185, 940)
 
-  ctx.fillText('60 Hour /', 552, 913)
-  ctx.fillText('7 Day', 615, 913)
-  ctx.fillText('Drivers', 585, 943)
+  ctx.fillText('60 Hour/ 7', 525, 916)
+  ctx.fillText('Day Drivers', 525, 928)
 
-  ctx.fillText('*If you took', 876, 913)
-  ctx.fillText('34', 916, 928)
+  ctx.fillText('*If you took', 896, 916)
+  ctx.fillText('34', 896, 928)
   setFont(ctx, 8, '600')
-  const warningTextX = 916
-  ctx.fillText('consecutive', warningTextX, 944)
-  ctx.fillText('hours off', warningTextX, 959)
-  ctx.fillText('duty you', warningTextX, 974)
-  ctx.fillText('have 60/70', warningTextX, 989)
-  ctx.fillText('hours', warningTextX, 1004)
-  ctx.fillText('available', warningTextX, 1019)
+  const warningTextX = 896
+  ctx.fillText('consecutive', warningTextX, 940)
+  ctx.fillText('hours off', warningTextX, 952)
+  ctx.fillText('duty you', warningTextX, 964)
+  ctx.fillText('have 60/70', warningTextX, 976)
+  ctx.fillText('hours', warningTextX, 988)
+  ctx.fillText('available', warningTextX, 1000)
 
   const recapColumns = [
-    { x: 116, header: '', body: ['On duty', 'hours', 'today,', 'Total lines', '3 & 4'] },
-    { x: 282, header: 'A.', body: ['Total', 'hours on', 'duty last 7', 'days', 'including', 'today.'] },
-    { x: 394, header: 'B.', body: ['Total', 'hours', 'available', 'tomorrow', '70 hr.', 'minus A*'] },
-    { x: 506, header: 'C.', body: ['Total', 'hours on', 'duty last 5', 'days', 'including', 'today.'] },
-    { x: 622, header: 'A.', body: ['Total', 'hours on', 'duty last 8', 'days', 'including', 'today.'] },
-    { x: 734, header: 'B.', body: ['Total', 'hours', 'available', 'tomorrow', '60 hr.', 'minus A*'] },
-    { x: 846, header: 'C.', body: ['Total', 'hours on', 'duty last 7', 'days', 'including', 'today.'] },
+    { x: 104, header: '', body: ['On duty', 'hours', 'today,', 'Total lines', '3 & 4'] },
+    { x: 260, header: 'A.', body: ['A. Total', 'hours on', 'duty last 7', 'days', 'including', 'today.'] },
+    { x: 350, header: 'B.', body: ['B. Total', 'hours', 'available', 'tomorrow', '70 hr.', 'minus A*'] },
+    { x: 440, header: 'C.', body: ['C. Total', 'hours on', 'duty last 5', 'days', 'including', 'today.'] },
+    { x: 610, header: 'A.', body: ['A. Total', 'hours on', 'duty last 8', 'days', 'including', 'today.'] },
+    { x: 700, header: 'B.', body: ['B. Total', 'hours', 'available', 'tomorrow', '60 hr.', 'minus A*'] },
+    { x: 790, header: 'C.', body: ['C. Total', 'hours on', 'duty last 7', 'days', 'including', 'today.'] },
   ]
 
   setFont(ctx, 8, '600')
   for (const column of recapColumns) {
     if (column.header) {
-      ctx.fillText(column.header, column.x, 944)
-      drawLine(ctx, column.x - 2, 948, column.x + 40, 948, 1)
+      ctx.fillText(column.header, column.x, 940)
+      drawLine(ctx, column.x - 2, 946, column.x + 48, 946, 1)
     } else {
-      drawLine(ctx, column.x - 4, 948, column.x + 48, 948, 1)
+      drawLine(ctx, column.x - 4, 946, column.x + 48, 946, 1)
     }
 
     column.body.forEach((line, index) => {
-      ctx.fillText(line, column.x, 962 + index * 14)
+      ctx.fillText(line, column.x, 958 + index * 12)
     })
   }
 }
@@ -377,22 +371,129 @@ function drawRemarks(ctx: CanvasRenderingContext2D, dayLog: DailyLog) {
 function drawDutyRowTotals(ctx: CanvasRenderingContext2D, dayLog: DailyLog) {
   const rightEdge = 980
   const lineWidth = 52
+  const textBaselineOffset = 5
   const rows = [
-    { value: dayLog.totals.OFF_DUTY.toFixed(2), y: GRAPH_Y + GRAPH_ROW_HEIGHT * 0.5 },
-    { value: dayLog.totals.SLEEPER.toFixed(2), y: GRAPH_Y + GRAPH_ROW_HEIGHT * 1.5 },
-    { value: dayLog.totals.DRIVING.toFixed(2), y: GRAPH_Y + GRAPH_ROW_HEIGHT * 2.5 },
-    { value: dayLog.totals.ON_DUTY_NOT_DRIVING.toFixed(2), y: GRAPH_Y + GRAPH_ROW_HEIGHT * 3.5 },
+    { value: dayLog.totals.OFF_DUTY.toFixed(2), y: GRAPH_Y + GRAPH_ROW_HEIGHT * 1 },
+    { value: dayLog.totals.SLEEPER.toFixed(2), y: GRAPH_Y + GRAPH_ROW_HEIGHT * 2 },
+    { value: dayLog.totals.DRIVING.toFixed(2), y: GRAPH_Y + GRAPH_ROW_HEIGHT * 3 },
+    { value: dayLog.totals.ON_DUTY_NOT_DRIVING.toFixed(2), y: GRAPH_Y + GRAPH_ROW_HEIGHT * 4 },
   ]
 
   rows.forEach(({ value, y }) => {
-    fillTextFitted(ctx, value, rightEdge - lineWidth, y - 5, lineWidth, 8, '600', 'right')
+    fillTextFitted(ctx, value, rightEdge - lineWidth, y - textBaselineOffset, lineWidth, 8, '600', 'right')
   })
 }
 
 export const LogSheet = ({ trip, dayLog, dayNumber }: LogSheetProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const { resolvedTheme } = useTheme()
-  const isDark = resolvedTheme === 'dark'
+  const containerRef = useRef<HTMLDivElement>(null)
+  const { theme } = useTheme();
+  const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+  const [scale, setScale] = useState(1);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const stateRef = useRef({ scale: 1, position: { x: 0, y: 0 } });
+  const isDragging = useRef(false);
+  const dragStart = useRef({ x: 0, y: 0 });
+
+  useEffect(() => {
+    stateRef.current = { scale, position };
+  }, [scale, position]);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const initialScale = Math.min((container.clientWidth - 32) / CANVAS_WIDTH, (container.clientHeight - 32) / CANVAS_HEIGHT, 1);
+    const startX = (container.clientWidth - CANVAS_WIDTH * initialScale) / 2;
+    const startY = (container.clientHeight - CANVAS_HEIGHT * initialScale) / 2;
+
+    const initialState = { scale: initialScale, position: { x: startX, y: startY } };
+    setScale(initialState.scale);
+    setPosition(initialState.position);
+    stateRef.current = initialState;
+
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const { scale: currentScale, position: currentPos } = stateRef.current;
+      
+      const delta = e.deltaY * -0.002;
+      const newScale = Math.min(Math.max(0.1, currentScale * Math.exp(delta)), 10);
+
+      const rect = container.getBoundingClientRect();
+      const ptrX = e.clientX - rect.left;
+      const ptrY = e.clientY - rect.top;
+
+      const ratio = 1 - newScale / currentScale;
+      const newPosition = {
+        x: currentPos.x + (ptrX - currentPos.x) * ratio,
+        y: currentPos.y + (ptrY - currentPos.y) * ratio,
+      };
+
+      stateRef.current = { scale: newScale, position: newPosition }; 
+      setScale(newScale);
+      setPosition(newPosition);
+    };
+
+    container.addEventListener('wheel', handleWheel, { passive: false, capture: true });
+    return () => container.removeEventListener('wheel', handleWheel, true);
+    // Re-attach when fullscreen toggles: portaling replaces the DOM node, so the old
+    // listener is removed with the unmounted element and must bind to the new container.
+  }, [isFullscreen]);
+
+  useEffect(() => {
+    if (!isFullscreen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsFullscreen(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isFullscreen]);
+
+  useEffect(() => {
+    setTimeout(resetView, 10);
+  }, [isFullscreen]);
+
+  const toggleFullscreen = () => {
+    setIsFullscreen((prev) => !prev);
+  };
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    // Don't start panning when interacting with toolbar / buttons — pointerdown bubbles
+    // from buttons before click; without this, setPointerCapture steals the gesture and
+    // Full Screen / Reset never fire reliably.
+    const target = e.target as HTMLElement | null
+    if (target?.closest('button, a, input, textarea, select, [role="button"]')) {
+      return
+    }
+    isDragging.current = true;
+    dragStart.current = { x: e.clientX - position.x, y: e.clientY - position.y };
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isDragging.current) return;
+    setPosition({
+      x: e.clientX - dragStart.current.x,
+      y: e.clientY - dragStart.current.y,
+    });
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    isDragging.current = false;
+    e.currentTarget.releasePointerCapture(e.pointerId);
+  };
+
+  const resetView = () => {
+    const container = containerRef.current;
+    if (!container) return;
+    const initialScale = Math.min((container.clientWidth - 32) / CANVAS_WIDTH, (container.clientHeight - 32) / CANVAS_HEIGHT, 1);
+    const startX = (container.clientWidth - CANVAS_WIDTH * initialScale) / 2;
+    const startY = (container.clientHeight - CANVAS_HEIGHT * initialScale) / 2;
+    setScale(initialScale);
+    setPosition({ x: startX, y: startY });
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -400,25 +501,72 @@ export const LogSheet = ({ trip, dayLog, dayNumber }: LogSheetProps) => {
       return
     }
 
-    renderLogSheetCanvas(canvas, trip, dayLog, dayNumber)
-  }, [trip, dayLog, dayNumber])
+    renderLogSheetCanvas(canvas, trip, dayLog, dayNumber, { scale: 2 })
+  }, [trip, dayLog, dayNumber, isFullscreen, isDark])
 
-  return (
+  const logSheetContent = (
     <div
-      className={`w-full shrink-0 rounded-[20px] border p-2 shadow-[0_18px_50px_rgba(15,23,42,0.12)] ${
-        isDark ? 'border-white/10 bg-slate-950/85' : 'border-slate-200 bg-white'
-      }`}
+      ref={containerRef}
+      className={
+        isFullscreen
+          ? `fixed inset-0 z-[99999] w-screen h-screen flex flex-col overflow-hidden p-4 sm:p-8 cursor-grab active:cursor-grabbing select-none backdrop-blur-md ${
+              isDark ? 'bg-slate-950/95 text-white' : 'bg-slate-200/90 text-slate-900'
+            }`
+          : `relative w-full h-full min-h-[500px] flex-1 overflow-hidden sm:rounded-[20px] rounded-none cursor-grab active:cursor-grabbing select-none ${
+              isDark ? 'bg-slate-950/85' : 'bg-slate-50'
+            }`
+      }
       id={`log-sheet-day-${dayNumber}`}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
     >
-      {/* No overflow-hidden — canvas is scaled to full width; full height scrolls in parent */}
-      <div className="flex w-full justify-center">
+      <div 
+        style={{ 
+          transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`, 
+          transformOrigin: '0 0',
+          width: `${CANVAS_WIDTH}px`, 
+          height: `${CANVAS_HEIGHT}px` 
+        }} 
+        className="flex-shrink-0 absolute top-0 left-0"
+      >
         <canvas
           ref={canvasRef}
-          className="block h-auto max-h-none w-full rounded-sm border border-slate-200 bg-white"
+          className="block w-full h-full bg-white shadow-xl pointer-events-none"
+          style={{ width: `${CANVAS_WIDTH}px`, height: `${CANVAS_HEIGHT}px` }}
         />
       </div>
+
+      <div
+        className="absolute top-3 right-3 z-10 flex justify-end items-center gap-2"
+        onPointerDown={(e) => e.stopPropagation()}
+        onPointerMove={(e) => e.stopPropagation()}
+      >
+        <div className="bg-slate-800/90 backdrop-blur-sm px-2.5 py-1 rounded-md text-[10px] font-semibold text-slate-200 border border-slate-700 shadow-md uppercase tracking-wider hidden sm:block">
+          Scroll: Zoom • Drag: Pan
+        </div>
+        <button 
+          type="button"
+          onClick={(e) => { e.stopPropagation(); toggleFullscreen(); }}
+          className="bg-slate-900/95 backdrop-blur-md hover:bg-slate-800 text-white transition-colors cursor-pointer px-3 py-1.5 rounded-md text-xs font-semibold shadow-md border border-slate-700"
+        >
+          {isFullscreen ? 'Exit Full Screen' : 'Full Screen'}
+        </button>
+        <button 
+          type="button"
+          onClick={(e) => { e.stopPropagation(); resetView(); }}
+          className="bg-slate-900/95 backdrop-blur-md hover:bg-slate-800 text-white transition-colors cursor-pointer px-3 py-1.5 rounded-md text-xs font-semibold shadow-md border border-slate-700"
+        >
+          Reset View
+        </button>
+      </div>
     </div>
-  )
+  );
+
+  return isFullscreen && typeof document !== 'undefined'
+    ? createPortal(logSheetContent, document.body)
+    : logSheetContent;
 }
 
 function drawLabeledLine(ctx: CanvasRenderingContext2D, label: string, x: number, y: number, width: number) {
@@ -487,16 +635,16 @@ function drawRecapValue(
   setFont(ctx, 8, '600')
 
   if (!header) {
-    ctx.fillText(value, headerX - 2, 944)
-    drawLine(ctx, headerX - 4, 948, headerX + 48, 948, 1)
+    ctx.fillText(value, headerX - 2, 940)
+    drawLine(ctx, headerX - 4, 946, headerX + 48, 946, 1)
     return
   }
 
-  ctx.fillText(header, headerX, 944)
+  ctx.fillText(header, headerX, 940)
   const headerWidth = ctx.measureText(header).width
   const valueX = headerX + headerWidth + 12
-  ctx.fillText(value, valueX, 944)
-  drawLine(ctx, headerX - 2, 948, headerX + 40, 948, 1)
+  ctx.fillText(value, valueX, 940)
+  drawLine(ctx, headerX - 2, 946, headerX + 48, 946, 1)
 }
 
 function setFont(ctx: CanvasRenderingContext2D, size: number, weight = '400') {

@@ -535,18 +535,20 @@ export const TripResults = () => {
               className={`relative overflow-hidden rounded-[26px] border border-primary-ui-border-muted/60 bg-gradient-to-br from-card/50 via-surface/40 to-surface-container-low/25 p-2.5 sm:p-3 xl:flex xl:min-h-0 xl:flex-1 xl:flex-col xl:overflow-hidden dark:border-white/[0.06] dark:from-surface-container/40 dark:via-surface/20 dark:to-surface-container-low/12 ${panelHeightClass}`}
             >
               <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[24px] border border-primary-ui-border-muted/45 bg-surface/75 p-2 shadow-[0_16px_48px_rgba(15,23,42,0.09)] sm:p-3 xl:min-h-0 dark:border-white/[0.05] dark:bg-surface-container/35 dark:shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
-                <div className="flex shrink-0 flex-col gap-3 border-b border-outline-variant/15 pb-3">
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                    <div className="flex items-start gap-3">
-                      <div className="mt-0.5 flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/25 to-primary/5 text-primary shadow-inner">
-                        <ScrollText className="h-[18px] w-[18px]" />
+                <div className="flex shrink-0 flex-col gap-2 border-b border-outline-variant/15 pb-2">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary/25 to-primary/5 text-primary shadow-inner">
+                        <ScrollText className="h-4 w-4" />
                       </div>
                       <div>
-                        <p className="text-[10px] font-bold uppercase tracking-[0.26em] text-primary">Driver logs</p>
-                        <h2 className="font-headline mt-0.5 text-lg font-bold tracking-tight text-on-surface">Daily log sheets</h2>
+                        <div className="flex items-center gap-2">
+                          <h2 className="font-headline text-base font-bold tracking-tight text-on-surface uppercase pr-2 border-r border-outline-variant/30">Driver logs</h2>
+                          <p className="text-sm font-semibold tracking-tight text-on-surface/90">Daily log sheets</p>
+                        </div>
                         {activeLog && (
-                          <p className="mt-1 text-xs text-muted-foreground">
-                            <span className="font-medium text-on-surface/90">{formatLogHeading(tripData.created_at, activeLog.day_number)}</span>
+                          <p className="text-xs text-muted-foreground font-medium">
+                            <span className="text-on-surface/80">{formatLogHeading(tripData.created_at, activeLog.day_number)}</span>
                             <span className="mx-1.5 text-outline-variant">·</span>
                             {formatLogTimeRange(activeLog)}
                           </p>
@@ -558,16 +560,16 @@ export const TripResults = () => {
                       onClick={handleDownloadPDF}
                       disabled={isDownloadingPdf}
                       id="download-pdf"
-                      className="inline-flex h-10 shrink-0 items-center justify-center gap-2 self-stretch rounded-2xl border border-primary-ui-border-strong/55 bg-surface px-4 pr-5 text-[10px] font-bold uppercase tracking-[0.18em] text-primary shadow-[0_8px_24px_rgba(15,23,42,0.08)] transition-all hover:-translate-y-0.5 hover:border-primary-ui-border-strong hover:bg-surface-container-low active:translate-y-0 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-65 dark:border-primary-ui-border-muted dark:bg-surface-container dark:text-primary sm:self-start"
+                      className="inline-flex h-8 shrink-0 items-center justify-center gap-1.5 self-stretch rounded-xl border border-primary-ui-border-strong/55 bg-surface px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-primary shadow-[0_4px_16px_rgba(15,23,42,0.06)] transition-all hover:-translate-y-0.5 hover:border-primary-ui-border-strong hover:bg-surface-container-low active:translate-y-0 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-65 dark:border-primary-ui-border-muted dark:bg-surface-container dark:text-primary sm:self-center"
                     >
                       {isDownloadingPdf ? (
                         <>
-                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          <Loader2 className="h-3 w-3 animate-spin" />
                           {downloadProgress ?? 'Downloading...'}
                         </>
                       ) : (
                         <>
-                          <Download className="h-3.5 w-3.5" />
+                          <Download className="h-3 w-3" />
                           Save PDF
                         </>
                       )}
@@ -608,7 +610,7 @@ export const TripResults = () => {
                   </div>
 
                   <div className="flex min-h-[280px] flex-col overflow-hidden lg:min-h-0">
-                    <div className="shrink-0 rounded-[18px] border border-primary-ui-border-muted/40 bg-surface-container-low/50 px-3 py-2 dark:border-white/[0.05] dark:bg-surface-container/40">
+                    <div className="shrink-0 rounded-[16px] border border-primary-ui-border-muted/40 bg-surface-container-low/50 px-3 py-2 xl:mb-0 mb-1.5 dark:border-white/[0.05] dark:bg-surface-container/40">
                       {activeLog && (
                         <div className="grid grid-cols-3 gap-2 text-[11px]">
                           <div>
@@ -627,9 +629,9 @@ export const TripResults = () => {
                       )}
                     </div>
 
-                    {/* flex-col + shrink-0 so the log sheet keeps its natural height and this panel scrolls (stretch was clipping the canvas) */}
-                    <div className="fancy-scrollbar mt-2 flex min-h-0 flex-1 flex-col items-stretch overflow-y-auto overscroll-contain rounded-[22px] border border-primary-ui-border-muted/40 bg-surface-container-low/25 p-2 [scrollbar-gutter:stable] sm:p-3 dark:border-white/[0.04] dark:bg-surface/20">
-                      <div className="mx-auto w-full max-w-full shrink-0 pb-8 sm:max-w-[min(100%,1026px)]">
+                    {/* Make the log viewer wrapper expand to fill available space */}
+                    <div className="fancy-scrollbar mt-1.5 flex min-h-0 flex-1 flex-col items-stretch overflow-hidden rounded-[22px] border border-primary-ui-border-muted/40 bg-surface-container-low/25 dark:border-white/[0.04] dark:bg-surface/20">
+                      <div className="mx-auto flex w-full flex-col flex-1 pb-0 sm:max-w-[min(100%,1026px)]">
                         {activeLog && (
                           <LogSheet trip={tripData} dayLog={activeLog} dayNumber={activeLog.day_number} />
                         )}
