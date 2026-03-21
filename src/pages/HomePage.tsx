@@ -501,9 +501,9 @@ const TripPlanner: React.FC = () => {
   }
 
   return (
-    <div id="planner" className="relative min-h-[calc(100dvh-7rem)] px-4 pt-20 sm:px-6">
+    <div id="planner" className="relative min-h-[calc(100dvh-7rem)] px-4 pt-16 sm:px-6">
       <div className="relative z-10 mx-auto w-full max-w-7xl">
-      <section className="flex min-h-[calc(100dvh-7rem)] flex-col justify-center pb-0">
+      <section className="flex min-h-[calc(100dvh-7rem)] flex-col justify-start pb-0 pt-6 sm:pt-8">
       <style>{`
         @keyframes marquee {
           0% { transform: translateX(0); }
