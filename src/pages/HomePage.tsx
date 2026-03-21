@@ -509,42 +509,6 @@ const TripPlanner: React.FC = () => {
           100% { transform: translateX(-50%); }
         }
       `}</style>
-      {/* Enhanced Neon-style live ticker */}
-      <div 
-        className={`mb-6 flex h-10 items-center justify-between gap-4 overflow-hidden rounded-full border backdrop-blur-md px-5 sm:px-6 transition-all duration-300 hover:shadow-lg ${isLight ? 'border-primary/20 bg-white/40 shadow-[0_4px_20px_rgba(15,159,87,0.08)] hover:shadow-[0_8px_30px_rgba(15,159,87,0.12)]' : 'border-primary/20 bg-surface/50 shadow-[0_0_20px_rgba(0,255,163,0.1)] hover:border-primary/40 hover:shadow-[0_0_30px_rgba(0,255,163,0.2)] hover:bg-surface/70'}`}
-      >
-        <div className="flex items-center gap-2.5 whitespace-nowrap z-10 shrink-0">
-          <div className="relative flex h-2.5 w-2.5 items-center justify-center">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-60"></span>
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-primary shadow-[0_0_10px_currentColor]"></span>
-          </div>
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-on-surface">System Live</span>
-        </div>
-        <div 
-          className="relative flex-1 overflow-hidden"
-          style={{ maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)', WebkitMaskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)' }}
-        >
-          <div className="whitespace-nowrap animate-[marquee_25s_linear_infinite] flex items-center">
-            {[
-              'Network Load: 12% • Latency: 4ms • Node-7: Active',
-              'Routing Engine: 99.98% precision • HOS synchronized',
-              'Secure Data Stream: Encrypted • API Gateway: Normal',
-              'Autoscaling: instances stable • Replicas healthy',
-            ]
-              .concat([
-                'Network Load: 12% • Latency: 4ms • Node-7: Active',
-                'Routing Engine: 99.98% precision • HOS synchronized',
-                'Secure Data Stream: Encrypted • API Gateway: Normal',
-                'Autoscaling: instances stable • Replicas healthy',
-              ])
-              .map((msg, idx) => (
-                <span key={idx} className={`mr-12 text-[10px] font-bold uppercase tracking-[0.15em] ${isLight ? 'text-[#005c30]' : 'text-primary/90'}`}>
-                  {msg}
-                </span>
-              ))}
-          </div>
-        </div>
-      </div>
       <div className="mb-8 text-center">
         <div className="mb-4 flex flex-wrap items-center justify-center gap-3 text-[11px] font-semibold uppercase tracking-[0.2em]">
           <span className={`rounded-full border px-3 py-1 ${isLight ? 'border-primary-ui-border bg-primary/10 text-[#005c30]' : 'border-primary-ui-border-muted bg-primary/10 text-primary'}`}>Smart geocoding</span>
@@ -765,6 +729,43 @@ const TripPlanner: React.FC = () => {
           </Button>
           </div>
         </form>
+        </div>
+      </div>
+
+      {/* Enhanced Neon-style live ticker */}
+      <div 
+        className={`mx-auto mt-6 flex h-10 w-full max-w-[44rem] items-center justify-between gap-4 overflow-hidden rounded-full border px-5 backdrop-blur-md transition-all duration-300 hover:shadow-lg sm:px-6 ${isLight ? 'border-primary/20 bg-white/40 shadow-[0_4px_20px_rgba(15,159,87,0.08)] hover:shadow-[0_8px_30px_rgba(15,159,87,0.12)]' : 'border-primary/20 bg-surface/50 shadow-[0_0_20px_rgba(0,255,163,0.1)] hover:border-primary/40 hover:shadow-[0_0_30px_rgba(0,255,163,0.2)] hover:bg-surface/70'}`}
+      >
+        <div className="z-10 flex shrink-0 items-center gap-2.5 whitespace-nowrap">
+          <div className="relative flex h-2.5 w-2.5 items-center justify-center">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-60"></span>
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-primary shadow-[0_0_10px_currentColor]"></span>
+          </div>
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-on-surface">System Live</span>
+        </div>
+        <div 
+          className="relative flex-1 overflow-hidden"
+          style={{ maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)', WebkitMaskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)' }}
+        >
+          <div className="flex items-center whitespace-nowrap animate-[marquee_25s_linear_infinite]">
+            {[
+              'Network Load: 12% • Latency: 4ms • Node-7: Active',
+              'Routing Engine: 99.98% precision • HOS synchronized',
+              'Secure Data Stream: Encrypted • API Gateway: Normal',
+              'Autoscaling: instances stable • Replicas healthy',
+            ]
+              .concat([
+                'Network Load: 12% • Latency: 4ms • Node-7: Active',
+                'Routing Engine: 99.98% precision • HOS synchronized',
+                'Secure Data Stream: Encrypted • API Gateway: Normal',
+                'Autoscaling: instances stable • Replicas healthy',
+              ])
+              .map((msg, idx) => (
+                <span key={idx} className={`mr-12 text-[10px] font-bold uppercase tracking-[0.15em] ${isLight ? 'text-[#005c30]' : 'text-primary/90'}`}>
+                  {msg}
+                </span>
+              ))}
+          </div>
         </div>
       </div>
 

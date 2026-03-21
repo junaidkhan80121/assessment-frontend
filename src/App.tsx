@@ -22,7 +22,7 @@ function VanguardLogo() {
   return (
     <svg
       aria-hidden="true"
-      className="h-11 w-11"
+      className="h-9 w-9"
       viewBox="0 0 48 48"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -78,20 +78,20 @@ function Layout({ children, pathname }: { children: React.ReactNode; pathname: s
     <>
       <GlobalBackground variant={backgroundVariant} />
       <header className="fixed left-0 right-0 top-0 z-50 border-b border-slate-300/80 bg-surface/95 shadow-[0_10px_30px_rgba(0,0,0,0.16)] backdrop-blur-md dark:border-outline-variant/20 dark:bg-[#0E0E0E]/96">
-        <div className="relative flex h-20 w-full items-center justify-between px-1 sm:px-3 lg:px-4">
+        <div className="relative flex h-16 w-full items-center justify-between px-2 sm:px-3 lg:px-4">
           <div className="z-10 shrink-0">
-            <Link to="/" className="flex items-center gap-3 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35">
-              <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl bg-surface-container-highest ring-1 ring-slate-300/70 dark:ring-white/10">
+            <Link to="/" className="flex items-center gap-2.5 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35">
+              <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-surface-container-highest ring-1 ring-slate-300/70 dark:ring-white/10">
                 <VanguardLogo />
               </div>
               <div className="hidden flex-col sm:flex">
-                <span className="font-headline text-xl font-black uppercase tracking-tighter text-primary">Vanguard</span>
-                <span className="hidden text-[10px] uppercase tracking-[0.22em] text-on-surface-variant lg:block">Route planning cockpit</span>
+                <span className="font-headline text-lg font-black uppercase tracking-tight text-primary">Vanguard</span>
+                <span className="hidden text-[9px] uppercase tracking-[0.18em] text-on-surface-variant lg:block">Route planning cockpit</span>
               </div>
             </Link>
           </div>
-          <div className="absolute left-1/2 top-1/2 flex w-full -translate-x-1/2 -translate-y-1/2 justify-center px-16 sm:px-28 lg:px-40">
-            <nav className="flex max-w-full items-center gap-2 overflow-x-auto rounded-full border border-slate-300/80 bg-surface-container-low px-2 py-2 fancy-scrollbar dark:border-outline-variant/30">
+          <div className="absolute left-1/2 top-1/2 flex w-full -translate-x-1/2 -translate-y-1/2 justify-center px-16 sm:px-24 lg:px-36">
+            <nav className="flex max-w-full items-center gap-1.5 overflow-x-auto rounded-full border border-slate-300/80 bg-surface-container-low px-1.5 py-1.5 fancy-scrollbar dark:border-outline-variant/30">
               {NAV_ITEMS.map((item) => {
                 const isActive = item.to.startsWith('/#')
                   ? location.pathname === '/' && location.hash === item.to.slice(1)
@@ -100,13 +100,13 @@ function Layout({ children, pathname }: { children: React.ReactNode; pathname: s
                   <Link
                     key={item.to}
                     to={item.to}
-                    className={`group flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] transition-all ${
+                    className={`group flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] transition-all ${
                       isActive
                         ? 'bg-primary text-on-primary shadow-[0_0_18px_rgba(0,255,163,0.22)]'
                         : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary'
                     }`}
                   >
-                    <item.icon className="h-[18px] w-[18px]" aria-hidden="true" />
+                    <item.icon className="h-4 w-4" aria-hidden="true" />
                     <span className="hidden sm:inline">{item.label}</span>
                   </Link>
                 )
@@ -114,7 +114,7 @@ function Layout({ children, pathname }: { children: React.ReactNode; pathname: s
             </nav>
           </div>
           <div className="z-10 flex shrink-0 items-center gap-2">
-            <div className="rounded-full border border-slate-300/80 bg-surface-container-low px-1 py-1 dark:border-outline-variant/30">
+            <div className="rounded-full border border-slate-300/80 bg-surface-container-low p-0.5 dark:border-outline-variant/30">
               <ThemeToggle />
             </div>
           </div>
