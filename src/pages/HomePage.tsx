@@ -509,14 +509,22 @@ const TripPlanner: React.FC = () => {
           100% { transform: translateX(-50%); }
         }
       `}</style>
-      {/* Neon-style live ticker (inspired by Neon.com) */}
-      <div className="mb-6 flex h-9 items-center justify-between gap-4 overflow-hidden rounded-full border border-primary-ui-border-muted bg-surface/40 px-4 backdrop-blur-md sm:px-6">
-        <div className="flex items-center gap-2 whitespace-nowrap">
-          <span className="h-2 w-2 rounded-full bg-primary shadow-[0_0_12px_rgba(0,255,163,0.35)]" aria-hidden />
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-on-surface-variant">System Live</span>
+      {/* Enhanced Neon-style live ticker */}
+      <div 
+        className={`mb-6 flex h-10 items-center justify-between gap-4 overflow-hidden rounded-full border backdrop-blur-md px-5 sm:px-6 transition-all duration-300 hover:shadow-lg ${isLight ? 'border-primary/20 bg-white/40 shadow-[0_4px_20px_rgba(15,159,87,0.08)] hover:shadow-[0_8px_30px_rgba(15,159,87,0.12)]' : 'border-primary/20 bg-surface/50 shadow-[0_0_20px_rgba(0,255,163,0.1)] hover:border-primary/40 hover:shadow-[0_0_30px_rgba(0,255,163,0.2)] hover:bg-surface/70'}`}
+      >
+        <div className="flex items-center gap-2.5 whitespace-nowrap z-10 shrink-0">
+          <div className="relative flex h-2.5 w-2.5 items-center justify-center">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-60"></span>
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-primary shadow-[0_0_10px_currentColor]"></span>
+          </div>
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-on-surface">System Live</span>
         </div>
-        <div className="relative flex-1 overflow-hidden">
-          <div className="whitespace-nowrap animate-[marquee_18s_linear_infinite]">
+        <div 
+          className="relative flex-1 overflow-hidden"
+          style={{ maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)', WebkitMaskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)' }}
+        >
+          <div className="whitespace-nowrap animate-[marquee_25s_linear_infinite] flex items-center">
             {[
               'Network Load: 12% • Latency: 4ms • Node-7: Active',
               'Routing Engine: 99.98% precision • HOS synchronized',
@@ -530,7 +538,7 @@ const TripPlanner: React.FC = () => {
                 'Autoscaling: instances stable • Replicas healthy',
               ])
               .map((msg, idx) => (
-                <span key={idx} className="mr-10 text-[10px] font-bold uppercase tracking-wider text-primary">
+                <span key={idx} className={`mr-12 text-[10px] font-bold uppercase tracking-[0.15em] ${isLight ? 'text-[#005c30]' : 'text-primary/90'}`}>
                   {msg}
                 </span>
               ))}
