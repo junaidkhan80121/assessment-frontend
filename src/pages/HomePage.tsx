@@ -463,6 +463,7 @@ const TripPlanner: React.FC = () => {
   }
 
   const handlePlanTrip = async () => {
+    //console.log("test")
     setShowAllErrors(true)
     const nextErrors = validateTripForm(formValues)
     setFieldErrors(nextErrors)
