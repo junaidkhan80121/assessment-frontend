@@ -544,6 +544,15 @@ const TripPlanner: React.FC = () => {
             : 'border-white/5 bg-surface/30'
         }`}>
         <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+          <div className={`flex items-center gap-2.5 rounded-xl border px-3 py-2 backdrop-blur-md transition-colors hover:border-primary/30 ${isLight ? 'border-primary/15 bg-primary/5' : 'border-primary/20 bg-primary/5'}`}>
+            <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${isLight ? 'bg-primary/20 text-[#005c30]' : 'bg-primary/20 text-primary'}`}>
+              <Globe className="h-3 w-3" />
+            </div>
+            <p className="text-[11px] font-medium leading-tight text-on-surface-variant">
+              <strong className={`uppercase tracking-wider mr-1 ${isLight ? 'text-[#005c30]' : 'text-primary'}`}>US Routing Only:</strong> 
+              Vanguard operates exclusively within the United States. Please select US-based nodes.
+            </p>
+          </div>
           <div className="grid gap-3 md:grid-cols-2">
             <LocationInput
               label="Current Position"
