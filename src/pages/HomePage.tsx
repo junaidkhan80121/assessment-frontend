@@ -212,7 +212,7 @@ const LocationInput = ({
           style={{ backgroundColor: 'transparent' }}
         >
           <MapPin className="w-4 h-4 shrink-0" style={{ color: accentColor }} />
-          <span className="truncate">{option.display_name}</span>
+          <span>{option.display_name}</span>
         </li>
       )}
       PaperComponent={({ children }) => (
