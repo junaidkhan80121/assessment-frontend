@@ -23,7 +23,7 @@ const TripPage: React.FC = () => {
   const [activeLogIndex, setActiveLogIndex] = useState(0);
   const { data: tripData, isLoading, error } = useGetTripQuery(tripId || '', {
     skip: !tripId,
-    pollingInterval: 5000,
+    pollingInterval: 1500,
     refetchOnFocus: true,
     refetchOnReconnect: true,
   })
