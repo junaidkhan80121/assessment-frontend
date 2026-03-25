@@ -8,15 +8,6 @@ export interface GeocodingLocation {
   lon: string
 }
 
-interface OrsFeature {
-  geometry?: {
-    coordinates?: [number, number]
-  }
-  properties?: {
-    label?: string
-  }
-}
-
 interface MapboxFeature {
   geometry?: {
     coordinates?: [number, number]
@@ -134,48 +125,6 @@ function getCuratedLocations(searchTerm: string): GeocodingLocation[] {
   return CURATED_US_LOCATIONS.filter((location) => normalizeQuery(location.display_name).includes(normalized))
 }
 
-async function fetchOrsLocations(searchTerm: string): Promise<GeocodingLocation[]> {
-  if (!config.integrations.orsApiKey) {
-    return []
-  }
-
-  const params = new URLSearchParams({
-    api_key: config.integrations.orsApiKey,
-    text: searchTerm,
-    'boundary.country': 'US',
-    size: String(MAX_PROVIDER_RESULTS),
-  })
-
-  const response = await fetch(`https://api.openrouteservice.org/geocode/autocomplete?${params.toString()}`, {
-    headers: {
-      Accept: 'application/json',
-    },
-  })
-
-  if (!response.ok) {
-    throw new Error('ORS autocomplete failed')
-  }
-
-  const payload = await response.json() as { features?: OrsFeature[] }
-
-  return (payload.features ?? [])
-    .map<GeocodingLocation | null>((feature, index) => {
-      const coords = feature.geometry?.coordinates
-      const label = feature.properties?.label
-      if (!coords || !label) {
-        return null
-      }
-
-      return {
-        place_id: index + 1,
-        display_name: label,
-        lat: String(coords[1]),
-        lon: String(coords[0]),
-      }
-    })
-    .filter((item): item is GeocodingLocation => Boolean(item))
-}
-
 async function fetchMapboxLocations(searchTerm: string): Promise<GeocodingLocation[]> {
   if (!config.integrations.mapboxAccessToken) {
     return []
@@ -222,28 +171,6 @@ async function fetchMapboxLocations(searchTerm: string): Promise<GeocodingLocati
     .filter((item): item is GeocodingLocation => Boolean(item))
 }
 
-async function fetchNominatimLocations(searchTerm: string): Promise<GeocodingLocation[]> {
-  const params = new URLSearchParams({
-    format: 'json',
-    q: searchTerm,
-    countrycodes: 'us',
-    addressdetails: '1',
-    limit: String(MAX_PROVIDER_RESULTS),
-  })
-
-  const response = await fetch(`${config.services.geocodingApiUrl}/search?${params.toString()}`, {
-    headers: {
-      Accept: 'application/json',
-    },
-  })
-
-  if (!response.ok) {
-    throw new Error('Nominatim lookup failed')
-  }
-
-  return await response.json() as GeocodingLocation[]
-}
-
 export const geocodingApi = createApi({
   reducerPath: 'geocodingApi',
   baseQuery: fakeBaseQuery(),
@@ -256,15 +183,9 @@ export const geocodingApi = createApi({
         }
 
         try {
-          const [mapboxResult, orsResult] = await Promise.allSettled([
-            fetchMapboxLocations(trimmed),
-            fetchOrsLocations(trimmed),
-          ])
-
-          const mapboxLocations = mapboxResult.status === 'fulfilled' ? mapboxResult.value : []
-          const orsLocations = orsResult.status === 'fulfilled' ? orsResult.value : []
+          const mapboxLocations = await fetchMapboxLocations(trimmed)
           const curatedLocations = getCuratedLocations(trimmed)
-          const merged = dedupeLocations([...curatedLocations, ...mapboxLocations, ...orsLocations])
+          const merged = dedupeLocations([...curatedLocations, ...mapboxLocations])
             .sort((left, right) => scoreLocation(trimmed, right.display_name) - scoreLocation(trimmed, left.display_name))
             .slice(0, MAX_DISPLAY_RESULTS)
 
