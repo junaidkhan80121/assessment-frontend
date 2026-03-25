@@ -2,7 +2,7 @@ import { createApi, fakeBaseQuery } from '@reduxjs/toolkit/query/react'
 import { config } from '@/config'
 
 export interface GeocodingLocation {
-  place_id: number
+  place_id: number | string
   display_name: string
   lat: string
   lon: string
@@ -14,6 +14,18 @@ interface OrsFeature {
   }
   properties?: {
     label?: string
+  }
+}
+
+interface MapboxFeature {
+  geometry?: {
+    coordinates?: [number, number]
+  }
+  properties?: {
+    mapbox_id?: string
+    full_address?: string
+    name?: string
+    place_formatted?: string
   }
 }
 
@@ -147,7 +159,7 @@ async function fetchOrsLocations(searchTerm: string): Promise<GeocodingLocation[
   const payload = await response.json() as { features?: OrsFeature[] }
 
   return (payload.features ?? [])
-    .map((feature, index) => {
+    .map<GeocodingLocation | null>((feature, index) => {
       const coords = feature.geometry?.coordinates
       const label = feature.properties?.label
       if (!coords || !label) {
@@ -157,6 +169,52 @@ async function fetchOrsLocations(searchTerm: string): Promise<GeocodingLocation[
       return {
         place_id: index + 1,
         display_name: label,
+        lat: String(coords[1]),
+        lon: String(coords[0]),
+      }
+    })
+    .filter((item): item is GeocodingLocation => Boolean(item))
+}
+
+async function fetchMapboxLocations(searchTerm: string): Promise<GeocodingLocation[]> {
+  if (!config.integrations.mapboxAccessToken) {
+    return []
+  }
+
+  const params = new URLSearchParams({
+    access_token: config.integrations.mapboxAccessToken,
+    q: searchTerm,
+    country: 'US',
+    language: 'en',
+    limit: String(MAX_PROVIDER_RESULTS),
+  })
+
+  const response = await fetch(`https://api.mapbox.com/search/geocode/v6/forward?${params.toString()}`, {
+    headers: {
+      Accept: 'application/json',
+    },
+  })
+
+  if (!response.ok) {
+    throw new Error('Mapbox search failed')
+  }
+
+  const payload = await response.json() as { features?: MapboxFeature[] }
+
+  return (payload.features ?? [])
+    .map<GeocodingLocation | null>((feature, index) => {
+      const coords = feature.geometry?.coordinates
+      const properties = feature.properties
+      const displayName = properties?.full_address
+        ?? [properties?.name, properties?.place_formatted].filter(Boolean).join(', ')
+
+      if (!coords || !displayName) {
+        return null
+      }
+
+      return {
+        place_id: properties?.mapbox_id ?? `mapbox-${index}`,
+        display_name: displayName,
         lat: String(coords[1]),
         lon: String(coords[0]),
       }
@@ -198,15 +256,15 @@ export const geocodingApi = createApi({
         }
 
         try {
-          const [orsResult, nominatimResult] = await Promise.allSettled([
+          const [mapboxResult, orsResult] = await Promise.allSettled([
+            fetchMapboxLocations(trimmed),
             fetchOrsLocations(trimmed),
-            fetchNominatimLocations(trimmed),
           ])
 
+          const mapboxLocations = mapboxResult.status === 'fulfilled' ? mapboxResult.value : []
           const orsLocations = orsResult.status === 'fulfilled' ? orsResult.value : []
-          const nominatimLocations = nominatimResult.status === 'fulfilled' ? nominatimResult.value : []
           const curatedLocations = getCuratedLocations(trimmed)
-          const merged = dedupeLocations([...curatedLocations, ...orsLocations, ...nominatimLocations])
+          const merged = dedupeLocations([...curatedLocations, ...mapboxLocations, ...orsLocations])
             .sort((left, right) => scoreLocation(trimmed, right.display_name) - scoreLocation(trimmed, left.display_name))
             .slice(0, MAX_DISPLAY_RESULTS)
 
