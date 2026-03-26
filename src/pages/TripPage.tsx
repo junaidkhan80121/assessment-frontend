@@ -21,12 +21,22 @@ const TripPage: React.FC = () => {
   const { tripId } = useParams();
   const { theme } = useTheme();
   const [activeLogIndex, setActiveLogIndex] = useState(0);
+  const [pollingInterval, setPollingInterval] = useState(1500);
   const { data: tripData, isLoading, error } = useGetTripQuery(tripId || '', {
     skip: !tripId,
-    pollingInterval: 1500,
+    pollingInterval,
     refetchOnFocus: true,
     refetchOnReconnect: true,
   })
+
+  useEffect(() => {
+    if (tripData?.status === 'COMPUTED' || tripData?.status === 'FAILED') {
+      setPollingInterval(0);
+      return;
+    }
+
+    setPollingInterval(1500);
+  }, [tripData?.status])
 
   const tileUrl = theme === 'light' 
     ? 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'

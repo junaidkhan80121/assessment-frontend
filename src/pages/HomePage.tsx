@@ -250,7 +250,7 @@ const validateTripForm = (values: TripFormState): FieldErrors => {
     ['pickup_location', values.pickup_location_lat, values.pickup_location_lon],
     ['dropoff_location', values.dropoff_location_lat, values.dropoff_location_lon],
   ] as const).forEach(([field, lat, lon]) => {
-    if (values[field].trim() && (lat == null || lon == null)) {
+    if (values[field].trim() && (lat == null || lon == null) && !errors[field]) {
       errors[field] = 'Choose a suggested location so we can route precisely.'
     }
   })
