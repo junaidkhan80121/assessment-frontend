@@ -152,8 +152,8 @@ const LocationInput = ({
             '& .MuiOutlinedInput-root': {
               backgroundColor: 'rgba(var(--surface-color-rgb), 0.4)',
               color: 'var(--on-surface)',
-              borderRadius: '16px',
-              minHeight: '52px',
+              borderRadius: '14px',
+              minHeight: '46px',
               transition: 'all 0.2s ease',
               backdropFilter: 'blur(16px)',
               '& fieldset': {
@@ -173,7 +173,7 @@ const LocationInput = ({
               },
             },
             '& .MuiInputLabel-root': {
-              fontSize: '0.9rem',
+              fontSize: '0.82rem',
               fontWeight: 500,
               color: errorText ? 'var(--error)' : 'var(--on-surface)',
               opacity: 0.8,
@@ -183,10 +183,10 @@ const LocationInput = ({
               },
             },
             '& .MuiInputBase-input': {
-              fontSize: '1rem',
+              fontSize: '0.95rem',
               fontWeight: 600,
-              paddingTop: '12px',
-              paddingBottom: '12px',
+              paddingTop: '10px',
+              paddingBottom: '10px',
               color: 'var(--on-surface)',
             },
             '& .MuiInputBase-input::placeholder': {
@@ -195,8 +195,8 @@ const LocationInput = ({
               fontWeight: 500,
             },
             '& .MuiFormHelperText-root': {
-              minHeight: '1rem',
-              fontSize: '0.75rem',
+              minHeight: '0.9rem',
+              fontSize: '0.7rem',
               fontWeight: 600,
               color: errorText ? 'var(--error)' : 'var(--on-surface-variant)',
               marginLeft: 0,
@@ -533,22 +533,22 @@ const TripPlanner: React.FC = () => {
         </p>
       </div>
 
-      <div className={`mx-auto w-full max-w-[44rem] overflow-hidden rounded-[32px] border backdrop-blur-[60px] ${
+      <div className={`mx-auto w-full max-w-[42rem] overflow-hidden rounded-[28px] border backdrop-blur-[60px] ${
         isLight
           ? 'border-white/60 bg-white/25 shadow-[0_32px_80px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.8)]'
           : 'border-white/8 bg-black/25 shadow-[0_32px_80px_rgba(0,0,0,0.5)]'
       }`}>
-        <div className={`rounded-[28px] border p-5 sm:px-6 sm:py-7 backdrop-blur-3xl ${
+        <div className={`rounded-[24px] border p-4 sm:px-5 sm:py-5 backdrop-blur-3xl ${
           isLight
             ? 'border-white/50 bg-white/35'
             : 'border-white/5 bg-surface/30'
         }`}>
-        <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-          <div className={`flex items-center gap-2.5 rounded-xl border px-3 py-2 backdrop-blur-md transition-colors hover:border-primary/30 ${isLight ? 'border-primary/15 bg-primary/5' : 'border-primary/20 bg-primary/5'}`}>
-            <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${isLight ? 'bg-primary/20 text-[#005c30]' : 'bg-primary/20 text-primary'}`}>
+        <form className="space-y-3" onSubmit={(e) => e.preventDefault()}>
+          <div className={`flex items-center gap-2 rounded-xl border px-2.5 py-1.5 backdrop-blur-md transition-colors hover:border-primary/30 ${isLight ? 'border-primary/15 bg-primary/5' : 'border-primary/20 bg-primary/5'}`}>
+            <div className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${isLight ? 'bg-primary/20 text-[#005c30]' : 'bg-primary/20 text-primary'}`}>
               <Globe className="h-3 w-3" />
             </div>
-            <p className="text-[11px] font-medium leading-tight text-on-surface-variant">
+            <p className="text-[10px] font-medium leading-tight text-on-surface-variant">
               <strong className={`uppercase tracking-wider mr-1 ${isLight ? 'text-[#005c30]' : 'text-primary'}`}>US Routing Only:</strong> 
               Vanguard operates exclusively within the United States. Please select US-based nodes.
             </p>
@@ -636,14 +636,14 @@ const TripPlanner: React.FC = () => {
             />
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-[1.45fr_auto] lg:items-center mt-2">
-            <div className="flex flex-col justify-end pt-2 pb-1">
+          <div className="mt-1 grid gap-3 lg:grid-cols-[1.45fr_auto] lg:items-center">
+            <div className="flex flex-col justify-end pt-1 pb-0.5">
             <div className="flex justify-between items-end">
               <div className="flex items-center gap-2">
                 <Clock className="h-3.5 w-3.5" style={{ color: accentColor }} />
                 <label className="font-headline text-[10px] uppercase tracking-widest" style={{ color: accentColor }}>Cycle Hours Used</label>
               </div>
-              <span className="font-headline text-lg font-bold text-on-surface sm:text-xl">
+              <span className="font-headline text-base font-bold text-on-surface sm:text-lg">
                 {formValues.current_cycle_used.toFixed(1)} <span className="text-xs font-normal text-on-surface-variant ml-1">HRS</span>
               </span>
             </div>
@@ -663,13 +663,13 @@ const TripPlanner: React.FC = () => {
               sx={{
                 color: accentColor,
                 height: 4,
-                padding: '10px 0',
+                padding: '8px 0',
                 '& .MuiSlider-track': {
                   border: 'none',
                 },
                 '& .MuiSlider-thumb': {
-                  height: 16,
-                  width: 16,
+                  height: 14,
+                  width: 14,
                   backgroundColor: accentColor,
                   border: `2px solid ${accentColor}`,
                   boxShadow: isLight ? '0 0 12px rgba(15,159,87,0.24)' : '0 0 10px rgba(0,255,163,0.4)',
@@ -686,7 +686,7 @@ const TripPlanner: React.FC = () => {
                 },
               }}
             />
-            <div className="flex justify-between text-[11px] text-on-surface-variant font-medium mt-1">
+            <div className="mt-0.5 flex justify-between text-[10px] text-on-surface-variant font-medium">
               <span>Fresh Cycle (0 hrs)</span>
               <span>Maxed Out (70 hrs)</span>
             </div>
@@ -703,8 +703,8 @@ const TripPlanner: React.FC = () => {
             sx={{
               minWidth: { lg: '184px' },
               width: { xs: '100%', lg: '184px' },
-              height: '44px',
-              fontSize: '0.875rem',
+              height: '40px',
+              fontSize: '0.82rem',
               fontWeight: 'bold',
               borderRadius: '10px',
               textTransform: 'none',
